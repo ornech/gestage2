@@ -9,12 +9,24 @@ class User extends Model
     protected $table = 'user';
 
     protected $fillable = [
+        'idTuteur',
+        'idClasse',
         'nom',
         'prenom',
         'email',
+        'date_entree',
+        'telephone',
+        'spe',
+        'classe',
+        'promo',
+        'login',
         'password',
-        'role',
+        'password_reset',
+        'statut',
+        'inactif',
+        'dateFirstConn',
+        'isDeleted',
     ];
 
-    public $timestamps = false;
+    public $timestamps = true;
 }
