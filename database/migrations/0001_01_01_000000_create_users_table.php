@@ -17,6 +17,19 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // 👉 Colonnes ajoutées (ancienne table)
+            $table->date('date_entree')->nullable();
+            $table->string('telephone')->nullable();
+            $table->string('spe')->nullable();
+            $table->string('classe')->nullable();
+            $table->string('promo')->nullable();
+            $table->unsignedBigInteger('idTuteur')->nullable();
+            $table->unsignedBigInteger('idClasse')->nullable();
+
+            // 👉 Colonne rôle (remplace l'ancien "status")
+            $table->string('role')->default('Etudiant');
+
             $table->rememberToken();
             $table->timestamps();
         });

@@ -29,6 +29,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ⭐ OBLIGATOIRE pour activer les routes Fortify
+        Fortify::ignoreRoutes(false);
+
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
@@ -37,24 +40,25 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
-
             return Limit::perMinute(5)->by($throttleKey);
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
+
+        // ⭐ Vues Fortify
         Fortify::loginView(function () {
-    return view('auth.login');
+            return view('auth.login');
         });
 
-Fortify::registerView(function () {
-    return view('auth.register');
+        Fortify::registerView(function () {
+            return view('auth.register');
         });
 
-Fortify::requestPasswordResetLinkView(function () {
-    return view('auth.forgot-password');
+        Fortify::requestPasswordResetLinkView(function () {
+            return view('auth.forgot-password');
         });
-
+        
     }
 }

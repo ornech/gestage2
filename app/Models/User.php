@@ -2,31 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+
+class User extends Authenticatable
 {
-    protected $table = 'user';
+    use Notifiable;
 
-    protected $fillable = [
-        'idTuteur',
-        'idClasse',
-        'nom',
-        'prenom',
-        'email',
-        'date_entree',
-        'telephone',
-        'spe',
-        'classe',
-        'promo',
-        'login',
-        'password',
-        'password_reset',
-        'statut',
-        'inactif',
-        'dateFirstConn',
-        'isDeleted',
+protected $fillable = [
+    'name',
+    'email',
+    'password',
+    'date_entree',
+    'telephone',
+    'spe',
+    'classe',
+    'promo',
+    'idTuteur',
+    'idClasse',
+    'role',
+];
+
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'date_entree' => 'date',
+        'dateFirstConn' => 'datetime',
+        'inactif' => 'boolean',
+        'deleted' => 'boolean',
     ];
 
-    public $timestamps = true;
+    public function isProfesseur(): bool
+    {
+        return $this->statut === 'Professeur';
+    }
+
+    public function isEtudiant(): bool
+    {
+        return $this->statut === 'Etudiant';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->statut === 'Administrateur';
+    }
 }
