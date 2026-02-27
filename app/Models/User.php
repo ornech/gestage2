@@ -10,6 +10,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+
 protected $fillable = [
     'name',
     'email',
@@ -23,7 +24,6 @@ protected $fillable = [
     'idClasse',
     'role',
 ];
-
 
     protected $casts = [
         'email_verified_at' => 'datetime',
