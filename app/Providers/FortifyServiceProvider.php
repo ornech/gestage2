@@ -30,7 +30,7 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ⭐ OBLIGATOIRE pour activer les routes Fortify
-        Fortify::ignoreRoutes(false);
+        Fortify::ignoreRoutes();
 
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
@@ -40,6 +40,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+
             return Limit::perMinute(5)->by($throttleKey);
         });
 
@@ -59,6 +60,6 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::requestPasswordResetLinkView(function () {
             return view('auth.forgot-password');
         });
-        
+
     }
 }
