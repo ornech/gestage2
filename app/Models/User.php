@@ -36,16 +36,16 @@ protected $fillable = [
 
     public function isProfesseur(): bool
     {
-        return $this->statut === 'Professeur';
+        return $this->role === 'Professeur';
     }
 
     public function isEtudiant(): bool
     {
-        return $this->statut === 'Etudiant';
+        return $this->role === 'Etudiant';
     }
 
     public function isAdmin(): bool
     {
-        return $this->statut === 'Administrateur';
+        return $this->role === 'Administrateur';
     }
 }
