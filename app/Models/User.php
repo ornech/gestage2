@@ -49,6 +49,6 @@ protected $hidden = ['password','remember_token',];
 
     public function isAdmin(): bool
     {
-        return $this->role === 'Administrateur';
+        return $this->role === 'Admin';
     }
 }

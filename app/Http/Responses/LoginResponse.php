@@ -11,13 +11,13 @@ public function toResponse($request)
     //récupération de l'utilisateur connecté
     $user = $request->user();
 
-    if($user->role === 'admin' ) {
+    if($user->role === 'Admin' ) {
         return redirect('/admin');
     }
-    if ($user->role === 'professeur') {
+    if ($user->role === 'Professeur') {
         return redirect('/dashboard');
     }
-    if ($user->role === 'etudiant') {
+    if ($user->role === 'Etudiant') {
         return redirect('/stages');
     }
     //si aucun role ne correspond, on redirige vers la page d'accueil

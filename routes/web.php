@@ -24,7 +24,7 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 });
 
 // Espace administrateur
-Route::middleware(['auth', 'role:Administrateur'])->group(function () {
+Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return 'Espace administrateur';
     });
