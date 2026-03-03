@@ -29,6 +29,8 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        //laravel fortify nous permet de personnaliser la redirection après la connexion en créant une classe qui implémente l'interface LoginResponseContract
+        Fortify::loginResponse(\App\Http\Responses\LoginResponse::class);
         // ⭐ OBLIGATOIRE pour activer les routes Fortify
         Fortify::ignoreRoutes();
 

@@ -71,6 +71,7 @@
 </style>
 </head>
 <body>
+    <div class="login-box">
     <h1>Connexion</h1>
 
     <form method="POST" action="/login">
@@ -79,7 +80,7 @@
         <label>Email :</label>
         <input type="email" name="email" required>
 
-    //ajout des directives d'affichage des erreurs de validation
+  
         @error('email') 
         <p style="color:red;">{{ $message }}</p>
          @enderror
