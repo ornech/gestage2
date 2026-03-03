@@ -25,6 +25,9 @@ protected $fillable = [
     'idClasse',
     'role',
 ];
+//pour l'activer on enlève // 
+//protected $hidden = ['password','remember_token',];
+
 
     protected $casts = [
         'email_verified_at' => 'datetime',
