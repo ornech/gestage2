@@ -25,10 +25,8 @@ protected $fillable = [
     'idClasse',
     'role',
 ];
-protected $hidden = [
-    'password',
-    'remember_token',
-];
+//pour l'activer on enlève // 
+//protected $hidden = ['password','remember_token',];
 
 
     protected $casts = [
