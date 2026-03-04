@@ -44,8 +44,20 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('professeur'),
             ]);
 
-            // Crée 10 entreprises (et 10 utilisateurs associés automatiquement)
-            Entreprise::factory(10)->create();
+            // / Création de l'admin d'abord
+            $admin = User::factory()->create([
+                'nom' => 'ADMIN',
+                'prenom' => 'Système',
+                'email' => 'admin@test.com',
+                'role' => 'Admin',
+                'password' => Hash::make('admin'),
+
+            ]);
+
+            // On crée 10 entreprises liées à cet admin précis
+            Entreprise::factory(10)->create([
+                'user_id' => $admin->id,
+            ]);
         }
     }
 }
