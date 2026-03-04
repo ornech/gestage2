@@ -2,101 +2,55 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion</title>
-
-<style>
-    body {
-        font-family: Roboto, Arial, sans-serif;
-        background: #f5f6f8;
-        display:flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-
-    .login-box {
-        background:white;
-        border: 1px solid #0A2A43;
-        width:380px;
-        padding:35px;
-        border-radius:6px;
-    }
-    h1 {
-        color:#0A2A43;
-        text-align:center;
-        margin-bottom:30px;
-        font-size:24px;
-    }
-    label {
-        color: #0A2A43;
-        font-weight: bold;
-    }
-    input {
-        width:100%;
-        padding:10px;
-        margin-top:6px;
-        margin-bottom:18px;
-        border:1px solid #0A2A43;
-        border-radius:4px;
-        font-size:14px;
-    }
-    button {
-        width:100%;
-        padding : 12px;
-        background: #0A2A43;
-        color:white;
-        border:none;
-        border-radius:4px;
-        font-size:16px;
-        cursor:pointer;
-    }
-    button:hover {
-        background: #09304f;
-    }
-    .forgot {
-        display:block;
-        text-align:right;
-        margin-top:10px;
-        color:#0A2A43;
-        font-size:13px;
-        text-decoration: none;
-    }
-    .error {
-        color:red;
-        font-size:13px;
-        margin-top:-12px;
-        margin-bottom:12px;
-    }
-</style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
-    <div class="login-box">
-    <h1>Connexion</h1>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
 
-    <form method="POST" action="/login">
-        @csrf
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Connexion</h1>
 
-        <label>Email :</label>
-        <input type="email" name="email" required>
+        <form method="POST" action="/login" class="space-y-5">
+            @csrf
 
-  
-        @error('email') 
-        <p style="color:red;">{{ $message }}</p>
-         @enderror
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email :</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value="{{ old('email') }}"
+                    required 
+                    autofocus
+                    class="w-full px-4 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                >
+                @error('email') 
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe :</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    class="w-full px-4 py-2 border @error('password') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                >
+                @error('password')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-        <br><br>
+            <button 
+                type="submit" 
+                class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all"
+            >
+                Se connecter
+            </button>
+        </form>
+    </div>
 
-        <label>Mot de passe :</label>
-        <input type="password" name="password" required>
-
-        @error('password')
-         <p style="color:red;">{{ $message }}</p>
-          @enderror
-
-        <br><br>
-
-        <button type="submit">Se connecter</button>
-    </form>
 </body>
 </html>
