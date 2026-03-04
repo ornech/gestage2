@@ -30,7 +30,12 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //laravel fortify nous permet de personnaliser la redirection après la connexion en créant une classe qui implémente l'interface LoginResponseContract
-        Fortify::loginResponse(\App\Http\Responses\LoginResponse::class);
+        //Fortify::loginResponse(\App\Http\Responses\LoginResponse::class);
+          //on peut pas utiliser car Laravel 10 a changé la façon de faire, il faut utiliser un singleton dans le service provider
+        $this->app->singleton(
+    \Laravel\Fortify\Contracts\LoginResponse::class,
+    \App\Http\Responses\LoginResponse::class
+    );
         // ⭐ OBLIGATOIRE pour activer les routes Fortify
         Fortify::ignoreRoutes();
 

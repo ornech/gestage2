@@ -15,7 +15,8 @@ class CreateNewUser implements CreatesNewUsers
        
 
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
+            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
 
             'email' => [
                 'required',
@@ -45,7 +46,8 @@ class CreateNewUser implements CreatesNewUsers
         session()->flash('status', 'Compte créé avec succès.');
 
         return User::create([
-            'name' => $input['name'],
+            'nom' => $input['nom'],
+            'prenom' => $input['prenom'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
 
