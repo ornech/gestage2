@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Données structurelles (S'exécutent partout)
-        $this->call([
-            RoleSeeder::class,
-        ]);
+        // $this->call([
+        // RoleSeeder::class,
+        // ]);
 
         // 2. Cloisonnement : Données de test uniquement pour le développement
         if (app()->environment('local', 'testing')) {
