@@ -19,7 +19,11 @@
         @csrf
 
         <label>Nom :</label>
-        <input type="text" name="name" required>
+        <input type="text" name="nom">
+        <br><br>
+        <label>Prénom :</label>
+        <input type="text" name="prenom">
+
 
         <br><br>
 

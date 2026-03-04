@@ -25,8 +25,8 @@ protected $fillable = [
     'idClasse',
     'role',
 ];
-//pour l'activer on enlève // 
-//protected $hidden = ['password','remember_token',];
+
+protected $hidden = ['password','remember_token',];
 
 
     protected $casts = [
@@ -49,6 +49,6 @@ protected $fillable = [
 
     public function isAdmin(): bool
     {
-        return $this->role === 'Administrateur';
+        return $this->role === 'Admin';
     }
 }

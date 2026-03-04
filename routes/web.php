@@ -3,10 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
 
-//Route pour tester la connexion à la base de données et l'affichage du premier utilisateur
-Route::get('/test-user', [TestController::class, 'test']);
-
-
 
 // Page d'accueil
 Route::get('/', function () {
@@ -28,7 +24,7 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 });
 
 // Espace administrateur
-Route::middleware(['auth', 'role:Administrateur'])->group(function () {
+Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return 'Espace administrateur';
     });
