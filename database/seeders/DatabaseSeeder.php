@@ -26,28 +26,22 @@ class DatabaseSeeder extends Seeder
         if (app()->environment('local', 'testing')) {
             $this->command->info('Environnement de dev détecté : Création des données de test...');
 
-            // Création d'un étudiant spécifique
+            // Création d'un étudiant de test
             User::factory()->create([
-                'name' => 'Étudiant Test',
+                'nom' => 'DEMO',
+                'prenom' => 'Étudiant',
                 'email' => 'etudiant@test.com',
-                'role' => 'etudiant',
+                'role' => 'Etudiant', // Respectez la casse de votre migration ('Etudiant')
                 'password' => Hash::make('etudiant'),
             ]);
 
             // Création d'un professeur spécifique
             User::factory()->create([
-                'name' => 'Professeur Test',
-                'email' => 'prof@test.com',
-                'role' => 'professeur',
+                'nom' => 'DEMO',
+                'prenom' => 'professeur',
+                'email' => 'professeur@test.com',
+                'role' => 'Professeur', // Respectez la casse de votre migration ('Professeur')
                 'password' => Hash::make('professeur'),
-            ]);
-
-            // Création de l'administrateur
-            User::factory()->create([
-                'name' => 'Admin Système',
-                'email' => 'admin@test.com',
-                'role' => 'admin',
-                'password' => Hash::make('admin'),
             ]);
 
             // Crée 10 entreprises (et 10 utilisateurs associés automatiquement)
