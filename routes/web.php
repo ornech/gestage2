@@ -2,12 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
-
+use App\Http\Controllers\Auth\LoginController;
 
 // Page d'accueil
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
+
 });
+
 
 // Espace professeur
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
@@ -30,10 +32,18 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     });
 });
 
-Route::get('/force-logout', function () {
+
+
+//la route de logout 
+Route::post('/logout', function () {
     auth()->logout();
     session()->invalidate();
     session()->regenerateToken();
-    return 'Déconnecté';
-});
+    return redirect('/login');
+})->name('logout');
 
+
+//route de login
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
