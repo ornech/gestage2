@@ -15,17 +15,35 @@ class SetSecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // On laisse Laravel traiter la requête et générer la réponse avant d'ajouter les en-têtes
         $response = $next($request);
 
-        // 1. MIME Type Confusion (X-Content-Type-Options)
+        // Empêche le navigateur de deviner le type de contenu (MIME Sniffing)
+        // Force l'utilisation du Content-Type déclaré (ex: empêche d'exécuter un .txt comme du .js)
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
-        // 2. Clickjacking Protection (X-Frame-Options)
+        // Protection contre le Clickjacking : autorise l'affichage du site dans une iframe
+        // uniquement si l'appelant provient du même domaine (SAMEORIGIN)
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
-        // 3. Content Security Policy (CSP) - Version de base
-        // Note: À adapter selon vos besoins (si vous utilisez des CDN, scripts externes, etc.)
-        $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self';");
+        // Configuration de la Politique de Sécurité du Contenu (CSP)
+        $csp = "default-src 'self'; " // Par défaut, on n'autorise que les ressources du même domaine
+
+            // Autorise les scripts du domaine ('self') et les blocs JS intégrés spécifiques
+            // identifiés par leurs empreintes SHA-256 (évite l'utilisation de 'unsafe-inline')
+            ."script-src 'self' 'sha256-ieoeWczDHkReVBsRBqaal5AFMlBtNjMzgwKvLqi/tSU=' 'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='; "
+
+            // Autorise les CSS venant du domaine ('self') et du CDN jsDelivr (pour Bulma)
+            ."style-src 'self' https://cdn.jsdelivr.net; "
+
+            // Autorise les images du domaine et les images encodées en base64 (data:)
+            ."img-src 'self' data:; "
+
+            // Autorise uniquement les polices de caractères hébergées sur notre serveur
+            ."font-src 'self';";
+
+        // Applique la politique CSP à la réponse HTTP
+        $response->headers->set('Content-Security-Policy', $csp);
 
         return $response;
     }
