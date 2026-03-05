@@ -1,102 +1,74 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
+@extends('layouts.app')
 
-<style>
-    body {
-        font-family: Roboto, Arial, sans-serif;
-        background: #f5f6f8;
-        display:flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+@section('content')
+<section class="hero is-fullheight-with-navbar">
+    <div class="hero-body">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+                    
+                    <div class="box shadow-lg">
+                        <h1 class="title has-text-centered has-text-grey-dark">Connexion</h1>
+                        <hr>
 
-    .login-box {
-        background:white;
-        border: 1px solid #0A2A43;
-        width:380px;
-        padding:35px;
-        border-radius:6px;
-    }
-    h1 {
-        color:#0A2A43;
-        text-align:center;
-        margin-bottom:30px;
-        font-size:24px;
-    }
-    label {
-        color: #0A2A43;
-        font-weight: bold;
-    }
-    input {
-        width:100%;
-        padding:10px;
-        margin-top:6px;
-        margin-bottom:18px;
-        border:1px solid #0A2A43;
-        border-radius:4px;
-        font-size:14px;
-    }
-    button {
-        width:100%;
-        padding : 12px;
-        background: #0A2A43;
-        color:white;
-        border:none;
-        border-radius:4px;
-        font-size:16px;
-        cursor:pointer;
-    }
-    button:hover {
-        background: #09304f;
-    }
-    .forgot {
-        display:block;
-        text-align:right;
-        margin-top:10px;
-        color:#0A2A43;
-        font-size:13px;
-        text-decoration: none;
-    }
-    .error {
-        color:red;
-        font-size:13px;
-        margin-top:-12px;
-        margin-bottom:12px;
-    }
-</style>
-</head>
-<body>
-    <div class="login-box">
-    <h1>Connexion</h1>
+                        <form method="POST" action="/login">
+                            @csrf
 
-    <form method="POST" action="/login">
-        @csrf
+                            {{-- Champ Email --}}
+                            <div class="field">
+                                <label class="label">Email</label>
+                                <div class="control has-icons-left">
+                                    <input 
+                                        class="input @error('email') is-danger @enderror" 
+                                        type="email" 
+                                        name="email" 
+                                        placeholder="nom@exemple.com" 
+                                        value="{{ old('email') }}" 
+                                        required
+                                    >
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                </div>
+                                @error('email')
+                                    <p class="help is-danger">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-        <label>Email :</label>
-        <input type="email" name="email" required>
+                            {{-- Champ Mot de passe --}}
+                            <div class="field">
+                                <label class="label">Mot de passe</label>
+                                <div class="control has-icons-left">
+                                    <input 
+                                        class="input @error('password') is-danger @enderror" 
+                                        type="password" 
+                                        name="password" 
+                                        required
+                                    >
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                </div>
+                                @error('password')
+                                    <p class="help is-danger">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-  
-        @error('email') 
-        <p style="color:red;">{{ $message }}</p>
-         @enderror
+                            {{-- Bouton de validation --}}
+                            <div class="field mt-5">
+                                <button type="submit" class="button is-primary is-fullwidth is-medium">
+                                    <strong>Se connecter</strong>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
 
-        <br><br>
-
-        <label>Mot de passe :</label>
-        <input type="password" name="password" required>
-
-        @error('password')
-         <p style="color:red;">{{ $message }}</p>
-          @enderror
-
-        <br><br>
-
-        <button type="submit">Se connecter</button>
-    </form>
-</body>
-</html>
+                    <p class="has-text-centered mt-4">
+                        <a href="/password/reset" class="has-text-grey">Mot de passe oublié ?</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@endsection
