@@ -15,6 +15,14 @@ class SetSecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        $response = $next($request);
+
+        // Correction de la vulnérabilité MIME Sniffing
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+
+        // Empêche l'affichage dans une iframe (Clickjacking)
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+
+        return $response;
     }
 }
