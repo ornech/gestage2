@@ -17,11 +17,15 @@ class SetSecurityHeaders
     {
         $response = $next($request);
 
-        // Correction de la vulnérabilité MIME Sniffing
+        // 1. MIME Type Confusion (X-Content-Type-Options)
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
-        // Empêche l'affichage dans une iframe (Clickjacking)
+        // 2. Clickjacking Protection (X-Frame-Options)
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+
+        // 3. Content Security Policy (CSP) - Version de base
+        // Note: À adapter selon vos besoins (si vous utilisez des CDN, scripts externes, etc.)
+        $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self';");
 
         return $response;
     }

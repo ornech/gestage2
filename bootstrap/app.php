@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Ajout du middleware de sécurité pour les en-têtes HTTP:
+        $middleware->web(append: [
+            SetSecurityHeaders::class,
+        ]);
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
