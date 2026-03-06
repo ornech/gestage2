@@ -1,30 +1,56 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route; // <- Import très important
 
-// Page d'accueil
+// --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', function () {
-    return view('welcome');
+
+    // 1. Si l'utilisateur n'est pas connecté (Visiteur)
+    if (! Auth::check()) {
+        return redirect('/login');
+    }
+
+    // 2. Si l'utilisateur est connecté, on récupère son profil
+    $user = Auth::user();
+
+    // 3. Redirections dynamiques basées sur les rôles Spatie
+    if ($user->hasRole('Administrateur')) {
+        return redirect('/admin');
+    }
+
+    if ($user->hasRole('Professeur')) {
+        return redirect('/dashboard');
+    }
+
+    if ($user->hasRole('Etudiant')) {
+        return redirect('/stages');
+    }
+
+    // Sécurité de repli si le compte a un bug de rôle
+    auth()->logout();
+
+    return redirect('/login')->withErrors(['erreur' => 'Votre compte ne possède aucun rôle.']);
 });
 
 // Espace professeur (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
     Route::get('/dashboard', function () {
-        return 'Espace professeur - Accès autorisé';
+        return view('dashboards.professeur'); // Appel de la vue Blade professeur
     });
 });
 
 // Espace étudiant (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Etudiant'])->group(function () {
     Route::get('/stages', function () {
-        return 'Espace étudiant - Accès autorisé';
+        return view('dashboards.etudiant'); // Appel de la vue Blade pour les stages
     });
 });
 
 // Espace administrateur (Nom du rôle corrigé + URL synchronisée)
 Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     Route::get('/admin', function () {
-        return 'Espace administrateur - Accès autorisé';
+        return view('dashboards.admin'); // Appel de la vue Blade administrateur
     });
 });
 
@@ -34,5 +60,6 @@ Route::get('/force-logout', function () {
     session()->invalidate();
     session()->regenerateToken();
 
-    return 'Déconnecté avec succès.';
+    return redirect('/login');
+
 });
