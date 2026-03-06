@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
                 'nom' => 'DEMO',
                 'prenom' => 'Étudiant',
                 'email' => 'etudiant@test.com',
-                'role' => 'Etudiant', // Respectez la casse de votre migration ('Etudiant')
                 'password' => Hash::make('etudiant'),
             ]);
 
@@ -40,7 +39,6 @@ class DatabaseSeeder extends Seeder
                 'nom' => 'DEMO',
                 'prenom' => 'professeur',
                 'email' => 'professeur@test.com',
-                'role' => 'Professeur', // Respectez la casse de votre migration ('Professeur')
                 'password' => Hash::make('professeur'),
             ]);
 
@@ -49,7 +47,6 @@ class DatabaseSeeder extends Seeder
                 'nom' => 'ADMIN',
                 'prenom' => 'Système',
                 'email' => 'admin@test.com',
-                'role' => 'Admin',
                 'password' => Hash::make('admin'),
 
             ]);
