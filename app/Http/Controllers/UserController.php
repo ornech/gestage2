@@ -17,7 +17,7 @@ class UserController extends Controller
             'prenom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
-            'role' => ['sometimes', 'in:Etudiant,Professeur,Administrateur'],
+           //suppression de la validation du champ 'role' car il est géré par Spatie et non plus stocké dans la table 'users'
         ]);
 
         // Création de l'utilisateur avec données validées
@@ -26,8 +26,11 @@ class UserController extends Controller
             'prenom' => $validated['prenom'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'] ?? 'Etudiant',
+            //suppression du champ role
         ]);
+        //Attribution du role par défaut via Spatie RBAC
+        $user->assignRole('Etudiant');
+
 
         return response()->json([
             'message' => 'Utilisateur créé avec succès',
