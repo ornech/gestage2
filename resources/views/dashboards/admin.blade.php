@@ -19,7 +19,6 @@
                     <p class="mb-4">Gestion globale de la plateforme, paramétrage du système et administration des comptes utilisateurs.</p>
                     
                     <div class="buttons">
-                        <a href="#" class="button is-danger">Gérer les utilisateurs</a>
                         <a href="/force-logout" class="button is-light is-danger">Se déconnecter</a>
                     </div>
                 </div>

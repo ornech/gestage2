@@ -19,7 +19,6 @@
                     <p class="mb-4">C'est ici que tu pourras gérer tes conventions de stage et suivre tes candidatures.</p>
                     
                     <div class="buttons">
-                        <a href="#" class="button is-info">Mes stages</a>
                         <a href="/force-logout" class="button is-light is-danger">Se déconnecter</a>
                     </div>
                 </div>
