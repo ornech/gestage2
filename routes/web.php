@@ -1,39 +1,38 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TestController;
-
 
 // Page d'accueil
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Espace professeur
+// Espace professeur (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
-    Route::get('/prof/dashboard', function () {
-        return 'Espace professeur';
+    Route::get('/dashboard', function () {
+        return 'Espace professeur - Accès autorisé';
     });
 });
 
-// Espace étudiant
+// Espace étudiant (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Etudiant'])->group(function () {
-    Route::get('/etu/dashboard', function () {
-        return 'Espace étudiant';
+    Route::get('/stages', function () {
+        return 'Espace étudiant - Accès autorisé';
     });
 });
 
-// Espace administrateur
-Route::middleware(['auth', 'role:Admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return 'Espace administrateur';
+// Espace administrateur (Nom du rôle corrigé + URL synchronisée)
+Route::middleware(['auth', 'role:Administrateur'])->group(function () {
+    Route::get('/admin', function () {
+        return 'Espace administrateur - Accès autorisé';
     });
 });
 
+// Route de secours pour forcer la déconnexion lors des tests
 Route::get('/force-logout', function () {
     auth()->logout();
     session()->invalidate();
     session()->regenerateToken();
-    return 'Déconnecté';
-});
 
+    return 'Déconnecté avec succès.';
+});

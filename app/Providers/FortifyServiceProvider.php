@@ -6,12 +6,15 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Http\Responses\LoginResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
+// Import de nos classes pour la redirection
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -21,7 +24,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // C'est ICI que l'on modifie le conteneur de services.
+        // On dit à Laravel : utilise notre classe personnalisée pour la redirection.
+        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
     /**
@@ -29,15 +34,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //laravel fortify nous permet de personnaliser la redirection après la connexion en créant une classe qui implémente l'interface LoginResponseContract
-        //Fortify::loginResponse(\App\Http\Responses\LoginResponse::class);
-          //on peut pas utiliser car Laravel 10 a changé la façon de faire, il faut utiliser un singleton dans le service provider
-        $this->app->singleton(
-    \Laravel\Fortify\Contracts\LoginResponse::class,
-    \App\Http\Responses\LoginResponse::class
-    );
-        // ⭐ OBLIGATOIRE pour activer les routes Fortify
-        Fortify::ignoreRoutes();
+        // Attention : On désactive l'ignorance des routes pour que Fortify gère le Login natif.
+        // (Sauf si tu as recréé manuellement les routes de connexion dans web.php)
+        // Fortify::ignoreRoutes();
 
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
@@ -67,6 +66,5 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::requestPasswordResetLinkView(function () {
             return view('auth.forgot-password');
         });
-
     }
 }
