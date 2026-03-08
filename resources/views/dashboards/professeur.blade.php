@@ -16,14 +16,8 @@
                         Bienvenue, <strong>{{ auth()->user()->prenom }} {{ auth()->user()->nom }}</strong>.
                     </p>
                     <hr>
-                    <p class="mb-4">Supervision des étudiants, validation des offres d'entreprise et suivi des conventions.</p>
-                    
-                    <div class="buttons">
-                        <a href="#" class="button is-success">Liste des étudiants</a>
-                        <a href="/force-logout" class="button is-light is-danger">Se déconnecter</a>
-                    </div>
+                    <p class="mb-4">Supervision des étudiants, validation des offres d'entreprise et suivi des conventions.</p>      
                 </div>
-
             </div>
         </div>
     </div>

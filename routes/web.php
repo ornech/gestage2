@@ -1,11 +1,16 @@
 <?php
 
-use App\Http\Controllers\RedirectController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
 use Illuminate\Support\Facades\Route; // <- Import très important
 
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
+
+// --- Routes communes à tous les utilisateurs connectés ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+});
 
 // Espace professeur (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
@@ -27,4 +32,3 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
         return view('dashboards.admin'); // Appel de la vue Blade administrateur
     });
 });
-

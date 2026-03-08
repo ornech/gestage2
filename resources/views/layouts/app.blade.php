@@ -38,6 +38,17 @@
                     $target.classList.toggle('is-active');
                 });
             });
+
+            // Gestion du clic sur le lien de déconnexion pour soumettre le formulaire parent
+            const logoutLink = document.getElementById('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (event) => {
+                    // Empêche le lien de suivre son href (qui ferait une requête GET)
+                    event.preventDefault();
+                    // Trouve le formulaire parent le plus proche et le soumet (en POST)
+                    logoutLink.closest('form').submit();
+                });
+            }
         });
     </script>
 </body>

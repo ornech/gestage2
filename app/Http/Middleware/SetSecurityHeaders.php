@@ -31,8 +31,7 @@ class SetSecurityHeaders
 
             // Autorise les scripts du domaine ('self') et les blocs JS intégrés spécifiques
             // identifiés par leurs empreintes SHA-256 (évite l'utilisation de 'unsafe-inline')
-            ."script-src 'self' 'sha256-ieoeWczDHkReVBsRBqaal5AFMlBtNjMzgwKvLqi/tSU=' 'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='; "
-
+            ."script-src 'self' 'sha256-0hUgG2dplh9gkMgRQWXKTltn1bQhXqQSku0VnkhJZaI=' 'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='; "
             // Autorise les CSS venant du domaine ('self') et du CDN jsDelivr (pour Bulma)
             ."style-src 'self' https://cdn.jsdelivr.net; "
 

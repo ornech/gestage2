@@ -19,7 +19,10 @@
                     <p class="mb-4">Gestion globale de la plateforme, paramétrage du système et administration des comptes utilisateurs.</p>
                     
                     <div class="buttons">
-                        <a href="/force-logout" class="button is-light is-danger">Se déconnecter</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="button is-light is-danger">Se déconnecter</button>
+                        </form>
                     </div>
                 </div>
 
