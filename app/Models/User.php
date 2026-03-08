@@ -23,7 +23,6 @@ class User extends Authenticatable
         'promo',
         'idTuteur',
         'idClasse',
-        'role',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -35,19 +34,5 @@ class User extends Authenticatable
         'inactif' => 'boolean',
         'deleted' => 'boolean',
     ];
-
-    public function isProfesseur(): bool
-    {
-        return $this->role === 'Professeur';
-    }
-
-    public function isEtudiant(): bool
-    {
-        return $this->role === 'Etudiant';
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'Admin';
-    }
 }
+

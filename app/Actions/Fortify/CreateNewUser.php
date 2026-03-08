@@ -45,7 +45,7 @@ class CreateNewUser implements CreatesNewUsers
 
         session()->flash('status', 'Compte créé avec succès.');
 
-        return User::create([
+        $user = User::create([
             'nom' => $input['nom'],
             'prenom' => $input['prenom'],
             'email' => $input['email'],
@@ -65,5 +65,9 @@ class CreateNewUser implements CreatesNewUsers
             'dateFirstConn' => $input['dateFirstConn'] ?? null,
             'deleted' => $input['deleted'] ?? 0,
         ]);
+
+        $user->assignRole('Etudiant');
+
+        return $user;
     }
 }

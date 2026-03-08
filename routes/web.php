@@ -1,37 +1,11 @@
 <?php
 
+use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route; // <- Import très important
 
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
-Route::get('/', function () {
-
-    // 1. Si l'utilisateur n'est pas connecté (Visiteur)
-    if (! Auth::check()) {
-        return redirect('/login');
-    }
-
-    // 2. Si l'utilisateur est connecté, on récupère son profil
-    $user = Auth::user();
-
-    // 3. Redirections dynamiques basées sur les rôles Spatie
-    if ($user->hasRole('Administrateur')) {
-        return redirect('/admin');
-    }
-
-    if ($user->hasRole('Professeur')) {
-        return redirect('/dashboard');
-    }
-
-    if ($user->hasRole('Etudiant')) {
-        return redirect('/stages');
-    }
-
-    // Sécurité de repli si le compte a un bug de rôle
-    auth()->logout();
-
-    return redirect('/login')->withErrors(['erreur' => 'Votre compte ne possède aucun rôle.']);
-});
+Route::get('/', [RedirectController::class, 'index']);
 
 // Espace professeur (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
@@ -54,12 +28,3 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     });
 });
 
-// Route de secours pour forcer la déconnexion lors des tests
-Route::get('/force-logout', function () {
-    auth()->logout();
-    session()->invalidate();
-    session()->regenerateToken();
-
-    return redirect('/login');
-
-});

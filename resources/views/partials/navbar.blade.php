@@ -63,9 +63,15 @@
                                     <i class="fas fa-user-cog mr-2"></i> Mon Profil
                                 </a>
                                 <hr class="navbar-divider">
-                                <a href="/force-logout" class="navbar-item has-text-danger">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
-                                </a>
+                                {{-- Le lien de déconnexion est maintenant dans un formulaire pour la sécurité (POST + CSRF) --}}
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <a href="{{ route('logout') }}"
+                                       onclick="event.preventDefault(); this.closest('form').submit();"
+                                       class="navbar-item has-text-danger">
+                                        <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                                    </a>
+                                </form>
                             </div>
                         </div>
                     @endauth
