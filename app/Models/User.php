@@ -34,5 +34,10 @@ class User extends Authenticatable
         'inactif' => 'boolean',
         'deleted' => 'boolean',
     ];
+    // Un utilisateur (étudiant) peut avoir plusieurs stages
+    public function stages()
+    {
+        return $this->hasMany(Stage::class);
+    }
 }
 
