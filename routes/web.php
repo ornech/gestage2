@@ -32,3 +32,6 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
         return view('dashboards.admin'); // Appel de la vue Blade administrateur
     });
 });
+
+//ajout de la route pour les employes
+Route::resource('employes', EmployeController::class);
