@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stage extends Model
 {
+    protected $fillable = [
+        'titre',
+        'description',
+        'date_debut',
+        'date_fin',
+        'idEmploye',
+        'idUser',
+    ];
     // Un stage appartient à un employé
     public function employe()
     {

@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('telephone')->nullable();
             $table->string('entreprise');
             $table->timestamps();
+            $table->string('service')->nullable();
+            $table->string('fonction')->nullable();
+
         });
     }
 
