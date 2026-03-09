@@ -9,20 +9,33 @@ class Stage extends Model
     protected $fillable = [
         'titre',
         'description',
-        'date_debut',
-        'date_fin',
+        'dateDebut',
+        'dateFin',
         'idEmploye',
-        'employe_id',
-        'user_id',
+         'idMaitreDeStage',
+        'idEtudiant',
+        'idProfesseur',
+        'classe',
+    
     ];
-    // Un stage appartient à un employé
-    public function employe()
+       public function entreprise()
     {
-        return $this->belongsTo(Employe::class);
+        return $this->belongsTo(Entreprise::class, 'idEntreprise');
     }
-    // Un stage peut être associé à un utilisateur (étudiant)
-    public function user()
+
+    public function maitreDeStage()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Employe::class, 'idMaitreDeStage');
     }
+
+    public function etudiant()
+    {
+        return $this->belongsTo(User::class, 'idEtudiant');
+    }
+
+    public function professeur()
+    {
+        return $this->belongsTo(User::class, 'idProfesseur');
+    }
+
 }
