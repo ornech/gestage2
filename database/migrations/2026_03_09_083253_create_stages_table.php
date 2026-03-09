@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
              $table->string('titre');
             $table->text('description')->nullable();
-            $table->date('date_debut');
-            $table->date('date_fin');
-            $table->foreignId('employe_id')->constrained('employes')->onDelete('cascade');
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->date('dateDebut');
+            $table->date('dateFin');
+            $table->unsignedBigInteger('idEntreprise');
+            $table->unsignedBigInteger('idMaitreDeStage');
+            $table->unsignedBigInteger('idEtudiant');
+            $table->unsignedBigInteger('idProfesseur')->nullable();
+            $table->string('classe')->nullable();
             $table->timestamps();
         });
     }
