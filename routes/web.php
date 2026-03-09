@@ -35,3 +35,5 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 
 //ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
+//ajout de la route pour les stages 
+Route::resource('stages', StageController::class);
