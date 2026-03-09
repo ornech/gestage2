@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Stage;
 use App\Models\Employe;
+use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -15,6 +15,7 @@ class StageController extends Controller
     public function index()
     {
         $stages = Stage::with('employe')->get();
+
         return view('stages.index', compact('stages'));
     }
 
@@ -25,6 +26,7 @@ class StageController extends Controller
     {
         $employes = Employe::all();
         $users = User::all(); // Étudiants potentiels
+
         return view('stages.create', compact('employes', 'users'));
     }
 
@@ -54,6 +56,7 @@ class StageController extends Controller
     {
         $employes = Employe::all();
         $users = User::all();
+
         return view('stages.edit', compact('stage', 'employes', 'users'));
     }
 
@@ -82,6 +85,7 @@ class StageController extends Controller
     public function destroy(Stage $stage)
     {
         $stage->delete();
+
         return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
     }
 }
