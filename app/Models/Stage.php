@@ -12,7 +12,8 @@ class Stage extends Model
         'date_debut',
         'date_fin',
         'idEmploye',
-        'idUser',
+        'employe_id',
+        'user_id',
     ];
     // Un stage appartient à un employé
     public function employe()

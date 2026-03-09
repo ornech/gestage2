@@ -3,7 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
 use Illuminate\Support\Facades\Route; // <- Import très important
-
+use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
+use App\Http\Controllers\StageController; // Importer le contrôleur Stage
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
 
