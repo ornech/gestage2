@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('employes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('idEntreprise');
+            $table->foreignId('entreprise_id')->constrained('entreprises')->onDelete('cascade');
+            $table->foreignId('creator_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('nom');
             $table->string('prenom');
             $table->string('email');
             $table->string('telephone');
             $table->string('service')->nullable();
             $table->string('fonction')->nullable();
-            $table->unsignedBigInteger('created_userid')->nullable();
-            $table->date('created_date')->nullable();
             $table->boolean('contact_valide')->default(false);
             $table->boolean('newsletter')->default(false);
             $table->boolean('jury')->default(false);
