@@ -31,7 +31,9 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->foreignId('classe_id')
-                ->nullable();
+                 ->nullable()
+                 ->constrained('classes')
+                 ->nullOnDelete();
 
 
 
