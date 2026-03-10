@@ -39,4 +39,13 @@ class Entreprise extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function employes(): HasMany
+     { 
+        return $this->hasMany(Employe::class); 
+    }
+    public function stages(): HasMany
+     {
+         return $this->hasMany(Stage::class); 
+     }
 }
