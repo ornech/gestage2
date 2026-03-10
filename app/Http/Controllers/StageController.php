@@ -40,8 +40,8 @@ class StageController extends Controller
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
-            'employe_id' => 'required|exists:employes,id',
-            'user_id' => 'nullable|exists:users,id',
+            'entreprise_id' => 'required|exists:entreprises,id',
+            'maitre_de_stage_id' => 'required|exists:employes,id',
         ]);
 
         Stage::create($request->all());
@@ -70,8 +70,8 @@ class StageController extends Controller
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
-            'employe_id' => 'required|exists:employes,id',
-            'user_id' => 'nullable|exists:users,id',
+            'entreprise_id' => 'required|exists:entreprises,id',
+            'maitre_de_stage_id' => 'required|exists:employes,id',
         ]);
 
         $stage->update($request->all());
