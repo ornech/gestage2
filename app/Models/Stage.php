@@ -18,11 +18,9 @@ class Stage extends Model
         'classe',
 
     ];
+    protected $casts = ['date_debut' => 'date', 'date_fin' => 'date'];
 
-    public function entreprise()
-    {
-        return $this->belongsTo(Entreprise::class, 'idEntreprise');
-    }
+    public function entreprise(): BelongsTo { return $this->belongsTo(Entreprise::class); }
 
     public function maitreDeStage()
     {
