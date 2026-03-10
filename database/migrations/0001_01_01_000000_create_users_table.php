@@ -25,8 +25,15 @@ return new class extends Migration
             $table->string('spe')->nullable();
             $table->string('classe')->nullable();
             $table->string('promo')->nullable();
-            $table->unsignedBigInteger('idTuteur')->nullable();
-            $table->unsignedBigInteger('idClasse')->nullable();
+            $table->foreignId('tuteur_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('classe_id')
+                ->nullable();
+
+
 
             // 👉 Colonne rôle (remplace l'ancien "status")
             $table->string('role')->default('Etudiant');
