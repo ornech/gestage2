@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
              $table->string('titre');
             $table->text('description')->nullable();
-            $table->date('dateDebut');
-            $table->date('dateFin');
-            $table->unsignedBigInteger('idEntreprise');
-            $table->unsignedBigInteger('idMaitreDeStage');
-            $table->unsignedBigInteger('idEtudiant');
-            $table->unsignedBigInteger('idProfesseur')->nullable();
+           $table->date('date_debut');
+            $table->date('date_fin');
+            $table->foreignId('entreprise_id')->constrained('entreprises')->onDelete('cascade');
+            $table->foreignId('maitre_de_stage_id')->constrained('employes')->onDelete('cascade');
+            $table->foreignId('etudiant_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('professeur_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('classe')->nullable();
             $table->timestamps();
         });
