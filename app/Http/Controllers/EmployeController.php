@@ -37,7 +37,7 @@ class EmployeController extends Controller
             'prenom' => 'required',
             'email' => 'required|email|unique:employes,email',
             'telephone' => 'nullable',
-            'entreprise' => 'required',
+            'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Créer un nouvel employé avec les données validées
             Employe::create($request->all());
@@ -75,7 +75,7 @@ class EmployeController extends Controller
             'prenom' => 'required',
             'email' => 'required|email|unique:employes,email,' . $employe->id,
             'telephone' => 'nullable',
-            'entreprise' => 'required',
+            'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Mettre à jour l'employé avec les données validées
             $employe->update($request->all());
