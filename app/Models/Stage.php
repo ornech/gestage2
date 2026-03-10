@@ -9,16 +9,17 @@ class Stage extends Model
     protected $fillable = [
         'titre',
         'description',
-        'dateDebut',
-        'dateFin',
-        'idEmploye',
-         'idMaitreDeStage',
-        'idEtudiant',
-        'idProfesseur',
+        'date_debut',
+        'date_fin',
+        'employe_id',
+        'maitre_de_stage_id',
+        'etudiant_id',
+        'professeur_id',
         'classe',
-    
+
     ];
-       public function entreprise()
+
+    public function entreprise()
     {
         return $this->belongsTo(Entreprise::class, 'idEntreprise');
     }
@@ -37,5 +38,4 @@ class Stage extends Model
     {
         return $this->belongsTo(User::class, 'idProfesseur');
     }
-
 }
