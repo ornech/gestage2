@@ -13,7 +13,7 @@ class EmployeController extends Controller
     public function index()
     {
         // Récupérer tous les employés et les passer à la vue
-        $employes = Employe::all();
+        $employes = Employe::with('entreprise')->paginate(10);
         return view('employes.index', compact('employes'));
     }
 
@@ -40,7 +40,7 @@ class EmployeController extends Controller
             'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Créer un nouvel employé avec les données validées
-            Employe::create($request->all());
+            Employe::create($request->validated());
         // Rediriger vers la liste des employés avec un message de succès
         return redirect()->route('employes.index')
                          ->with('success', 'Employé ajouté avec succès.');
@@ -78,7 +78,7 @@ class EmployeController extends Controller
             'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Mettre à jour l'employé avec les données validées
-            $employe->update($request->all());
+            $employe->update($request->validated());
         // Rediriger vers la liste des employés avec un message de succès
         return redirect()->route('employes.index')
                          ->with('success', 'Employé mis à jour avec succès.');
