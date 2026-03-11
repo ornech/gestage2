@@ -6,6 +6,7 @@ use App\Models\Employe;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Entreprise;
 
 class StageController extends Controller
 {
@@ -26,8 +27,9 @@ class StageController extends Controller
     {
         $employes = Employe::all();
         $users = User::all(); // Étudiants potentiels
+        $entreprises = Entreprise::all();
 
-        return view('stages.create', compact('employes', 'users'));
+        return view('stages.create', compact('employes', 'users', 'entreprises'));
     }
 
     /**
@@ -56,8 +58,9 @@ class StageController extends Controller
     {
         $employes = Employe::all();
         $users = User::all();
+        $entreprises = Entreprise::all();
 
-        return view('stages.edit', compact('stage', 'employes', 'users'));
+        return view('stages.edit', compact('stage', 'employes', 'users', 'entreprises'));
     }
 
     /**
