@@ -70,6 +70,6 @@
         </tbody>
 
     </table>
-
+{{ $employes->links() }}
 </div>
 @endsection
