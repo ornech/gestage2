@@ -60,5 +60,7 @@
             @endif
         </tbody>
     </table>
+{{ $stages->links() }}
+
 </div>
 @endsection
