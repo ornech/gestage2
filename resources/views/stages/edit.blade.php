@@ -10,45 +10,58 @@
 
         <div class="mb-3">
             <label class="form-label">Titre</label>
-            <input type="text" name="titre" class="form-control" value="{{ $stage->titre }}" required>
+            <input type="text" name="titre" class="form-control" value="{{ old('titre', $stage->titre) }}" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea name="description" class="form-control">{{ $stage->description }}</textarea>
+            <textarea name="description" class="form-control">{{ old('description', $stage->description) }}</textarea>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Date de début</label>
-            <input type="date" name="date_debut" class="form-control" value="{{ $stage->date_debut }}" required>
+            <input type="date" name="date_debut" class="form-control" value="{{ old('date_debut', $stage->date_debut) }}" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Date de fin</label>
-            <input type="date" name="date_fin" class="form-control" value="{{ $stage->date_fin }}" required>
+            <input type="date" name="date_fin" class="form-control" value="{{ old('date_fin', $stage->date_fin) }}" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Maître de stage</label>
-            <select name="employe_id" class="form-control" required>
+            <select name="maitre_de_stage_id" class="form-control" required>
                 @foreach($employes as $employe)
-                    <option value="{{ $employe->id }}" 
-                        @if($employe->id == $stage->employe_id) selected @endif>
+                   <option value="{{ $employe->id }}" 
+                        {{ old('maitre_de_stage_id', $stage->maitre_de_stage_id) == $employe->id ? 'selected' : '' }}>
                         {{ $employe->nom }} {{ $employe->prenom }}
                     </option>
+
                 @endforeach
             </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Entreprise</label>
+            <select name="entreprise_id" class="form-control" required>
+                @foreach($entreprises as $entreprise)
+                 <option value="{{ $entreprise->id }}" 
+                      {{ old('entreprise_id', $stage->entreprise_id) == $entreprise->id ? 'selected' : '' }}>
+                     {{ $entreprise->nom }}
+                 </option>
+            @endforeach
+        </select>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Étudiant</label>
-            <select name="user_id" class="form-control">
+            <select name="etudiant_id" class="form-control">
                 <option value="">Aucun</option>
                 @foreach($users as $user)
-                    <option value="{{ $user->id }}" 
-                        @if($user->id == $stage->user_id) selected @endif>
-                        {{ $user->name }}
-                    </option>
+                     <option value="{{ $user->id }}" 
+                            {{ old('etudiant_id', $stage->etudiant_id) == $user->id ? 'selected' : '' }}>
+                            {{ $user->name }}
+                 </option>
+
                 @endforeach
             </select>
         </div>
