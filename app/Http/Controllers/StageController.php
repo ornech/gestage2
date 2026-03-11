@@ -14,7 +14,7 @@ class StageController extends Controller
      */
     public function index()
     {
-        $stages = Stage::with('employe')->get();
+        $stages = Stage::with(['entreprise', 'maitreDeStage'])->paginate(10);
 
         return view('stages.index', compact('stages'));
     }
@@ -44,7 +44,7 @@ class StageController extends Controller
             'maitre_de_stage_id' => 'required|exists:employes,id',
         ]);
 
-        Stage::create($request->all());
+        Stage::create($request->validated());
 
         return redirect()->route('stages.index')->with('success', 'Stage créé avec succès.');
     }
@@ -74,7 +74,7 @@ class StageController extends Controller
             'maitre_de_stage_id' => 'required|exists:employes,id',
         ]);
 
-        $stage->update($request->all());
+        $stage->update($request->validated());
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');
     }
