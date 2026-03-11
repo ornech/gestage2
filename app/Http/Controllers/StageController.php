@@ -38,13 +38,15 @@ class StageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'entreprise_id' => 'required|exists:entreprises,id',
             'maitre_de_stage_id' => 'required|exists:employes,id',
-        ]);
+            'etudiant_id' => 'nullable|exists:users,id',
+            ]);
 
         Stage::create($request->validated());
 
@@ -75,6 +77,8 @@ class StageController extends Controller
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'entreprise_id' => 'required|exists:entreprises,id',
             'maitre_de_stage_id' => 'required|exists:employes,id',
+       
+         'etudiant_id' => 'nullable|exists:users,id',
         ]);
 
         $stage->update($request->validated());
