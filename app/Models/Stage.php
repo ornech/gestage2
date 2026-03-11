@@ -35,16 +35,16 @@ class Stage extends Model
 
     public function maitreDeStage(): BelongsTo
     {
-        return $this->belongsTo(Employe::class, 'maitre_de_stage_id');
+        return $this->belongsTo(Employe::class);
     }
 
     public function etudiant(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'etudiant_id');
+        return $this->belongsTo(User::class);
     }
 
     public function professeur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'professeur_id');
+        return $this->belongsTo(User::class);
     }
 }
