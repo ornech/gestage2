@@ -13,9 +13,11 @@ class StagePolicy
      */
     //un étudiant peut voir la liste des stages
     public function viewAny(User $user): bool
-    {
-        return $user->role === 'etudiant';
-    }
+{
+     //on autorise les étudiants, les professeurs et les administrateurs à voir la liste des stages
+    return $user->hasAnyRole(['Administrateur', 'Professeur', 'Etudiant']);
+}
+
 
     /**
      * Determine whether the user can view the model.
@@ -32,8 +34,9 @@ class StagePolicy
     //un étudiant peut créer un stage que pour sa propre année
     public function create(User $user): bool
     {
-        return $user->role === 'etudiant';
-    }
+    return $user->hasRole('Etudiant');
+}
+
 
     /**
      * Determine whether the user can update the model.
