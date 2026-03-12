@@ -44,7 +44,8 @@ class StagePolicy
     //un étudiant ne peut modifier un stage uniquement si c'est le sien 
     public function update(User $user, Stage $stage): bool
     {
-        return $stage->etudiant_id === $user->id;
+        // Autorisé si c'est un Admin OU si c'est le professeur responsable du stage
+    return $user->hasRole('Administrateur') || $user->id === $stage->professeur_id;
     }
 
     /**
@@ -53,7 +54,7 @@ class StagePolicy
     //un étudiant ne peut supprimer un stage si c'est le sien
     public function delete(User $user, Stage $stage): bool
     {
-        return $stage->etudiant_id === $user->id;
+       return $user->hasRole('Administrateur');
     }
 
     /**
