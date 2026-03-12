@@ -43,6 +43,11 @@ class StageController extends Controller
      */
     public function store(Request $request)
     {
+        // Vérification que l'étudiant ne peut créer un stage que pour sa propre année
+        if ($request->promo != auth()->user()->promo) {
+    abort(403, "Vous ne pouvez pas créer un stage pour une autre année.");
+}
+
         
             //autorisation pour créer un stage
             $this->authorize('create', Stage::class);
@@ -113,4 +118,14 @@ class StageController extends Controller
 
         return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
     }
+    // Affiche les stages de l'étudiant connecté
+    public function mesStages()
+{
+    $stages = Stage::with(['entreprise', 'maitreDeStage'])
+        ->where('etudiant_id', auth()->id())
+        ->get();
+
+    return view('etudiant.stages.index', compact('stages'));
+}
+
 }

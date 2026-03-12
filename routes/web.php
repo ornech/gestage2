@@ -8,6 +8,11 @@ use App\Http\Controllers\StageController; // Importer le contrôleur Stage
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
 
+
+// --- Routes pour les étudiants ---
+Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
+    ->name('etudiant.stages.index');
+
 // --- Routes communes à tous les utilisateurs connectés ---
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
