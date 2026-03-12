@@ -8,7 +8,8 @@ class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         //
-    ];
+    
+        \App\Models\Stage::class => \App\Policies\StagePolicy::class,];
 
     public function boot(): void
     {

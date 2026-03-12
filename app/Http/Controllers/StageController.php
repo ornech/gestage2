@@ -15,6 +15,9 @@ class StageController extends Controller
      */
     public function index()
     {
+        //autoriser uniquement les étudiants à voir la liste des stages
+        $this->authorize('viewAny', Stage::class);
+
         $stages = Stage::with(['entreprise', 'maitreDeStage'])->paginate(10);
 
         return view('stages.index', compact('stages'));
@@ -25,6 +28,9 @@ class StageController extends Controller
      */
     public function create()
     {
+        //autorisation pour créer un stage
+        $this->authorize('create', Stage::class);
+
         $employes = Employe::all();
         $users = User::all(); // Étudiants potentiels
         $entreprises = Entreprise::all();
@@ -37,8 +43,11 @@ class StageController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-
+        
+            //autorisation pour créer un stage
+            $this->authorize('create', Stage::class);
+        
+            $request->validate([
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
             'date_debut' => 'required|date',
@@ -58,6 +67,9 @@ class StageController extends Controller
      */
     public function edit(Stage $stage)
     {
+        //autoriser un étudiant à modifier son stage seulement si c'est le sien
+        $this->authorize('update', $stage);
+
         $employes = Employe::all();
         $users = User::all();
         $entreprises = Entreprise::all();
@@ -70,6 +82,9 @@ class StageController extends Controller
      */
     public function update(Request $request, Stage $stage)
     {
+        //autoriser un étudiant à modifier son stage
+        $this->authorize('update', $stage);
+
         $request->validate([
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -91,6 +106,9 @@ class StageController extends Controller
      */
     public function destroy(Stage $stage)
     {
+        //autoriser un étudiant à supprimer son stage
+        $this->authorize('delete', $stage);
+
         $stage->delete();
 
         return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
