@@ -33,11 +33,16 @@ class SetSecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
         // Configuration de la Politique de Sécurité du Contenu (CSP)
-        $csp = "default-src 'self'; " // Par défaut, on n'autorise que les ressources du même domaine
+       $csp = "default-src 'self'; "
+    ."script-src 'self' 'nonce-$nonce'; "
+    ."style-src 'self' https://cdn.jsdelivr.net; "
+    ."img-src 'self' data:; "
+    ."font-src 'self';";
 
             // Autorise les scripts du domaine ('self') et les blocs JS intégrés spécifiques
             // identifiés par leurs empreintes SHA-256 (évite l'utilisation de 'unsafe-inline')
-            ."script-src 'self' 'sha256-0hUgG2dplh9gkMgRQWXKTltn1bQhXqQSku0VnkhJZaI=' 'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='; "
+           "script-src 'self' 'nonce-$nonce'; "
+
             // Autorise les CSS venant du domaine ('self') et du CDN jsDelivr (pour Bulma)
             ."style-src 'self' https://cdn.jsdelivr.net; "
 
