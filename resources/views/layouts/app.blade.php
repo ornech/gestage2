@@ -27,7 +27,7 @@
     </main>
 
     {{-- Script JavaScript minimaliste de Bulma pour faire fonctionner le menu sur Mobile --}}
-    <script nonce="{{ $cspNonce }}">
+    <script {{ isset($cspNonce) ? 'nonce='.$cspNonce : '' }}>
 
         document.addEventListener('DOMContentLoaded', () => {
             const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
