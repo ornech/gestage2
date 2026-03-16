@@ -15,8 +15,14 @@ class SetSecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        
         // On laisse Laravel traiter la requête et générer la réponse avant d'ajouter les en-têtes
         $response = $next($request);
+        // 1. Générer un nonce unique pour cette requête
+        $nonce = bin2hex(random_bytes(16));
+
+        // 2. Partager ce nonce avec toutes les vues Blade
+        view()->share('cspNonce', $nonce);
 
         // Empêche le navigateur de deviner le type de contenu (MIME Sniffing)
         // Force l'utilisation du Content-Type déclaré (ex: empêche d'exécuter un .txt comme du .js)
