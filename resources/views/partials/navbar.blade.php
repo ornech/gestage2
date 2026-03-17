@@ -66,9 +66,9 @@
                                 {{-- Le lien de déconnexion est maintenant dans un formulaire pour la sécurité (POST + CSRF) --}}
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <a href="{{ route('logout') }}" class="navbar-item" id="logout-link">
+                                      <button type="submit" class="navbar-item button is-white is-fullwidth" style="border: none; background: none;">
                                         Se déconnecter
-                                    </a>
+                                      </button>
                                 </form>
                             </div>
                         </div>
