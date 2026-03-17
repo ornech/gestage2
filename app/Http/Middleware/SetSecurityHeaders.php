@@ -33,13 +33,13 @@ class SetSecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
         // Configuration de la Politique de Sécurité du Contenu (CSP)
-        $csp = "default-src 'self'; "
-            ."script-src 'self' 'nonce-$nonce'; "
-            ."style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; "
+    $csp = "default-src 'self'; "
+    ."script-src 'self' 'nonce-$nonce'; "
+    ."style-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+    ."img-src 'self' data:; "
+    ."font-src 'self' https://cdnjs.cloudflare.com; "
+    ."form-action 'self';";
 
-            ."img-src 'self' data:; "
-
-            ."font-src 'self' https://cdnjs.cloudflare.com;";
         // Applique la politique CSP à la réponse HTTP
         $response->headers->set('Content-Security-Policy', $csp);
 
