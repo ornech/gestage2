@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'sirene' => [
+    'key' => env('SIRENE_API_KEY'),
+],
+
 
 ];
