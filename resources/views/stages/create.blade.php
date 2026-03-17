@@ -1,69 +1,107 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1 class="mb-4">Créer un stage</h1>
+<div class="container mt-6">
 
-    <form action="{{ route('stages.store') }}" method="POST">
-        @csrf
+    <h1 class="title has-text-centered mb-5">Créer un stage</h1>
 
-        <div class="mb-3">
-            <label class="form-label">Titre</label>
-            <input type="text" name="titre" class="form-control" value="{{ old('titre') }}" required>
-
+    @if ($errors->any())
+        <div class="notification is-danger">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
+    @endif
 
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control">{{ old('description') }}</textarea>
-        </div>
+    <div class="box">
+        <form action="{{ route('stages.store') }}" method="POST">
+            @csrf
 
-        <div class="mb-3">
-            <label class="form-label">Date de début</label>
-            <input type="date" name="date_debut" class="form-control" value="{{ old('date_debut') }}" required>
-        </div>
+            <div class="field">
+                <label class="label">Titre</label>
+                <div class="control">
+                    <input class="input" type="text" name="titre" value="{{ old('titre') }}" required>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Date de fin</label>
-            <input type="date" name="date_fin" class="form-control" value="{{ old('date_fin') }}" required>
-        </div>
-        <div class="mb-3">
-             <label class="form-label">Entreprise</label>
-            <select name="entreprise_id" class="form-control" required>
-        @foreach($entreprises as $entreprise)
-            <option value="{{ $entreprise->id }}" {{ old('entreprise_id') == $entreprise->id ? 'selected' : '' }}>
-                {{ $entreprise->nom }}
-            </option>
-        @endforeach
-        </select>
-        </div>
+            <div class="field">
+                <label class="label">Description</label>
+                <div class="control">
+                    <textarea class="textarea" name="description">{{ old('description') }}</textarea>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Maître de stage</label>
-            <select name="maitre_de_stage_id" class="form-control" required>
-                @foreach($employes as $employe)
-                    <option value="{{ $employe->id }}" {{ old('maitre_de_stage_id') == $employe->id ? 'selected' : '' }}>
-                        {{ $employe->nom }} {{ $employe->prenom }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            <div class="field">
+                <label class="label">Date de début</label>
+                <div class="control">
+                    <input class="input" type="date" name="date_debut" value="{{ old('date_debut') }}" required>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Étudiant</label>
-           <select name="etudiant_id" class="form-control">
-                <option value="">Aucun</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ old('etudiant_id') == $user->id ? 'selected' : '' }}>
+            <div class="field">
+                <label class="label">Date de fin</label>
+                <div class="control">
+                    <input class="input" type="date" name="date_fin" value="{{ old('date_fin') }}" required>
+                </div>
+            </div>
 
-                        {{ $user->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            <div class="field">
+                <label class="label">Entreprise</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="entreprise_id" required>
+                            @foreach($entreprises as $entreprise)
+                                <option value="{{ $entreprise->id }}" {{ old('entreprise_id') == $entreprise->id ? 'selected' : '' }}>
+                                    {{ $entreprise->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-        <button class="btn btn-success">Enregistrer</button>
-        <a href="{{ route('stages.index') }}" class="btn btn-secondary">Annuler</a>
-    </form>
+            <div class="field">
+                <label class="label">Maître de stage</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="maitre_de_stage_id" required>
+                            @foreach($employes as $employe)
+                                <option value="{{ $employe->id }}" {{ old('maitre_de_stage_id') == $employe->id ? 'selected' : '' }}>
+                                    {{ $employe->nom }} {{ $employe->prenom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Étudiant</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="etudiant_id">
+                            <option value="">Aucun</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ old('etudiant_id') == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field is-grouped mt-5">
+                <div class="control">
+                    <button class="button is-link">Enregistrer</button>
+                </div>
+                <div class="control">
+                    <a href="{{ route('stages.index') }}" class="button is-light">Annuler</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
 </div>
 @endsection
