@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
 use Illuminate\Support\Facades\Route; // <- Import très important
@@ -7,8 +7,8 @@ use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
 use App\Http\Controllers\StageController; // Importer le contrôleur Stage
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
-
-
+// --- Route de test pour vérifier que l'application fonctionne ---
+Route::post('/companies', [CompanyController::class, 'store']);
 // --- Routes pour les étudiants ---
 Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
     ->name('etudiant.stages.index');
