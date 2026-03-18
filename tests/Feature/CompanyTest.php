@@ -15,14 +15,14 @@ class CompanyTest extends TestCase
 {
     // 1) On simule une requête POST pour créer une entreprise
     $response = $this->post('/companies', [
-        'name' => 'Entreprise Test',
+        'raison_sociale' => 'Entreprise Test',
         'siret' => '12345678901234',
     ]);
 
     // 2) On vérifie que la base contient bien status = pending
     $this->assertDatabaseHas('entreprises', [
-        'name' => 'Entreprise Test',
-        'status' => 'pending',
+        'raison_sociale' => 'Entreprise Test',
+        'est_valide' => 0,
     ]);
 }
 }
