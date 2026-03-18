@@ -45,3 +45,11 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 Route::resource('employes', EmployeController::class);
 //ajout de la route pour les stages 
 Route::resource('stages', StageController::class);
+// Routes pour les contacts d'une entreprise
+Route::prefix('companies/{company}')->group(function () {
+    Route::get('/contacts', [ContactController::class, 'index'])->name('companies.contacts.index');
+    Route::post('/contacts', [ContactController::class, 'store'])->name('companies.contacts.store');
+    Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('companies.contacts.show');
+    Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('companies.contacts.update');
+    Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('companies.contacts.destroy');
+});
