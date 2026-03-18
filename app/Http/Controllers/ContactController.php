@@ -9,8 +9,13 @@ class ContactController extends Controller
 {
     public function index(Entreprise $company)
     {
-        //
+        // Récupérer les contacts liés à l'entreprise
+        $contacts = $company->contacts()->paginate(10);
+
+        // Retourner la vue (on la créera plus tard)
+        return view('contacts.index', compact('company', 'contacts'));
     }
+
 
     public function store(Request $request, Entreprise $company)
     {
