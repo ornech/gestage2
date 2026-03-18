@@ -12,6 +12,8 @@ Route::post('/companies', [CompanyController::class, 'store']);
 // --- Routes pour les étudiants ---
 Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
     ->name('etudiant.stages.index');
+    // --- Route pour l'import de SIRET (utilisée dans le test) ---
+Route::post('/companies/import-siret', [CompanyController::class, 'importSiret']);
 
 // --- Routes communes à tous les utilisateurs connectés ---
 Route::middleware(['auth'])->group(function () {
