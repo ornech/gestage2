@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Entreprise;
 use Illuminate\Http\Request;
+use App\Services\SireneClient;
+
 
 class CompanyController extends Controller
 {
