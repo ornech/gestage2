@@ -36,4 +36,12 @@ class ContactController extends Controller
     {
         //
     }
+    // Méthode privée pour vérifier que le contact appartient bien à l'entreprise
+    private function ensureContactBelongsToCompany(Entreprise $company, Contact $contact)
+{
+    if ($contact->entreprise_id !== $company->id) {
+        abort(404);
+    }
+}
+
 }
