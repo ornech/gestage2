@@ -52,5 +52,29 @@ class CompanyController extends Controller
             'entreprise' => $entreprise
         ]);
     }
+    public function index(Request $request)
+{
+    // Compteurs
+    $companies_count = Entreprise::count();
+    $stages_count = Stage::count();
+    $contacts_count = Contact::count();
+
+    // Recherche simple
+    $search = $request->input('search');
+
+    $entreprises = Entreprise::query()
+        ->when($search, function ($query, $search) {
+            $query->where('raison_sociale', 'like', "%{$search}%");
+        })
+        ->paginate(10);
+
+    return view('index', compact(
+        'companies_count',
+        'stages_count',
+        'contacts_count',
+        'entreprises'
+    ));
+}
+
     
 }
