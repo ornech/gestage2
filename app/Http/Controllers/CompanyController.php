@@ -30,6 +30,11 @@ class CompanyController extends Controller
         }
 
         $etab = $data['etablissement'];
+        $companies_count = Entreprise::count();
+        $stages_count = Stage::count();
+        $contacts_count = Contact::count();
+
+        return view('index', compact('companies_count', 'stages_count', 'contacts_count'));
 
         $entreprise = Entreprise::updateOrCreate(
             ['siret' => $siret],
@@ -47,4 +52,5 @@ class CompanyController extends Controller
             'entreprise' => $entreprise
         ]);
     }
+    
 }
