@@ -23,6 +23,8 @@ Route::get('/entreprises', [CompanyController::class, 'index'])->name('entrepris
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 });
+// --- Route pour afficher les détails d'une entreprise (exemple) ---
+Route::get('/entreprises/{id}', [CompanyController::class, 'show'])->name('entreprises.show');
 
 // Espace professeur (Synchronisé avec LoginResponse)
 Route::middleware(['auth', 'role:Professeur'])->group(function () {

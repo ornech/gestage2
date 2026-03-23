@@ -35,6 +35,48 @@
             </button>
         </div>
     </div>
+    <table class="table is-striped is-fullwidth">
+    <thead>
+        <tr>
+            <th>Nom entreprise</th>
+            <th>Adresse</th>
+            <th>Ville</th>
+            <th>NAF</th>
+            <th>Code postal</th>
+            <th>Stage</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach ($entreprises as $entreprise)
+            <tr>
+                <td>
+                    <a href="{{ route('entreprises.show', $entreprise->id) }}">
+                        {{ $entreprise->raison_sociale }}
+                    </a>
+                </td>
+
+                <td>
+                    {{ $entreprise->adresse }}
+                    @if($entreprise->complement_adresse)
+                        <br><small>{{ $entreprise->complement_adresse }}</small>
+                    @endif
+                </td>
+
+                <td>{{ $entreprise->ville }}</td>
+
+                <td>{{ $entreprise->code_naf }}</td>
+
+                <td>{{ $entreprise->code_postal }}</td>
+
+                <td>-</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+{{ $entreprises->links() }}
+
 </form>
 
 @endsection

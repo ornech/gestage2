@@ -76,5 +76,10 @@ class CompanyController extends Controller
     ));
 }
 
-    
+    public function show($id)
+{
+    $entreprise = Entreprise::findOrFail($id);
+    return view('show', compact('entreprise'));
+}
+
 }
