@@ -53,7 +53,7 @@ class Entreprise extends Model
     // Relation : Une entreprise a plusieurs contacts
     public function contacts()
 {
-    return $this->hasMany(Contact::class);
+    return $this->hasMany(Contact::class, 'entreprise_id');
 }
 
 }

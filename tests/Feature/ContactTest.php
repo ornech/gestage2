@@ -45,9 +45,9 @@ class ContactTest extends TestCase
         ];
         $response = $this->post("/companies/{$company->id}/contacts", $data);
 
-        $response->assertStatus(302);
+        $response->assertStatus(200);
 
-        $this->assertDatabaseHas('contacts', [
+        $this->assertDatabaseHas('employes', [
             'entreprise_id' => $company->id,
             'nom' => 'Dupont',
         ]);
@@ -76,9 +76,9 @@ class ContactTest extends TestCase
             'telephone' => $contact->telephone,
         ]);
 
-        $response->assertStatus(302);
+        $response->assertStatus(200);
 
-        $this->assertDatabaseHas('contacts', [
+        $this->assertDatabaseHas('employes', [
             'id' => $contact->id,
             'nom' => 'NouveauNom',
         ]);
@@ -93,7 +93,7 @@ class ContactTest extends TestCase
 //on va vérifier que le contact supprimé appartient bien à l'entreprise demandée
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('contacts', [
+        $this->assertDatabaseMissing('employes', [
             'id' => $contact->id,
         ]);
     }

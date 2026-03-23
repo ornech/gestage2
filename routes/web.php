@@ -5,7 +5,6 @@ use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
 use Illuminate\Support\Facades\Route; // <- Import très important
 use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
 use App\Http\Controllers\StageController; // Importer le contrôleur Stage
-use App\Http\Controllers\ContactController; // Importer le contrôleur Contact
 
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
@@ -51,11 +50,4 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 Route::resource('employes', EmployeController::class);
 //ajout de la route pour les stages 
 Route::resource('stages', StageController::class);
-// Routes pour les contacts d'une entreprise
-Route::prefix('companies/{company}')->group(function () {
-    Route::get('/contacts', [ContactController::class, 'index'])->name('companies.contacts.index');
-    Route::post('/contacts', [ContactController::class, 'store'])->name('companies.contacts.store');
-    Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('companies.contacts.show');
-    Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('companies.contacts.update');
-    Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('companies.contacts.destroy');
-});
+
