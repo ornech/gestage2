@@ -40,7 +40,7 @@ class EmployeController extends Controller
             'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Créer un nouvel employé avec les données validées
-            Employe::create($request->validated());
+            Employe::create($request->all());
         // Rediriger vers la liste des employés avec un message de succès
         return redirect()->route('employes.index')
                          ->with('success', 'Employé ajouté avec succès.');
@@ -70,7 +70,7 @@ class EmployeController extends Controller
     public function update(Request $request, Employe $employe)
      {
         // Valider les données du formulaire
-         $request->validate([
+         $data = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
             'email' => 'required|email|unique:employes,email,' . $employe->id,
@@ -78,7 +78,7 @@ class EmployeController extends Controller
             'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Mettre à jour l'employé avec les données validées
-            $employe->update($request->validated());
+            $employe->update($data);
         // Rediriger vers la liste des employés avec un message de succès
         return redirect()->route('employes.index')
                          ->with('success', 'Employé mis à jour avec succès.');

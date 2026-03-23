@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Factories;
-
+use App\Models\Entreprise;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,10 +17,16 @@ class EmployeFactory extends Factory
    public function definition(): array
 {
     return [
-        'nom' => fake()->lastName(),
-        'prenom' => fake()->firstName(),
-        'email' => fake()->unique()->safeEmail(),
-        'entreprise_id' => \App\Models\Entreprise::factory(),
+      'entreprise_id' => Entreprise::factory(),
+            'nom' => $this->faker->lastName(),
+            'prenom' => $this->faker->firstName(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'telephone' => $this->faker->phoneNumber(), // 🔥 OBLIGATOIRE
+            'service' => $this->faker->word(),
+            'fonction' => $this->faker->jobTitle(),
+            'contact_valide' => false,
+            'newsletter' => false,
+            'jury' => false,
     ];
 }
 

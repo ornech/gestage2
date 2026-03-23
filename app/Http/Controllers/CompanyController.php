@@ -5,7 +5,7 @@ use App\Models\Entreprise;
 use Illuminate\Http\Request;
 use App\Services\SireneClient;
 use App\Models\Stage;
-use App\Models\Contact;
+use App\Models\Employe;
 
 class CompanyController extends Controller
 {
@@ -26,7 +26,7 @@ class CompanyController extends Controller
     // Compteurs
     $companies_count = Entreprise::count();
     $stages_count = Stage::count();
-    $contacts_count = Contact::count();
+    $contacts_count = Employe::count();
 
     // Recherche simple
     $search = $request->input('search');
@@ -37,18 +37,20 @@ class CompanyController extends Controller
         })
         ->paginate(10);
 
-    return view('index', compact(
+    return view('entreprises.index', compact(
         'companies_count',
         'stages_count',
         'contacts_count',
         'entreprises'
     ));
+
 }
 
     public function show($id)
 {
     $entreprise = Entreprise::findOrFail($id);
-    return view('show', compact('entreprise'));
+   return view('entreprises.show', compact('entreprise'));
+
 }
 public function importSiret(Request $request, SireneClient $sirene)
 {
