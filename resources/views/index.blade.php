@@ -35,6 +35,7 @@
             </button>
         </div>
     </div>
+    </form>
     <table class="table is-striped is-fullwidth">
     <thead>
         <tr>
@@ -77,6 +78,6 @@
 
 {{ $entreprises->links() }}
 
-</form>
+
 
 @endsection

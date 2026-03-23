@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Entreprise;
 use Illuminate\Http\Request;
 use App\Services\SireneClient;
-
+use App\Models\Stage;
+use App\Models\Contact;
 
 class CompanyController extends Controller
 {
