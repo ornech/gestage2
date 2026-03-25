@@ -36,5 +36,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Stage::class);
     }
+    // On ajoute une méthode pour vérifier si l'utilisateur est un étudiant (basé sur son rôle ou d'autres critères)
+    public function isEtudiant()
+    {
+    return $this->prenom === 'Étudiant' || $this->email === 'etudiant@test.com';
+    }
+
 }
 

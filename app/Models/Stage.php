@@ -30,21 +30,21 @@ class Stage extends Model
 
     public function entreprise(): BelongsTo
     {
-        return $this->belongsTo(Entreprise::class);
+        return $this->belongsTo(Entreprise::class, 'entreprise_id');
     }
 
     public function maitreDeStage(): BelongsTo
     {
-        return $this->belongsTo(Employe::class);
+        return $this->belongsTo(Employe::class, 'maitre_de_stage_id');
     }
 
     public function etudiant(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'etudiant_id');
     }
 
     public function professeur(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'professeur_id');
     }
 }

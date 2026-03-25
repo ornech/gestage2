@@ -28,26 +28,31 @@
             @foreach($stages as $stage)
                 <tr>
                     <td>{{ $stage->titre }}</td>
-                    <td>
-                        {{ $stage->employe->nom }} {{ $stage->employe->prenom }}
+                   <td>
+                        {{ $stage->maitreDeStage?->nom ?? '—' }}
+                      {{ $stage->maitreDeStage?->prenom ?? '' }}
                     </td>
+
                     <td>{{ $stage->date_debut }}</td>
                     <td>{{ $stage->date_fin }}</td>
-                    <td>
-                        <a href="{{ route('stages.edit', $stage) }}" class="btn btn-warning btn-sm">
-                            Modifier
-                        </a>
+                   <td>
+    @unless(auth()->user()->isEtudiant())
+        <a href="{{ route('stages.edit', $stage) }}" class="btn btn-warning btn-sm">
+            Modifier
+        </a>
 
-                        <form action="{{ route('stages.destroy', $stage) }}" 
-                              method="POST" 
-                              style="display:inline-block;">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce stage ?')">
-                                Supprimer
-                            </button>
-                        </form>
-                    </td>
+        <form action="{{ route('stages.destroy', $stage) }}" 
+              method="POST" 
+              style="display:inline-block;">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce stage ?')">
+                Supprimer
+            </button>
+        </form>
+    @endunless
+                </td>
+
                 </tr>
             @endforeach
 
