@@ -18,4 +18,18 @@ class AdminStageController extends Controller
      $tuteurs = Employe::all();
      return view('admin.stages.index', compact('stages', 'tuteurs'));
     }
+    public function assign(Request $request, Stage $stage)
+{
+    // Validation : le tuteur doit exister dans la table employes
+    $request->validate([
+        'maitre_de_stage_id' => 'nullable|exists:employes,id',
+    ]);
+
+    // Mise à jour du tuteur
+    $stage->maitre_de_stage_id = $request->maitre_de_stage_id;
+    $stage->save();
+
+    return back()->with('success', 'Tuteur assigné avec succès.');
+}
+
 }

@@ -4,6 +4,11 @@
     <div class="container mt-6">
         <h1 class="title">Gestion des stages (Admin)</h1>
         
+    @if(session('success'))
+        <div class="notification is-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
         @if($stages->count() === 0)
             <div class="notification is-warning">

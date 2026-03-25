@@ -36,15 +36,7 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
     });
 });
 
-// Espace administrateur (Nom du rôle corrigé + URL synchronisée)
-Route::middleware(['auth', 'role:Administrateur'])->group(function () {
-    Route::get('/admin', function () {
-        return view('dashboards.admin'); // Appel de la vue Blade administrateur
-    });
-});
-// Nouvelle route pour assigner un tuteur
-    Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
-        ->name('admin.stages.assign');
+
 
 //ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
@@ -61,10 +53,15 @@ Route::prefix('companies/{company}')->group(function () {
 // Espace administrateur 
 Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     Route::get('/admin', function () {
-        return view('dashboards.admin'); // Appel de la vue Blade administrateur
-    });
+        return view('dashboards.admin');
+    })->name('admin.dashboard');
 
     //  Nouvelle route pour la console admin des stages
     Route::get('/admin/stages', [\App\Http\Controllers\AdminStageController::class, 'index'])
         ->name('admin.stages.index');
+
+// Assignation du tuteur
+    Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
+        ->name('admin.stages.assign');
 });
+
