@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Stage;
-
+use App\Models\Employe;
 class AdminStageController extends Controller
 {
     /**
@@ -14,7 +14,8 @@ class AdminStageController extends Controller
         
           // Charger tous les stages avec leurs relations
      $stages = Stage::with(['entreprise', 'maitreDeStage', 'etudiant'])->paginate(10);
-
-     return view('admin.stages.index', compact('stages'));
+        // Charger tous les employés (tuteurs potentiels)
+     $tuteurs = Employe::all();
+     return view('admin.stages.index', compact('stages', 'tuteurs'));
     }
 }

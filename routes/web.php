@@ -42,6 +42,9 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
         return view('dashboards.admin'); // Appel de la vue Blade administrateur
     });
 });
+// Nouvelle route pour assigner un tuteur
+    Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
+        ->name('admin.stages.assign');
 
 //ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
