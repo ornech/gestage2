@@ -75,21 +75,7 @@
                 </div>
             </div>
 
-            <div class="field">
-                <label class="label">Étudiant</label>
-                <div class="control">
-                    <div class="select is-fullwidth">
-                        <select name="etudiant_id">
-                            <option value="">Aucun</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ old('etudiant_id') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
+           
 
             <div class="field is-grouped mt-5">
                 <div class="control">

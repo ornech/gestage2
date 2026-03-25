@@ -43,12 +43,10 @@ class StageController extends Controller
      */
     public function store(Request $request)
     {
-        // Vérification que l'étudiant ne peut créer un stage que pour sa propre année
-        if ($request->promo != auth()->user()->promo) {
-    abort(403, "Vous ne pouvez pas créer un stage pour une autre année.");
-}
-
-        
+        //  // Vérifier que l'étudiant crée un stage pour SA promo
+    if ($request->promo != auth()->user()->promo) {
+        abort(403, "Vous ne pouvez pas créer un stage pour une autre année.");
+    }
             //autorisation pour créer un stage
             $this->authorize('create', Stage::class);
         
@@ -59,10 +57,19 @@ class StageController extends Controller
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'entreprise_id' => 'required|exists:entreprises,id',
             'maitre_de_stage_id' => 'required|exists:employes,id',
-            'etudiant_id' => 'nullable|exists:users,id',
+           
             ]);
 
-        Stage::create($request->validated());
+         Stage::create([
+        'titre' => $request->titre,
+        'description' => $request->description,
+        'date_debut' => $request->date_debut,
+        'date_fin' => $request->date_fin,
+        'entreprise_id' => $request->entreprise_id,
+        'maitre_de_stage_id' => $request->maitre_de_stage_id,
+        'etudiant_id' => auth()->id(), //  Sécurisé
+        'promo' => auth()->user()->promo, // Empêche SIO1 → SIO2
+    ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage créé avec succès.');
     }
