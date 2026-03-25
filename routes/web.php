@@ -55,3 +55,13 @@ Route::prefix('companies/{company}')->group(function () {
     Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('companies.contacts.update');
     Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('companies.contacts.destroy');
 });
+// Espace administrateur 
+Route::middleware(['auth', 'role:Administrateur'])->group(function () {
+    Route::get('/admin', function () {
+        return view('dashboards.admin'); // Appel de la vue Blade administrateur
+    });
+
+    //  Nouvelle route pour la console admin des stages
+    Route::get('/admin/stages', [\App\Http\Controllers\AdminStageController::class, 'index'])
+        ->name('admin.stages.index');
+});
