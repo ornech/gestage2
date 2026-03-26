@@ -59,6 +59,9 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     //  Nouvelle route pour la console admin des stages
     Route::get('/admin/stages', [\App\Http\Controllers\AdminStageController::class, 'index'])
         ->name('admin.stages.index');
+// Route pour télécharger la convention de stage au format PDF
+Route::get('/stages/{stage}/pdf/convention', [PdfController::class, 'convention'])
+    ->name('pdf.convention');
 
 // Assignation du tuteur
     Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
