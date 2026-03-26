@@ -20,6 +20,7 @@ class EmployeFactory extends Factory
         'nom' => fake()->lastName(),
         'prenom' => fake()->firstName(),
         'email' => fake()->unique()->safeEmail(),
+        'telephone' => fake()->phoneNumber(),
         'entreprise_id' => \App\Models\Entreprise::factory(),
     ];
 }

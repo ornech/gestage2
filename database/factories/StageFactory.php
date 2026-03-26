@@ -16,10 +16,11 @@ class StageFactory extends Factory
      */
     public function definition(): array
 {
+    $start = fake()->dateTimeBetween('-1 month', '+1 month');
     return [
         'titre' => fake()->sentence(),
-        'date_debut' => fake()->date(),
-        'date_fin' => fake()->date(),
+        'date_debut' => $start,
+        'date_fin' => fake()->dateTimeBetween($start, '+2 months'),
         'entreprise_id' => \App\Models\Entreprise::factory(),
         'maitre_de_stage_id' => \App\Models\Employe::factory(),
     ];

@@ -23,10 +23,11 @@ class StagePolicy
      * Determine whether the user can view the model.
      */
     //l'étudiant peut voir la un stage si c'est le sien
-    public function view(User $user, Stage $stage): bool
-    {
-        return $stage->etudiant_id === $user->id;
-    }
+    public function view(User $user, Stage $stage)
+{
+    return true;
+}
+
 
     /**
      * Determine whether the user can create models.
