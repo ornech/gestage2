@@ -23,6 +23,7 @@
                         <th>Tuteur Pro</th>
                         <th>Date début</th>
                         <th>Date fin</th>
+                        <th>Promo</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
