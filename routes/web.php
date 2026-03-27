@@ -37,11 +37,18 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 });
 
 
+Route::get('/stages/entreprises', [CompanyController::class, 'index'])
+    ->name('entreprises.index');
+
+Route::get('/stages/entreprises/{entreprise}', [CompanyController::class, 'show'])
+    ->name('entreprises.show');
 
 //ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
+
 //ajout de la route pour les stages 
 Route::resource('stages', StageController::class);
+
 // Routes pour les contacts d'une entreprise
 Route::prefix('companies/{company}')->group(function () {
     Route::get('/contacts', [ContactController::class, 'index'])->name('companies.contacts.index');
@@ -67,5 +74,6 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     // Assignation du tuteur
     Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
             ->name('admin.stages.assign');
+            
 });
 
