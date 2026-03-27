@@ -52,7 +52,7 @@
                         <select name="entreprise_id" required>
                             @foreach($entreprises as $entreprise)
                                 <option value="{{ $entreprise->id }}" {{ old('entreprise_id') == $entreprise->id ? 'selected' : '' }}>
-                                    {{ $entreprise->nom }}
+                                    {{ $entreprise->raison_sociale }}
                                 </option>
                             @endforeach
                         </select>
@@ -88,6 +88,35 @@
 
         </form>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dateDebutInput = document.querySelector('input[name="date_debut"]');
+    const dateFinInput = document.querySelector('input[name="date_fin"]');
+
+    dateDebutInput.addEventListener('change', function () {
+        const debut = new Date(this.value);
+
+        if (!isNaN(debut.getTime())) {
+            // Calcul de la date maximale = début + 42 jours
+            const finMax = new Date(debut);
+            finMax.setDate(finMax.getDate() + 42);
+
+            const yyyy = finMax.getFullYear();
+            const mm = String(finMax.getMonth() + 1).padStart(2, '0');
+            const dd = String(finMax.getDate()).padStart(2, '0');
+            const maxDate = `${yyyy}-${mm}-${dd}`;
+
+            // Appliquer la limite max
+            dateFinInput.setAttribute('max', maxDate);
+
+            // Si la date fin dépasse la limite → correction automatique
+            if (dateFinInput.value > maxDate) {
+                dateFinInput.value = maxDate;
+            }
+        }
+    });
+});
+</script>
 
 </div>
 @endsection

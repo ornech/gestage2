@@ -59,6 +59,7 @@ class StageController extends Controller
             'maitre_de_stage_id' => 'required|exists:employes,id',
            
             ]);
+            
 
          Stage::create([
         'titre' => $request->titre,
@@ -107,6 +108,7 @@ class StageController extends Controller
        
          'etudiant_id' => 'nullable|exists:users,id',
         ]);
+        
 
         $stage->update($request->validated());
 
