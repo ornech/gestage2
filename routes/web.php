@@ -5,11 +5,9 @@ use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
 use Illuminate\Support\Facades\Route; // <- Import très important
 use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
 use App\Http\Controllers\StageController; // Importer le contrôleur Stage
-use App\Http\Controllers\ContactController; // Importer le contrôleur Contact
+
 use App\Http\Controllers\PdfController;
-Route::get('/entreprises/{entreprise}/employes', function(App\Models\Entreprise $entreprise) {
-    return $entreprise->employes()->select('id', 'nom', 'prenom')->get();
-});
+
 // Page d’import
 Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
     ->name('entreprises.import.form');
@@ -48,11 +46,6 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 });
 
 
-Route::get('/stages/entreprises', [CompanyController::class, 'index'])
-    ->name('entreprises.index');
-
-Route::get('/stages/entreprises/{entreprise}', [CompanyController::class, 'show'])
-    ->name('entreprises.show');
 
 //ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
@@ -60,14 +53,7 @@ Route::resource('employes', EmployeController::class);
 //ajout de la route pour les stages 
 Route::resource('stages', StageController::class);
 
-// Routes pour les contacts d'une entreprise
-Route::prefix('companies/{company}')->group(function () {
-    Route::get('/contacts', [ContactController::class, 'index'])->name('companies.contacts.index');
-    Route::post('/contacts', [ContactController::class, 'store'])->name('companies.contacts.store');
-    Route::get('/contacts/{contact}', [ContactController::class, 'show'])->name('companies.contacts.show');
-    Route::put('/contacts/{contact}', [ContactController::class, 'update'])->name('companies.contacts.update');
-    Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('companies.contacts.destroy');
-});
+
 // Route pour télécharger la convention de stage au format PDF
 
 Route::middleware(['auth'])->group(function () {
