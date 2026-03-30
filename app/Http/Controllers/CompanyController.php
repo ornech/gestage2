@@ -1,43 +1,60 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Entreprise;
 use Illuminate\Http\Request;
 use App\Services\SireneClient;
 use App\Models\Stage;
 use App\Models\Employe;
 
-
 class CompanyController extends Controller
 {
-public function index()
-{
-    $entreprises = Entreprise::all();
-    $nbEntreprises = Entreprise::count();
-    $nbStages = Stage::count();
-    $nbContacts = Employe::count(); // tes "contacts" = employés
+    public function index()
+    {
+        $entreprises = Entreprise::paginate(15);
 
-    return view('entreprises.index', compact(
-        'entreprises',
-        'nbEntreprises',
-        'nbStages',
-        'nbContacts'
-    ));
-}
+        $nbEntreprises = Entreprise::count();
+        $nbStages = Stage::count();
+        $nbContacts = Employe::count();
 
+        return view('entreprises.index', compact(
+            'entreprises',
+            'nbEntreprises',
+            'nbStages',
+            'nbContacts'
+        ));
+    }
 
-    //
-     public function store(Request $request)
+    public function update(Request $request, Entreprise $entreprise)
+    {
+        $entreprise->update([
+            'raison_sociale' => $request->raison_socialiale,
+            'adresse' => $request->adresse,
+            'code_postal' => $request->code_postal,
+            'ville' => $request->ville,
+            'siret' => $request->siret,
+        ]);
+
+        return redirect()->route('entreprises.show', $entreprise)
+                         ->with('success', 'Entreprise mise à jour.');
+    }
+
+    public function store(Request $request)
     {
         Entreprise::create([
-          'raison_sociale' => $request->raison_sociale,
-         'siret' => $request->siret,
-            'est_valide' => 0,
+            'raison_sociale' => $request->raison_sociale,
+            'adresse' => $request->adresse,
+            'code_postal' => $request->code_postal,
+            'ville' => $request->ville,
+            'siret' => $request->siret,
+            'est_valide' => false,
         ]);
 
         return response()->json(['message' => 'ok']);
     }
-        public function importSiret(Request $request, SireneClient $sirene)
+
+    public function importSiret(Request $request, SireneClient $sirene)
     {
         $siret = $request->siret;
 
@@ -49,57 +66,67 @@ public function index()
 
         $etab = $data['etablissement'];
 
-        $entreprise = Entreprise::updateOrCreate(
-            ['siret' => $siret],
-            [
-                'raison_sociale' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
-                'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
-                'code_postal' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
-                'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
-                'est_valide' => true,
-            ]
-        );
+        $normalized = [
+            'nom' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
+            'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
+            'cp' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
+            'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
+            'siret' => $siret,
+        ];
+
+        $entreprise = Entreprise::where('siret', $siret)->first();
 
         return response()->json([
             'message' => 'Entreprise importée',
+            'data' => $normalized,
             'entreprise' => $entreprise
         ]);
     }
+
     public function show(Entreprise $entreprise)
-{
-    $entreprise->load([
-        'employes',              // contacts
-        'stages.etudiant',       // étudiant du stage
-        'stages.maitreDeStage'   // maître de stage
-    ]);
+    {
+        $entreprise->load([
+            'employes',
+            'stages.etudiant',
+            'stages.maitreDeStage'
+        ]);
 
-    return view('entreprises.show', compact('entreprise'));
-}
-public function importForm()
-{
-    return view('entreprises.import');
-}
-public function import(Request $request)
-{
-    $request->validate([
-        'siret' => 'required|digits:14'
-    ]);
-
-    // Appel au service Sirene
-    $client = new SireneClient();
-    $data = $client->searchBySiret($request->siret);
-
-    if (!$data) {
-        return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
+        return view('entreprises.show', compact('entreprise'));
     }
 
-    // Vérifier si l’entreprise existe déjà
-    $entreprise = Entreprise::where('siret', $request->siret)->first();
+    public function importForm()
+    {
+        return view('entreprises.import');
+    }
 
-    return view('entreprises.import-result', [
-        'data' => $data,
-        'entreprise' => $entreprise
-    ]);
-}
+    public function import(Request $request)
+    {
+        $request->validate([
+            'siret' => 'required|digits:14'
+        ]);
 
+        $client = new SireneClient();
+        $data = $client->getBySiret($request->siret);
+
+        if (!$data || !isset($data['etablissement'])) {
+            return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
+        }
+
+        $etab = $data['etablissement'];
+
+        $normalized = [
+            'nom' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
+            'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
+            'cp' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
+            'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
+            'siret' => $request->siret,
+        ];
+
+        $entreprise = Entreprise::where('siret', $request->siret)->first();
+
+        return view('entreprises.import-result', [
+            'data' => $normalized,
+            'entreprise' => $entreprise
+        ]);
+    }
 }
