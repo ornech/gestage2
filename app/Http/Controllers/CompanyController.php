@@ -75,5 +75,31 @@ public function index()
 
     return view('entreprises.show', compact('entreprise'));
 }
+public function importForm()
+{
+    return view('entreprises.import');
+}
+public function import(Request $request)
+{
+    $request->validate([
+        'siret' => 'required|digits:14'
+    ]);
+
+    // Appel au service Sirene
+    $client = new SireneClient();
+    $data = $client->searchBySiret($request->siret);
+
+    if (!$data) {
+        return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
+    }
+
+    // Vérifier si l’entreprise existe déjà
+    $entreprise = Entreprise::where('siret', $request->siret)->first();
+
+    return view('entreprises.import-result', [
+        'data' => $data,
+        'entreprise' => $entreprise
+    ]);
+}
 
 }

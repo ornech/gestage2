@@ -7,6 +7,17 @@ use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
 use App\Http\Controllers\StageController; // Importer le contrôleur Stage
 use App\Http\Controllers\ContactController; // Importer le contrôleur Contact
 use App\Http\Controllers\PdfController;
+Route::get('/entreprises/{entreprise}/employes', function(App\Models\Entreprise $entreprise) {
+    return $entreprise->employes()->select('id', 'nom', 'prenom')->get();
+});
+// Page d’import
+Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
+    ->name('entreprises.import.form');
+
+// Traitement du SIRET
+Route::post('/entreprises/import', [CompanyController::class, 'import'])
+    ->name('entreprises.import');
+
 // --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
 Route::get('/', [RedirectController::class, 'index']);
 // --- Route de test pour vérifier que l'application fonctionne ---

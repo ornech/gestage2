@@ -49,7 +49,8 @@
                 <label class="label">Entreprise</label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select name="entreprise_id" required>
+                      <select name="entreprise_id" id="entrepriseSelect" required>
+
                             @foreach($entreprises as $entreprise)
                                 <option value="{{ $entreprise->id }}" {{ old('entreprise_id') == $entreprise->id ? 'selected' : '' }}>
                                     {{ $entreprise->raison_sociale }}
@@ -64,13 +65,10 @@
                 <label class="label">Maître de stage</label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select name="maitre_de_stage_id" required>
-                            @foreach($employes as $employe)
-                                <option value="{{ $employe->id }}" {{ old('maitre_de_stage_id') == $employe->id ? 'selected' : '' }}>
-                                    {{ $employe->nom }} {{ $employe->prenom }}
-                                </option>
-                            @endforeach
-                        </select>
+                       <select name="maitre_de_stage_id" id="maitreSelect" required>
+                            <option value="">Sélectionnez une entreprise d'abord</option>
+                    </select>
+
                     </div>
                 </div>
             </div>
@@ -115,6 +113,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const entrepriseSelect = document.getElementById('entrepriseSelect');
+    const maitreSelect = document.getElementById('maitreSelect');
+
+    entrepriseSelect.addEventListener('change', function () {
+        const entrepriseId = this.value;
+
+        // Message temporaire
+        maitreSelect.innerHTML = '<option>Chargement...</option>';
+
+        fetch(`/entreprises/${entrepriseId}/employes`)
+            .then(response => response.json())
+            .then(data => {
+                maitreSelect.innerHTML = '';
+
+                if (data.length === 0) {
+                    maitreSelect.innerHTML = '<option value="">Aucun employé trouvé</option>';
+                    return;
+                }
+
+                data.forEach(emp => {
+                    const option = document.createElement('option');
+                    option.value = emp.id;
+                    option.textContent = `${emp.nom} ${emp.prenom}`;
+                    maitreSelect.appendChild(option);
+                });
+
+                // Auto‑sélection si un seul employé
+                if (data.length === 1) {
+                    maitreSelect.value = data[0].id;
+                }
+            });
+    });
+
 });
 </script>
 
