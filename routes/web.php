@@ -1,76 +1,129 @@
 <?php
+
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RedirectController; // Importer le nouveau contrôleur
-use Illuminate\Support\Facades\Route; // <- Import très important
-use App\Http\Controllers\EmployeController; // Importer le contrôleur Employe
-use App\Http\Controllers\StageController; // Importer le contrôleur Stage
-
+use App\Http\Controllers\RedirectController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmployeController;
+use App\Http\Controllers\StageController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\AdminStageController;
+
+/*
+|--------------------------------------------------------------------------
+| Routes Entreprises
+|--------------------------------------------------------------------------
+*/
+Route::get('/entreprises', [CompanyController::class, 'index'])
+    ->name('entreprises.index');
+Route::get('/entreprises/{entreprise}', [CompanyController::class, 'show'])
+    ->name('entreprises.show');
 
 // Page d’import
 Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
     ->name('entreprises.import.form');
 
-// Traitement du SIRET
+// Traitement du SIRET (interface)
 Route::post('/entreprises/import', [CompanyController::class, 'import'])
     ->name('entreprises.import');
 
-// --- L'AIGUILLEUR PRINCIPAL (Racine du site) ---
-Route::get('/', [RedirectController::class, 'index']);
-// --- Route de test pour vérifier que l'application fonctionne ---
-Route::post('/companies', [CompanyController::class, 'store']);
-// --- Routes pour les étudiants ---
-Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
-    ->name('etudiant.stages.index');
-    // --- Route pour l'import de SIRET (utilisée dans le test) ---
+// API SIRET (utilisée par les tests)
 Route::post('/companies/import-siret', [CompanyController::class, 'importSiret']);
 
-// --- Routes communes à tous les utilisateurs connectés ---
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+// Création entreprise (test)
+Route::post('/companies', [CompanyController::class, 'store']);
+
+
+/*
+|--------------------------------------------------------------------------
+| Aiguilleur principal
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [RedirectController::class, 'index']);
+
+
+/*
+|--------------------------------------------------------------------------
+| Espace Étudiant
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:Etudiant'])->group(function () {
+
+    // Dashboard étudiant (RENOMMÉ pour éviter le conflit)
+    Route::get('/etudiant', function () {
+        return view('dashboards.etudiant');
+    })->name('etudiant.dashboard');
+
+    // Liste des stages de l'étudiant
+    Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
+        ->name('etudiant.stages.index');
 });
 
-// Espace professeur (Synchronisé avec LoginResponse)
+
+/*
+|--------------------------------------------------------------------------
+| Routes communes (profil)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])
+        ->name('profile.show');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Espace Professeur
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboards.professeur'); // Appel de la vue Blade professeur
-    });
-});
-
-// Espace étudiant (Synchronisé avec LoginResponse)
-Route::middleware(['auth', 'role:Etudiant'])->group(function () {
-    Route::get('/stages', function () {
-        return view('dashboards.etudiant'); // Appel de la vue Blade pour les stages
+        return view('dashboards.professeur');
     });
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| Employés & Stages (modules officiels)
+|--------------------------------------------------------------------------
+*/
 
-//ajout de la route pour les employes
 Route::resource('employes', EmployeController::class);
-
-//ajout de la route pour les stages 
 Route::resource('stages', StageController::class);
 
 
-// Route pour télécharger la convention de stage au format PDF
+/*
+|--------------------------------------------------------------------------
+| PDF
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/stages/{stage}/pdf/convention', [PdfController::class, 'convention'])
         ->name('pdf.convention');
 });
-// Espace administrateur 
+
+
+/*
+|--------------------------------------------------------------------------
+| Espace Administrateur
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:Administrateur'])->group(function () {
+
     Route::get('/admin', function () {
         return view('dashboards.admin');
     })->name('admin.dashboard');
-    //  Nouvelle route pour la console admin des stages
-    Route::get('/admin/stages', [\App\Http\Controllers\AdminStageController::class, 'index'])
-            ->name('admin.stages.index');
-    // Assignation du tuteur
-    Route::put('/admin/stages/{stage}/assign', [\App\Http\Controllers\AdminStageController::class, 'assign'])
-            ->name('admin.stages.assign');
-            
-});
 
+    Route::get('/admin/stages', [AdminStageController::class, 'index'])
+        ->name('admin.stages.index');
+
+    Route::put('/admin/stages/{stage}/assign', [AdminStageController::class, 'assign'])
+        ->name('admin.stages.assign');
+});

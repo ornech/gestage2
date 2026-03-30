@@ -18,13 +18,19 @@
             @csrf
             @method('PUT')
             <button class="button is-warning">Mettre à jour l’entreprise existante</button>
+            <input type="hidden" name="raison_sociale" value="{{ $data['nom'] }}">
+            <input type="hidden" name="adresse" value="{{ $data['adresse'] }}">
+            <input type="hidden" name="code_postal" value="{{ $data['cp'] }}">
+            <input type="hidden" name="ville" value="{{ $data['ville'] }}">
+            <input type="hidden" name="siret" value="{{ $data['siret'] }}">
+
         </form>
     @else
         <form action="{{ route('entreprises.store') }}" method="POST">
             @csrf
             <input type="hidden" name="raison_sociale" value="{{ $data['nom'] }}">
             <input type="hidden" name="adresse" value="{{ $data['adresse'] }}">
-            <input type="hidden" name="cp" value="{{ $data['cp'] }}">
+            <input type="hidden" name="code_postal" value="{{ $data['cp'] }}">
             <input type="hidden" name="ville" value="{{ $data['ville'] }}">
             <input type="hidden" name="siret" value="{{ $data['siret'] }}">
             <button class="button is-success">Créer cette entreprise</button>

@@ -29,7 +29,7 @@ class CompanyController extends Controller
     public function update(Request $request, Entreprise $entreprise)
     {
         $entreprise->update([
-            'raison_sociale' => $request->raison_socialiale,
+            'raison_sociale' => $request->raison_sociale,
             'adresse' => $request->adresse,
             'code_postal' => $request->code_postal,
             'ville' => $request->ville,
@@ -58,7 +58,8 @@ class CompanyController extends Controller
     {
         $siret = $request->siret;
 
-        $data = $sirene->getBySiret($siret);
+        $data = $sirene->getBySiret($request->siret);
+
 
         if (!$data || !isset($data['etablissement'])) {
             return response()->json(['error' => 'SIRET introuvable'], 404);
