@@ -35,37 +35,49 @@
     <hr>
 
     {{-- Stages --}}
-    <h2 class="title is-4">Stages</h2>
+  <h2 class="title is-4">Contacts</h2>
 
-    <table class="table is-striped is-fullwidth">
-        <thead>
-            <tr>
-                <th>Étudiant</th>
-                <th>Classe</th>
-                <th>Date début</th>
-                <th>Date fin</th>
-                <th>Maître de stage</th>
-            </tr>
-        </thead>
+<a href="{{ route('employes.create', $entreprise->id) }}" class="button is-primary mb-3">
+    Ajouter un maître de stage
+</a>
 
-        <tbody>
-            @foreach ($entreprise->stages as $stage)
-                <tr>
-                    <td>
-                        {{ $stage->etudiant->nom ?? 'Non défini' }}
-                        {{ $stage->etudiant->prenom ?? '' }}
-                    </td>
+@if($entreprise->employes->isEmpty())
+    <p>Aucun employé pour cette entreprise.</p>
+@else
+<table class="table is-striped is-fullwidth">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Rôle</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($entreprise->employes as $employe)
+        <tr>
+            <td>{{ $employe->prenom }} {{ $employe->nom }}</td>
+            <td>{{ $employe->email }}</td>
+            <td>{{ $employe->telephone ?? '—' }}</td>
+            <td>
+                @if($employe->is_maitre_de_stage)
+                    Maître de stage
+                @else
+                    Employé
+                @endif
+            </td>
+            <td>
+                <a href="{{ route('employes.show', $employe->id) }}" class="button is-small is-link">
+                    Voir
+                </a>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
 
-                    <td>{{ $stage->etudiant->classe ?? 'Non défini' }}</td>
 
-                    <td>{{ $stage->date_debut }}</td>
-                    <td>{{ $stage->date_fin }}</td>
-                    <td>{{ $stage->maitreDeStage->nom ?? 'Non défini' }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-</div>
 
 @endsection
