@@ -4,13 +4,9 @@
 <div class="container mt-6">
 
     <h1 class="title">Résultat de l'import</h1>
-<pre>
-SIRET importé : "{{ $data['siret'] }}"
-</pre>
 
-<pre>
-Entreprise trouvée ? : {{ $entreprise ? 'OUI' : 'NON' }}
-</pre>
+
+
 
     <div class="box">
         <p><strong>Raison sociale :</strong> {{ $data['nom'] }}</p>

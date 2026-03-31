@@ -15,6 +15,10 @@ use App\Http\Controllers\AdminStageController;
 |--------------------------------------------------------------------------
 */
 // Page d’import
+// Formulaire d’import
+Route::get('/entreprises/create', [CompanyController::class, 'create'])
+    ->name('entreprises.create');
+
 Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
     ->name('entreprises.import.form');
 // Traitement du SIRET (interface)

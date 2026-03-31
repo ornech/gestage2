@@ -116,8 +116,11 @@ class CompanyController extends Controller
     $data = $client->getBySiret($siret);
 
     if (!$data || !isset($data['etablissement'])) {
-        return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
-    }
+    return view('entreprises.import-not-found', [
+        'siret' => $request->siret
+    ]);
+}
+
 
     $etab = $data['etablissement'];
 
@@ -138,5 +141,9 @@ class CompanyController extends Controller
     ]);
 }
 
+public function create()
+{
+    return view('entreprises.create');
+}
 
 }
