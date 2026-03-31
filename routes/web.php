@@ -23,6 +23,9 @@ Route::post('/entreprises/import', [CompanyController::class, 'import'])
     //création d’une entreprise à partir du SIRET (test)
     Route::post('/entreprises', [CompanyController::class, 'store'])
     ->name('entreprises.store');
+//mise à jour d’une entreprise à partir du SIRET (test)
+Route::put('/entreprises/{entreprise}', [CompanyController::class, 'update'])
+    ->name('entreprises.update');
 
 //Liste des entreprises
 Route::get('/entreprises', [CompanyController::class, 'index'])
