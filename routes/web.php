@@ -106,6 +106,11 @@ Route::middleware(['auth', 'role:Professeur'])->group(function () {
 | Employés & Stages (modules officiels)
 |--------------------------------------------------------------------------
 */
+Route::get('/entreprises/{entreprise}/employes/create', [EmployeController::class, 'create'])
+    ->name('employes.create');
+
+Route::post('/entreprises/{entreprise}/employes', [EmployeController::class, 'store'])
+    ->name('employes.store');
 
 Route::resource('employes', EmployeController::class);
 Route::resource('stages', StageController::class);

@@ -19,8 +19,9 @@
     @endif
 
     {{-- Formulaire d'ajout d'un employé --}}
-    <form action="{{ route('employes.store') }}" method="POST">
+    <form action="{{ route('employes.store', $entreprise_id) }}" method="POST">
         @csrf  {{-- Jeton de sécurité obligatoire dans les formulaires Laravel --}}
+            <input type="hidden" name="entreprise_id" value="{{ $entreprise_id }}">
 
         {{-- Champ Nom --}}
         <div class="mb-3">
@@ -46,11 +47,7 @@
             <input type="text" name="telephone" id="telephone" class="form-control" value="{{ old('telephone') }}">
         </div>
 
-        {{-- Champ Entreprise --}}
-        <div class="mb-3">
-            <label for="entreprise" class="form-label">Entreprise</label>
-            <input type="text" name="entreprise" id="entreprise" class="form-control" value="{{ old('entreprise') }}">
-        </div>
+     
 
         {{-- Bouton de validation du formulaire --}}
         <button type="submit" class="btn btn-success">Enregistrer</button>

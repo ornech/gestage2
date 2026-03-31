@@ -20,31 +20,41 @@ class EmployeController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        // Afficher le formulaire de création d'un nouvel employé
-        return view('employes.create');
-    }
+   public function create($entrepriseId)
+{
+    return view('employes.create', [
+        'entreprise_id' => $entrepriseId
+    ]);
+}
+
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // Valider les données du formulaire
-         $request->validate([
-            'nom' => 'required',
-            'prenom' => 'required',
-            'email' => 'required|email|unique:employes,email',
-            'telephone' => 'nullable',
-            'entreprise_id' => 'required|exists:entreprises,id',
-            ]);
-            // Créer un nouvel employé avec les données validées
-            Employe::create($request->validated());
-        // Rediriger vers la liste des employés avec un message de succès
-        return redirect()->route('employes.index')
-                         ->with('success', 'Employé ajouté avec succès.');
-    }
+   public function store(Request $request)
+{
+    $request->validate([
+        'nom' => 'required',
+        'prenom' => 'required',
+        'email' => 'required|email|unique:employes,email',
+        'telephone' => 'nullable',
+        'entreprise_id' => 'required|exists:entreprises,id',
+    ]);
+
+    Employe::create([
+        'nom' => $request->nom,
+        'prenom' => $request->prenom,
+        'email' => $request->email,
+        'telephone' => $request->telephone,
+        'entreprise_id' => $request->entreprise_id,
+        'is_maitre_de_stage' => true,
+    ]);
+
+    return redirect()
+        ->route('entreprises.show', $request->entreprise_id)
+        ->with('success', 'Maître de stage ajouté avec succès.');
+}
+
 
     /**
      * Display the specified resource.

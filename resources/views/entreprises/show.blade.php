@@ -21,7 +21,7 @@
     {{-- Contacts --}}
     <h2 class="title is-4">Contacts</h2>
     <div class="mb-4">
-    <a href="{{ route('contacts.create', $entreprise->id) }}" class="button is-primary">
+    <a href="{{ route('employes.create', $entreprise->id) }}" class="button is-primary">
         Ajouter un maître de stage
     </a>
 </div>

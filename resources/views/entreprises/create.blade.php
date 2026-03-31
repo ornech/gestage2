@@ -6,7 +6,7 @@
 
     <form action="{{ route('entreprises.store') }}" method="POST">
         @csrf
-
+        <input type="hidden" name="entreprise_id" value="{{ $entreprise_id }}">
         <div class="field">
             <label class="label">Raison sociale</label>
             <input class="input" type="text" name="raison_sociale" required>
