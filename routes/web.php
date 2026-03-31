@@ -14,18 +14,25 @@ use App\Http\Controllers\AdminStageController;
 | Routes Entreprises
 |--------------------------------------------------------------------------
 */
-Route::get('/entreprises', [CompanyController::class, 'index'])
-    ->name('entreprises.index');
-Route::get('/entreprises/{entreprise}', [CompanyController::class, 'show'])
-    ->name('entreprises.show');
-
 // Page d’import
 Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
     ->name('entreprises.import.form');
-
 // Traitement du SIRET (interface)
 Route::post('/entreprises/import', [CompanyController::class, 'import'])
     ->name('entreprises.import');
+    //création d’une entreprise à partir du SIRET (test)
+    Route::post('/entreprises', [CompanyController::class, 'store'])
+    ->name('entreprises.store');
+
+//Liste des entreprises
+Route::get('/entreprises', [CompanyController::class, 'index'])
+    ->name('entreprises.index');
+ //Fiche entreprise
+Route::get('/entreprises/{entreprise}', [CompanyController::class, 'show'])
+    ->name('entreprises.show');
+
+
+
 
 // API SIRET (utilisée par les tests)
 Route::post('/companies/import-siret', [CompanyController::class, 'importSiret']);

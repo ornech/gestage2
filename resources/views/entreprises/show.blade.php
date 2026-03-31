@@ -11,19 +11,21 @@
         {{ $entreprise->code_postal }} {{ $entreprise->ville }}
     </p>
 
-    <p><strong>Activité :</strong> {{ $entreprise->code_naf }}</p>
-    <p><strong>Type :</strong> {{ $entreprise->type }}</p>
-    <p><strong>Effectif :</strong> {{ $entreprise->effectif }}</p>
-    <p><strong>SIRET :</strong> {{ $entreprise->siret }}</p>
+    <p><strong>Activité :</strong> {{ $entreprise->code_naf ?? 'Non défini' }}</p>
+    <p><strong>Type :</strong> {{ $entreprise->type ?? 'Non défini' }}</p>
+    <p><strong>Effectif :</strong> {{ $entreprise->effectif ?? 'Non défini' }}</p>
+    <p><strong>SIRET :</strong> {{ $entreprise->siret ?? 'Non défini' }}</p>
 
     <hr>
 
     {{-- Contacts --}}
     <h2 class="title is-4">Contacts</h2>
 
-    @foreach ($entreprise->employes as $employe)
+    @forelse ($entreprise->employes as $employe)
         <p>{{ $employe->nom }} {{ $employe->prenom }} | {{ $employe->telephone ?? 'Non défini' }}</p>
-    @endforeach
+    @empty
+        <p>Aucun contact enregistré.</p>
+    @endforelse
 
     <hr>
 
@@ -44,8 +46,13 @@
         <tbody>
             @foreach ($entreprise->stages as $stage)
                 <tr>
-                    <td>{{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}</td>
-                    <td>{{ $stage->etudiant->classe }}</td>
+                    <td>
+                        {{ $stage->etudiant->nom ?? 'Non défini' }}
+                        {{ $stage->etudiant->prenom ?? '' }}
+                    </td>
+
+                    <td>{{ $stage->etudiant->classe ?? 'Non défini' }}</td>
+
                     <td>{{ $stage->date_debut }}</td>
                     <td>{{ $stage->date_fin }}</td>
                     <td>{{ $stage->maitreDeStage->nom ?? 'Non défini' }}</td>

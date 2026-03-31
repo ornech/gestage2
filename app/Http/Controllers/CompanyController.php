@@ -42,7 +42,7 @@ class CompanyController extends Controller
 
     public function store(Request $request)
     {
-        Entreprise::create([
+        $entreprise = Entreprise::create([
             'raison_sociale' => $request->raison_sociale,
             'adresse' => $request->adresse,
             'code_postal' => $request->code_postal,
@@ -51,12 +51,15 @@ class CompanyController extends Controller
             'est_valide' => false,
         ]);
 
-        return response()->json(['message' => 'ok']);
+        
+    return redirect()
+        ->route('entreprises.show', $entreprise)
+        ->with('success', 'Entreprise créée avec succès.');
     }
 
     public function importSiret(Request $request, SireneClient $sirene)
     {
-        $siret = $request->siret;
+        $siret = trim($request->siret);
 
         $data = $sirene->getBySiret($request->siret);
 
@@ -101,33 +104,39 @@ class CompanyController extends Controller
     }
 
     public function import(Request $request)
-    {
-        $request->validate([
-            'siret' => 'required|digits:14'
-        ]);
+{
+    $request->validate([
+        'siret' => 'required|digits:14'
+    ]);
 
-        $client = new SireneClient();
-        $data = $client->getBySiret($request->siret);
+    // NORMALISATION DU SIRET
+    $siret = trim($request->siret);
 
-        if (!$data || !isset($data['etablissement'])) {
-            return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
-        }
+    $client = new SireneClient();
+    $data = $client->getBySiret($siret);
 
-        $etab = $data['etablissement'];
-
-        $normalized = [
-            'nom' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
-            'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
-            'cp' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
-            'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
-            'siret' => $request->siret,
-        ];
-
-        $entreprise = Entreprise::where('siret', $request->siret)->first();
-
-        return view('entreprises.import-result', [
-            'data' => $normalized,
-            'entreprise' => $entreprise
-        ]);
+    if (!$data || !isset($data['etablissement'])) {
+        return back()->withErrors(['siret' => 'Aucune entreprise trouvée pour ce SIRET.']);
     }
+
+    $etab = $data['etablissement'];
+
+    $normalized = [
+        'nom' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
+        'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
+        'cp' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
+        'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
+        'siret' => $siret,
+    ];
+
+    // RECHERCHE CORRECTE
+    $entreprise = Entreprise::where('siret', $siret)->first();
+
+    return view('entreprises.import-result', [
+        'data' => $normalized,
+        'entreprise' => $entreprise
+    ]);
+}
+
+
 }
