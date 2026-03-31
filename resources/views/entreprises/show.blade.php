@@ -18,27 +18,13 @@
 
     <hr>
 
-    {{-- Contacts --}}
-    <h2 class="title is-4">Contacts</h2>
-    <div class="mb-4">
-    <a href="{{ route('employes.create', $entreprise->id) }}" class="button is-primary">
-        Ajouter un maître de stage
-    </a>
-</div>
-
-    @forelse ($entreprise->employes as $employe)
-        <p>{{ $employe->nom }} {{ $employe->prenom }} | {{ $employe->telephone ?? 'Non défini' }}</p>
-    @empty
-        <p>Aucun contact enregistré.</p>
-    @endforelse
-
-    <hr>
+   
 
     {{-- Stages --}}
   <h2 class="title is-4">Contacts</h2>
 
 <a href="{{ route('employes.create', $entreprise->id) }}" class="button is-primary mb-3">
-    Ajouter un maître de stage
+    Ajouter un contact
 </a>
 
 @if($entreprise->employes->isEmpty())
