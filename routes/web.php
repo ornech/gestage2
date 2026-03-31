@@ -113,7 +113,10 @@ Route::post('/entreprises/{entreprise}/employes', [EmployeController::class, 'st
     ->name('employes.store');
 
 Route::resource('employes', EmployeController::class);
-Route::resource('stages', StageController::class);
+Route::resource('stages', StageController::class)->except(['create']);
+Route::get('/entreprises/{entreprise}/stages/create', [StageController::class, 'create'])
+    ->name('stages.create');
+
 
 
 /*

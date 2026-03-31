@@ -65,5 +65,50 @@
 @endif
 
 
+<hr>
+
+<h2 class="title is-4">Stages</h2>
+
+<a href="{{ route('stages.create', $entreprise->id) }}" class="button is-link mb-3">
+    Ajouter un stage
+</a>
+
+<p class="has-text-grey">
+    Les stages sont visibles par les étudiants et les professeurs.
+</p>
+
+@if($entreprise->stages->isEmpty())
+    <p>Aucun stage enregistré pour cette entreprise.</p>
+@else
+<table class="table is-striped is-fullwidth">
+    <thead>
+        <tr>
+            <th>Étudiant</th>
+            <th>Classe</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+            <th>Maître de stage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($entreprise->stages as $stage)
+        <tr>
+            <td>{{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}</td>
+            <td>{{ $stage->etudiant->classe }}</td>
+            <td>{{ $stage->date_debut }}</td>
+            <td>{{ $stage->date_fin }}</td>
+            <td>
+    @if($stage->employe)
+        {{ $stage->employe->prenom }} {{ $stage->employe->nom }}
+    @else
+        <span class="has-text-grey">Non défini</span>
+    @endif
+</td>
+
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
 
 @endsection

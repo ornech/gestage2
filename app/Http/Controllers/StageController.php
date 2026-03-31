@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Employe;
 use App\Models\Stage;
 use App\Models\User;
@@ -15,7 +16,7 @@ class StageController extends Controller
      */
     public function index()
     {
-        //autoriser uniquement les étudiants à voir la liste des stages
+        // Autoriser uniquement les étudiants à voir la liste des stages
         $this->authorize('viewAny', Stage::class);
 
         $stages = Stage::with(['entreprise', 'maitreDeStage'])->paginate(10);
@@ -24,18 +25,16 @@ class StageController extends Controller
     }
 
     /**
-     * Formulaire de création
+     * Formulaire de création (étudiant)
      */
-    public function create()
+    public function create(Entreprise $entreprise)
     {
-        //autorisation pour créer un stage
         $this->authorize('create', Stage::class);
 
-        $employes = Employe::all();
-        $users = User::all(); // Étudiants potentiels
-        $entreprises = Entreprise::all();
-
-        return view('stages.create', compact('employes', 'users', 'entreprises'));
+        return view('stages.create', [
+            'entreprise' => $entreprise,
+            'employes' => $entreprise->employes, // uniquement les employés de CETTE entreprise
+        ]);
     }
 
     /**
@@ -43,36 +42,47 @@ class StageController extends Controller
      */
     public function store(Request $request)
     {
-        //  // Vérifier que l'étudiant crée un stage pour SA promo
-    if ($request->promo != auth()->user()->promo) {
-        abort(403, "Vous ne pouvez pas créer un stage pour une autre année.");
-    }
-            //autorisation pour créer un stage
-            $this->authorize('create', Stage::class);
-        
-            $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
+        $user = auth()->user();
+
+        // Vérifier que l'étudiant est encore en BTS
+        if ($user->promo < date('Y')) {
+            abort(403, "Vous n'êtes plus autorisé à ajouter un stage.");
+        }
+
+        // Vérifier qu'il n'a pas déjà un stage pour sa classe
+        $existe = Stage::where('etudiant_id', $user->id)
+                       ->where('classe', $user->classe)
+                       ->exists();
+
+        if ($existe) {
+            return back()->withErrors("Vous avez déjà ajouté un stage pour votre année.");
+        }
+
+        // Validation
+        $request->validate([
+            'entreprise_id' => 'required',
+            'employe_id' => 'required',
             'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
-            'entreprise_id' => 'required|exists:entreprises,id',
-            'maitre_de_stage_id' => 'required|exists:employes,id',
-           
-            ]);
-            
+            'duree' => 'required|integer|min:1',
+        ]);
 
-         Stage::create([
-        'titre' => $request->titre,
-        'description' => $request->description,
-        'date_debut' => $request->date_debut,
-        'date_fin' => $request->date_fin,
-        'entreprise_id' => $request->entreprise_id,
-        'maitre_de_stage_id' => $request->maitre_de_stage_id,
-        'etudiant_id' => auth()->id(), //  Sécurisé
-        'promo' => auth()->user()->promo, // Empêche SIO1 → SIO2
-    ]);
+        // Calcul de la date de fin
+        $date_debut = Carbon::parse($request->date_debut);
+        $date_fin = $date_debut->copy()->addWeeks($request->duree);
 
-        return redirect()->route('stages.index')->with('success', 'Stage créé avec succès.');
+        // Création du stage
+        Stage::create([
+            'entreprise_id' => $request->entreprise_id,
+            'employe_id' => $request->employe_id,
+            'etudiant_id' => $user->id,
+            'classe' => $user->classe,
+            'date_debut' => $date_debut,
+            'date_fin' => $date_fin,
+            'duree' => $request->duree,
+        ]);
+
+        return redirect()->route('entreprises.show', $request->entreprise_id)
+                         ->with('success', 'Stage ajouté avec succès.');
     }
 
     /**
@@ -80,14 +90,13 @@ class StageController extends Controller
      */
     public function edit(Stage $stage)
     {
-        //autoriser un étudiant à modifier son stage seulement si c'est le sien
+        // Autoriser un étudiant à modifier son stage seulement si c'est le sien
         $this->authorize('update', $stage);
 
-        $employes = Employe::all();
-        $users = User::all();
-        $entreprises = Entreprise::all();
-
-        return view('stages.edit', compact('stage', 'employes', 'users', 'entreprises'));
+        return view('stages.edit', [
+            'stage' => $stage,
+            'employes' => $stage->entreprise->employes, // employés de l'entreprise du stage
+        ]);
     }
 
     /**
@@ -95,22 +104,25 @@ class StageController extends Controller
      */
     public function update(Request $request, Stage $stage)
     {
-        //autoriser un étudiant à modifier son stage
+        // Autoriser un étudiant à modifier son stage
         $this->authorize('update', $stage);
 
         $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
-            'entreprise_id' => 'required|exists:entreprises,id',
-            'maitre_de_stage_id' => 'required|exists:employes,id',
-       
-         'etudiant_id' => 'nullable|exists:users,id',
+            'duree' => 'required|integer|min:1',
+            'employe_id' => 'required|exists:employes,id',
         ]);
-        
 
-        $stage->update($request->validated());
+        // Recalcul de la date de fin
+        $date_debut = Carbon::parse($request->date_debut);
+        $date_fin = $date_debut->copy()->addWeeks($request->duree);
+
+        $stage->update([
+            'date_debut' => $date_debut,
+            'date_fin' => $date_fin,
+            'duree' => $request->duree,
+            'employe_id' => $request->employe_id,
+        ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');
     }
@@ -120,21 +132,23 @@ class StageController extends Controller
      */
     public function destroy(Stage $stage)
     {
-        //autoriser un étudiant à supprimer son stage
+        // Autoriser un étudiant à supprimer son stage
         $this->authorize('delete', $stage);
 
         $stage->delete();
 
         return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
     }
-    // Affiche les stages de l'étudiant connecté
+
+    /**
+     * Affiche les stages de l'étudiant connecté
+     */
     public function mesStages()
-{
-    $stages = Stage::with(['entreprise', 'maitreDeStage'])
-        ->where('etudiant_id', auth()->id())
-        ->get();
+    {
+        $stages = Stage::with(['entreprise', 'maitreDeStage'])
+            ->where('etudiant_id', auth()->id())
+            ->get();
 
-    return view('etudiant.stages.index', compact('stages'));
-}
-
+        return view('etudiant.stages.index', compact('stages'));
+    }
 }

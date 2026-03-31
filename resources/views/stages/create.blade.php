@@ -17,43 +17,25 @@
         <form action="{{ route('stages.store') }}" method="POST">
             @csrf
 
-            <div class="field">
-                <label class="label">Titre</label>
-                <div class="control">
-                    <input class="input" type="text" name="titre" value="{{ old('titre') }}" required>
-                </div>
-            </div>
+            {{-- L'entreprise est déjà connue --}}
+            <input type="hidden" name="entreprise_id" value="{{ $entreprise->id }}">
 
-            <div class="field">
-                <label class="label">Description</label>
-                <div class="control">
-                    <textarea class="textarea" name="description">{{ old('description') }}</textarea>
-                </div>
-            </div>
+            {{-- Classe automatique --}}
+            <input type="hidden" name="classe" value="{{ auth()->user()->classe }}">
 
-            <div class="field">
-                <label class="label">Date de début</label>
-                <div class="control">
-                    <input class="input" type="date" name="date_debut" value="{{ old('date_debut') }}" required>
-                </div>
-            </div>
+            {{-- Étudiant automatique --}}
+            <input type="hidden" name="etudiant_id" value="{{ auth()->id() }}">
 
+            {{-- Maître de stage --}}
             <div class="field">
-                <label class="label">Date de fin</label>
-                <div class="control">
-                    <input class="input" type="date" name="date_fin" value="{{ old('date_fin') }}" required>
-                </div>
-            </div>
-
-            <div class="field">
-                <label class="label">Entreprise</label>
+                <label class="label">Maître de stage</label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                      <select name="entreprise_id" id="entrepriseSelect" required>
-
-                            @foreach($entreprises as $entreprise)
-                                <option value="{{ $entreprise->id }}" {{ old('entreprise_id') == $entreprise->id ? 'selected' : '' }}>
-                                    {{ $entreprise->raison_sociale }}
+                        <select name="employe_id" required>
+                            <option value="">Sélectionner</option>
+                            @foreach($employes as $employe)
+                                <option value="{{ $employe->id }}">
+                                    {{ $employe->prenom }} {{ $employe->nom }}
                                 </option>
                             @endforeach
                         </select>
@@ -61,98 +43,34 @@
                 </div>
             </div>
 
+            {{-- Date début --}}
             <div class="field">
-                <label class="label">Maître de stage</label>
+                <label class="label">Date de début</label>
                 <div class="control">
-                    <div class="select is-fullwidth">
-                       <select name="maitre_de_stage_id" id="maitreSelect" required>
-                            <option value="">Sélectionnez une entreprise d'abord</option>
-                    </select>
-
-                    </div>
+                    <input class="input" type="date" name="date_debut" required>
                 </div>
             </div>
 
-           
+            {{-- Durée en semaines --}}
+            <div class="field">
+                <label class="label">Durée (en semaines)</label>
+                <div class="control">
+                    <input class="input" type="number" name="duree" min="1" required>
+                </div>
+            </div>
 
             <div class="field is-grouped mt-5">
                 <div class="control">
-                    <button class="button is-link">Enregistrer</button>
+                    <button class="button is-link">Ajouter</button>
                 </div>
                 <div class="control">
-                    <a href="{{ route('stages.index') }}" class="button is-light">Annuler</a>
+                    <a href="{{ route('entreprises.show', $entreprise->id) }}" class="button is-light">Annuler</a>
                 </div>
             </div>
 
         </form>
     </div>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const dateDebutInput = document.querySelector('input[name="date_debut"]');
-    const dateFinInput = document.querySelector('input[name="date_fin"]');
-
-    dateDebutInput.addEventListener('change', function () {
-        const debut = new Date(this.value);
-
-        if (!isNaN(debut.getTime())) {
-            // Calcul de la date maximale = début + 42 jours
-            const finMax = new Date(debut);
-            finMax.setDate(finMax.getDate() + 42);
-
-            const yyyy = finMax.getFullYear();
-            const mm = String(finMax.getMonth() + 1).padStart(2, '0');
-            const dd = String(finMax.getDate()).padStart(2, '0');
-            const maxDate = `${yyyy}-${mm}-${dd}`;
-
-            // Appliquer la limite max
-            dateFinInput.setAttribute('max', maxDate);
-
-            // Si la date fin dépasse la limite → correction automatique
-            if (dateFinInput.value > maxDate) {
-                dateFinInput.value = maxDate;
-            }
-        }
-    });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const entrepriseSelect = document.getElementById('entrepriseSelect');
-    const maitreSelect = document.getElementById('maitreSelect');
-
-    entrepriseSelect.addEventListener('change', function () {
-        const entrepriseId = this.value;
-
-        // Message temporaire
-        maitreSelect.innerHTML = '<option>Chargement...</option>';
-
-        fetch(`/entreprises/${entrepriseId}/employes`)
-            .then(response => response.json())
-            .then(data => {
-                maitreSelect.innerHTML = '';
-
-                if (data.length === 0) {
-                    maitreSelect.innerHTML = '<option value="">Aucun employé trouvé</option>';
-                    return;
-                }
-
-                data.forEach(emp => {
-                    const option = document.createElement('option');
-                    option.value = emp.id;
-                    option.textContent = `${emp.nom} ${emp.prenom}`;
-                    maitreSelect.appendChild(option);
-                });
-
-                // Auto‑sélection si un seul employé
-                if (data.length === 1) {
-                    maitreSelect.value = data[0].id;
-                }
-            });
-    });
-
-});
-</script>
 
 </div>
 @endsection
+
