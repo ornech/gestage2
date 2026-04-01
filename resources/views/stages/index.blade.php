@@ -33,8 +33,9 @@
                         {{ $stage->maitreDeStage?->prenom ?? '' }}
                     </td>
 
-                    <td>{{ $stage->date_debut }}</td>
-                    <td>{{ $stage->date_fin }}</td>
+                    <td>{{ \Carbon\Carbon::parse($stage->date_debut)->format('d/m/Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($stage->date_fin)->format('d/m/Y') }}</td>
+
 
                     <td>
                         @unless(auth()->user()->isEtudiant())
