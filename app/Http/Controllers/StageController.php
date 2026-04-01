@@ -88,16 +88,15 @@ class StageController extends Controller
     /**
      * Formulaire d'édition
      */
-    public function edit(Stage $stage)
-    {
-        // Autoriser un étudiant à modifier son stage seulement si c'est le sien
-        $this->authorize('update', $stage);
+   public function edit(Stage $stage)
+{
+    $entreprises = \App\Models\Entreprise::all();
+    $etudiants = \App\Models\User::where('role', 'etudiant')->get(); // si tu utilises User
+    $tuteurs = \App\Models\Employe::all(); // si tu en as besoin
 
-        return view('stages.edit', [
-            'stage' => $stage,
-            'employes' => $stage->entreprise->employes, // employés de l'entreprise du stage
-        ]);
-    }
+    return view('stages.edit', compact('stage', 'entreprises', 'etudiants', 'tuteurs'));
+}
+
 
     /**
      * Mise à jour d'un stage

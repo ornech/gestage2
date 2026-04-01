@@ -117,6 +117,12 @@ Route::resource('stages', StageController::class)->except(['create']);
 Route::get('/entreprises/{entreprise}/stages/create', [StageController::class, 'create'])
     ->name('stages.create');
 
+Route::middleware(['auth'])->group(function () {
+
+    // Console Admin Stages
+    Route::get('/admin/stages', [\App\Http\Controllers\AdminStageController::class, 'index'])
+        ->name('admin.stages.index');
+});
 
 
 /*

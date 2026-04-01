@@ -9,15 +9,24 @@ class AdminStageController extends Controller
     /**
      * Affiche la liste complète des stages pour l'admin/prof
      */
-    public function index()
-    {
-        
-          // Charger tous les stages avec leurs relations
-     $stages = Stage::with(['entreprise', 'maitreDeStage', 'etudiant'])->paginate(10);
-        // Charger tous les employés (tuteurs potentiels)
-     $tuteurs = Employe::all();
-     return view('admin.stages.index', compact('stages', 'tuteurs'));
+   public function index()
+{
+    $query = Stage::with(['entreprise', 'maitreDeStage', 'etudiant']);
+
+    // Filtre promo
+    if (request('promo')) {
+        $query->whereHas('etudiant', function ($q) {
+            $q->where('classe', request('promo'));
+        });
     }
+
+    $stages = $query->paginate(10);
+
+    $tuteurs = Employe::all();
+
+    return view('admin.stages.index', compact('stages', 'tuteurs'));
+}
+
     public function assign(Request $request, Stage $stage)
 {
     // Validation : le tuteur doit exister dans la table employes
