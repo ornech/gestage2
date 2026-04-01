@@ -4,9 +4,8 @@
 <div class="container">
     <h1 class="mb-4">Liste des stages</h1>
 
-    <a href="{{ route('stages.create') }}" class="btn btn-primary mb-3">
-        + Ajouter un stage
-    </a>
+    {{-- ❌ Bouton supprimé : un stage ne se crée jamais depuis ici --}}
+    {{-- <a href="{{ route('stages.create') }}" class="btn btn-primary mb-3">+ Ajouter un stage</a> --}}
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -28,31 +27,32 @@
             @foreach($stages as $stage)
                 <tr>
                     <td>{{ $stage->titre }}</td>
-                   <td>
+
+                    <td>
                         {{ $stage->maitreDeStage?->nom ?? '—' }}
-                      {{ $stage->maitreDeStage?->prenom ?? '' }}
+                        {{ $stage->maitreDeStage?->prenom ?? '' }}
                     </td>
 
                     <td>{{ $stage->date_debut }}</td>
                     <td>{{ $stage->date_fin }}</td>
-                   <td>
-    @unless(auth()->user()->isEtudiant())
-        <a href="{{ route('stages.edit', $stage) }}" class="btn btn-warning btn-sm">
-            Modifier
-        </a>
 
-        <form action="{{ route('stages.destroy', $stage) }}" 
-              method="POST" 
-              style="display:inline-block;">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce stage ?')">
-                Supprimer
-            </button>
-        </form>
-    @endunless
-                </td>
+                    <td>
+                        @unless(auth()->user()->isEtudiant())
+                            <a href="{{ route('stages.edit', $stage) }}" class="btn btn-warning btn-sm">
+                                Modifier
+                            </a>
 
+                            <form action="{{ route('stages.destroy', $stage) }}" 
+                                  method="POST" 
+                                  style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ce stage ?')">
+                                    Supprimer
+                                </button>
+                            </form>
+                        @endunless
+                    </td>
                 </tr>
             @endforeach
 
@@ -65,7 +65,8 @@
             @endif
         </tbody>
     </table>
-{{ $stages->links() }}
+
+    {{ $stages->links() }}
 
 </div>
 @endsection

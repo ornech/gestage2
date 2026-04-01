@@ -17,14 +17,38 @@
         <form action="{{ route('stages.store') }}" method="POST">
             @csrf
 
-            {{-- L'entreprise est déjà connue --}}
+            {{-- Valeurs envoyées au serveur --}}
             <input type="hidden" name="entreprise_id" value="{{ $entreprise->id }}">
-
-            {{-- Classe automatique --}}
             <input type="hidden" name="classe" value="{{ auth()->user()->classe }}">
-
-            {{-- Étudiant automatique --}}
             <input type="hidden" name="etudiant_id" value="{{ auth()->id() }}">
+
+            {{-- Entreprise --}}
+            <div class="field">
+                <label class="label">Entreprise</label>
+                <div class="control">
+                    <input class="input is-info-light" type="text" 
+                           value="{{ $entreprise->raison_sociale }}" readonly>
+                </div>
+            </div>
+
+            {{-- Classe --}}
+            <div class="field">
+                <label class="label">Classe</label>
+                <div class="control">
+                    <input class="input is-info-light" type="text" 
+                           value="{{ auth()->user()->classe }}" readonly>
+                </div>
+            </div>
+
+            {{-- Étudiant --}}
+            <div class="field">
+                <label class="label">Étudiant</label>
+                <div class="control">
+                    <input class="input is-info-light" type="text" 
+                           value="{{ auth()->user()->prenom }} {{ auth()->user()->nom }}" 
+                           readonly>
+                </div>
+            </div>
 
             {{-- Maître de stage --}}
             <div class="field">
@@ -51,11 +75,18 @@
                 </div>
             </div>
 
-            {{-- Durée en semaines --}}
+            {{-- Durée en semaines (1 à 6) --}}
             <div class="field">
-                <label class="label">Durée (en semaines)</label>
+                <label class="label">Durée du stage</label>
                 <div class="control">
-                    <input class="input" type="number" name="duree" min="1" required>
+                    <div class="select is-fullwidth">
+                        <select name="duree" required>
+                            <option value="">Sélectionner</option>
+                            @for($i = 1; $i <= 6; $i++)
+                                <option value="{{ $i }}">{{ $i }} semaine{{ $i > 1 ? 's' : '' }}</option>
+                            @endfor
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -73,4 +104,3 @@
 
 </div>
 @endsection
-
