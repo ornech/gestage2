@@ -88,15 +88,14 @@ class StageController extends Controller
     /**
      * Formulaire d'édition
      */
-   public function edit(Stage $stage)
+public function edit(Stage $stage)
 {
     $entreprises = \App\Models\Entreprise::all();
-    $etudiants = \App\Models\User::where('role', 'etudiant')->get(); // si tu utilises User
-    $tuteurs = \App\Models\Employe::all(); // si tu en as besoin
+    $tuteurs = \App\Models\Employe::all();
+    $etudiants = \App\Models\User::role('Etudiant')->get();
 
-    return view('stages.edit', compact('stage', 'entreprises', 'etudiants', 'tuteurs'));
+    return view('stages.edit', compact('stage', 'entreprises', 'tuteurs', 'etudiants'));
 }
-
 
     /**
      * Mise à jour d'un stage

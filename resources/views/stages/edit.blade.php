@@ -31,7 +31,7 @@
         <div class="mb-3">
             <label class="form-label">Maître de stage</label>
             <select name="maitre_de_stage_id" class="form-control" required>
-                @foreach($employes as $employe)
+                @foreach($tuteurs as $employe)
                    <option value="{{ $employe->id }}" 
                         {{ old('maitre_de_stage_id', $stage->maitre_de_stage_id) == $employe->id ? 'selected' : '' }}>
                         {{ $employe->nom }} {{ $employe->prenom }}
@@ -56,7 +56,7 @@
             <label class="form-label">Étudiant</label>
             <select name="etudiant_id" class="form-control">
                 <option value="">Aucun</option>
-                @foreach($users as $user)
+                @foreach($etudiants as $user)
                      <option value="{{ $user->id }}" 
                             {{ old('etudiant_id', $stage->etudiant_id) == $user->id ? 'selected' : '' }}>
                             {{ $user->name }}
