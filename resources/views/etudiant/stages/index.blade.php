@@ -3,9 +3,7 @@
 @section('content')
     <h1>Mes stages</h1>
 
-    @can('create', App\Models\Stage::class)
-        <a href="{{ route('stages.create') }}" class="btn btn-primary">Créer un stage</a>
-    @endcan
+
 
     @if($stages->isEmpty())
         <p>Aucun stage pour le moment.</p>

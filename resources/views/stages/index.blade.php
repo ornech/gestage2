@@ -4,7 +4,7 @@
 <div class="container">
     <h1 class="mb-4">Liste des stages</h1>
 
-    {{-- ❌ Bouton supprimé : un stage ne se crée jamais depuis ici --}}
+    {{-- Bouton supprimé : un stage ne se crée jamais depuis ici --}}
     {{-- <a href="{{ route('stages.create') }}" class="btn btn-primary mb-3">+ Ajouter un stage</a> --}}
 
     @if(session('success'))
