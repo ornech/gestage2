@@ -9,36 +9,36 @@ use App\Http\Controllers\StageController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\AdminStageController;
 
+
 /*
 |--------------------------------------------------------------------------
-| Routes Entreprises
+| Routes Entreprises (protégées)
 |--------------------------------------------------------------------------
 */
-// Page d’import
-// Formulaire d’import
-Route::get('/entreprises/create', [CompanyController::class, 'create'])
-    ->name('entreprises.create');
 
-Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
-    ->name('entreprises.import.form');
-// Traitement du SIRET (interface)
-Route::post('/entreprises/import', [CompanyController::class, 'import'])
-    ->name('entreprises.import');
-    //création d’une entreprise à partir du SIRET (test)
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/entreprises/create', [CompanyController::class, 'create'])
+        ->name('entreprises.create');
+
+    Route::get('/entreprises/import', [CompanyController::class, 'importForm'])
+        ->name('entreprises.import.form');
+
+    Route::post('/entreprises/import', [CompanyController::class, 'import'])
+        ->name('entreprises.import');
+
     Route::post('/entreprises', [CompanyController::class, 'store'])
-    ->name('entreprises.store');
-//mise à jour d’une entreprise à partir du SIRET (test)
-Route::put('/entreprises/{entreprise}', [CompanyController::class, 'update'])
-    ->name('entreprises.update');
+        ->name('entreprises.store');
 
-//Liste des entreprises
-Route::get('/entreprises', [CompanyController::class, 'index'])
-    ->name('entreprises.index');
- //Fiche entreprise
-Route::get('/entreprises/{entreprise}', [CompanyController::class, 'show'])
-    ->name('entreprises.show');
+    Route::put('/entreprises/{entreprise}', [CompanyController::class, 'update'])
+        ->name('entreprises.update');
 
+    Route::get('/entreprises', [CompanyController::class, 'index'])
+        ->name('entreprises.index');
 
+    Route::get('/entreprises/{entreprise}', [CompanyController::class, 'show'])
+        ->name('entreprises.show');
+});
 
 
 // API SIRET (utilisée par les tests)
