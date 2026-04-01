@@ -38,7 +38,13 @@
                     @role('Administrateur')
                         <a href="/admin" class="navbar-item"><i class="fas fa-cogs mr-2"></i> Administration</a>
                         <a href="#" class="navbar-item"><i class="fas fa-user-shield mr-2"></i> Comptes</a>
-                    @endrole
+                        <a href="{{ route('admin.stages.index') }}" class="navbar-item">
+    <i class="fas fa-briefcase mr-2"></i> Gestion des stages
+</a>
+
+                   
+                        @endrole
+
                 @endauth
 
             </div>
