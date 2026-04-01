@@ -40,27 +40,27 @@
 
                 <div class="column is-3">
                     <label class="label">Nom entreprise</label>
-                    <input type="text" name="nom" class="input" placeholder="Rechercher...">
+                    <input type="text" name="nom" class="input" placeholder="Rechercher..." value="{{ request('nom') }}">
                 </div>
 
                 <div class="column is-3">
                     <label class="label">Adresse</label>
-                    <input type="text" name="adresse" class="input">
+                    <input type="text" name="adresse" class="input" value="{{ request('adresse') }}">
                 </div>
 
                 <div class="column is-2">
                     <label class="label">Ville</label>
-                    <input type="text" name="ville" class="input">
+                    <input type="text" name="ville" class="input" value="{{ request('ville') }}">
                 </div>
 
                 <div class="column is-2">
                     <label class="label">Code postal</label>
-                    <input type="text" name="cp" class="input">
+                    <input type="text" name="cp" class="input" value="{{ request('cp') }}">
                 </div>
 
                 <div class="column is-2">
                     <label class="label">NAF</label>
-                    <input type="text" name="naf" class="input">
+                    <input type="text" name="naf" class="input" value="{{ request('naf') }}">
                 </div>
 
             </div>
