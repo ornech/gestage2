@@ -130,6 +130,10 @@ Route::middleware(['auth'])->group(function () {
 | PDF
 |--------------------------------------------------------------------------
 */
+// Route pour générer la convention de stage au format PDF
+Route::get('/etudiant/conventions', [StageController::class, 'mesConventions'])
+    ->name('etudiant.conventions.index')
+    ->middleware(['auth', 'role:Etudiant']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/stages/{stage}/pdf/convention', [PdfController::class, 'convention'])

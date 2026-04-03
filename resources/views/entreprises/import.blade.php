@@ -50,11 +50,7 @@
 
         <hr>
 
-        <p class="is-size-7 has-text-grey">
-            Gestage contributeurs : Logan Gaillard, Astrik Manukyan, Jean‑François Ornech<br>
-            Code source sous licence CC BY NC SA 4.0
-        </p>
-
+        
     </div>
 
 </div>

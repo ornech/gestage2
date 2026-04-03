@@ -21,7 +21,10 @@
                 @auth
                     {{-- Menu Étudiant --}}
                     @role('Etudiant')
-                        <a href="/stages" class="navbar-item"><i class="fas fa-file-contract mr-2"></i> Mes Conventions</a>
+           <a href="{{ route('etudiant.conventions.index') }}" class="navbar-item">
+    <i class="fas fa-file-contract mr-2"></i> Mes Conventions
+</a>
+
                       <a href="{{ route('entreprises.index') }}" class="navbar-item">
                         <i class="fas fa-building mr-2"></i> Entreprises
                     </a>

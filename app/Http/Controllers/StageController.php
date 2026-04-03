@@ -84,6 +84,13 @@ class StageController extends Controller
         return redirect()->route('entreprises.show', $request->entreprise_id)
                          ->with('success', 'Stage ajouté avec succès.');
     }
+    // Affiche les conventions de l’étudiant connecté
+public function mesConventions()
+{
+    $stages = auth()->user()->stages; // les stages de l’étudiant connecté
+
+    return view('etudiant.conventions', compact('stages'));
+}
 
     /**
      * Formulaire d'édition
