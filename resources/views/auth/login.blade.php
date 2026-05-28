@@ -66,6 +66,11 @@
                     <p class="has-text-centered mt-4">
                         <a href="/password/reset" class="has-text-grey">Mot de passe oublié ?</a>
                     </p>
+                    <p class="mt-2">
+                        Pas de compte ?
+                        <a href="{{ route('register') }}">Inscrivez‑vous</a>
+                    </p>
+
                 </div>
             </div>
         </div>

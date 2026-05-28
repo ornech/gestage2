@@ -21,8 +21,14 @@
                 @auth
                     {{-- Menu Étudiant --}}
                     @role('Etudiant')
-                        <a href="/stages" class="navbar-item"><i class="fas fa-file-contract mr-2"></i> Mes Conventions</a>
-                        <a href="#" class="navbar-item"><i class="fas fa-building mr-2"></i> Entreprises</a>
+           <a href="{{ route('etudiant.conventions.index') }}" class="navbar-item">
+    <i class="fas fa-file-contract mr-2"></i> Mes Conventions
+</a>
+
+                      <a href="{{ route('entreprises.index') }}" class="navbar-item">
+                        <i class="fas fa-building mr-2"></i> Entreprises
+                    </a>
+
                     @endrole
 
                     {{-- Menu Professeur --}}
@@ -35,7 +41,13 @@
                     @role('Administrateur')
                         <a href="/admin" class="navbar-item"><i class="fas fa-cogs mr-2"></i> Administration</a>
                         <a href="#" class="navbar-item"><i class="fas fa-user-shield mr-2"></i> Comptes</a>
-                    @endrole
+                        <a href="{{ route('admin.stages.index') }}" class="navbar-item">
+    <i class="fas fa-briefcase mr-2"></i> Gestion des stages
+</a>
+
+                   
+                        @endrole
+
                 @endauth
 
             </div>
@@ -66,9 +78,9 @@
                                 {{-- Le lien de déconnexion est maintenant dans un formulaire pour la sécurité (POST + CSRF) --}}
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <a href="{{ route('logout') }}" class="navbar-item" id="logout-link">
+                                      <button type="submit" class="navbar-item button is-white is-fullwidth" style="border: none; background: none;">
                                         Se déconnecter
-                                    </a>
+                                      </button>
                                 </form>
                             </div>
                         </div>

@@ -20,10 +20,10 @@ return new class extends Migration
             $table->string('code_naf', 5)->nullable();
 
             // Coordonnées
-            $table->string('adresse');
+            $table->string('adresse')->nullable();
             $table->string('complement_adresse')->nullable();
-            $table->string('code_postal', 5);
-            $table->string('ville');
+            $table->string('code_postal', 5)->nullable();
+            $table->string('ville')->nullable();
             $table->string('departement_code', 3)->nullable();
             $table->string('telephone', 20)->nullable();
 

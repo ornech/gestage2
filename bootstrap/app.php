@@ -16,11 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-
-        // Ajout du middleware de sécurité pour les en-têtes HTTP
-        $middleware->web(append: [
-            SetSecurityHeaders::class,
-        ]);
+            $middleware->append(\App\Http\Middleware\SetSecurityHeaders::class);
+       
 
         // Enregistrement des alias de Spatie pour la gestion des rôles et permissions
         $middleware->alias([

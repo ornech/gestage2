@@ -21,8 +21,8 @@ class User extends Authenticatable
         'spe',
         'classe',
         'promo',
-        'idTuteur',
-        'idClasse',
+        'tuteur_id',
+        'classe_id',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -30,9 +30,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'date_entree' => 'date',
-        'dateFirstConn' => 'datetime',
-        'inactif' => 'boolean',
-        'deleted' => 'boolean',
     ];
+    // Un utilisateur (étudiant) peut avoir plusieurs stages
+    public function stages()
+    {
+        return $this->hasMany(Stage::class);
+    }
+    // On ajoute une méthode pour vérifier si l'utilisateur est un étudiant (basé sur son rôle ou d'autres critères)
+    public function isEtudiant()
+    {
+    return $this->prenom === 'Étudiant' || $this->email === 'etudiant@test.com';
+    }
+
 }
 

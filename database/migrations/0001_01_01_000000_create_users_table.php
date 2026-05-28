@@ -19,14 +19,18 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
-          
             $table->date('date_entree')->nullable();
             $table->string('telephone')->nullable();
             $table->string('spe')->nullable();
             $table->string('classe')->nullable();
             $table->string('promo')->nullable();
-            $table->unsignedBigInteger('idTuteur')->nullable();
-            $table->unsignedBigInteger('idClasse')->nullable();
+            $table->foreignId('tuteur_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('classe_id')
+                ->nullable(); // La contrainte vers la table 'classes' sera ajoutée dans une migration séparée.
 
             // 👉 Colonne rôle (remplace l'ancien "status")
             $table->string('role')->default('Etudiant');

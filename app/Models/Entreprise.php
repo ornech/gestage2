@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entreprise extends Model
 {
@@ -39,4 +40,20 @@ class Entreprise extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function employes(): HasMany
+    {
+        return $this->hasMany(Employe::class);
+    }
+
+    public function stages(): HasMany
+    {
+        return $this->hasMany(Stage::class);
+    }
+    // Relation : Une entreprise a plusieurs contacts
+    public function contacts()
+{
+    return $this->hasMany(Contact::class);
+}
+
 }
