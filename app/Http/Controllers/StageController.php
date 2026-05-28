@@ -31,9 +31,22 @@ class StageController extends Controller
     {
         $this->authorize('create', Stage::class);
 
+        $user    = auth()->user();
+        $classe  = $user->classe_courante;     // SIO1 ou SIO2
+
+        // Charger la configuration de stage pour la classe de l'étudiant
+        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $config = $classe
+            ? \App\Models\ConfigurationStage::where('annee_scolaire', $annee)
+                ->where('classe', $classe)
+                ->first()
+            : null;
+
         return view('stages.create', [
             'entreprise' => $entreprise,
-            'employes' => $entreprise->employes, // uniquement les employés de CETTE entreprise
+            'employes'   => $entreprise->employes,
+            'config'     => $config,
+            'classe'     => $classe,
         ]);
     }
 
@@ -44,8 +57,8 @@ class StageController extends Controller
     {
         $user = auth()->user();
 
-        // Vérifier que l'étudiant est encore en BTS
-        if ($user->promo < date('Y')) {
+        // Vérifier que l'étudiant est encore en BTS (promo null = compte de test, autorisé)
+        if ($user->promo && $user->promo < date('Y')) {
             abort(403, "Vous n'êtes plus autorisé à ajouter un stage.");
         }
 
@@ -68,14 +81,16 @@ class StageController extends Controller
 
         // Calcul de la date de fin
         $date_debut = Carbon::parse($request->date_debut);
-        $date_fin = $date_debut->copy()->addWeeks($request->duree);
+        $date_fin = $date_debut->copy()->addWeeks((int) $request->duree);
 
-        // Création du stage
+        $entreprise = \App\Models\Entreprise::find($request->entreprise_id);
+
         Stage::create([
+            'titre'              => "Stage chez {$entreprise->raison_sociale}",
             'entreprise_id'      => $request->entreprise_id,
             'maitre_de_stage_id' => $request->maitre_de_stage_id,
             'etudiant_id'        => $user->id,
-            'classe'             => $user->classe,
+            'classe'             => $user->classe_courante ?? $request->classe,
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
         ]);
@@ -103,12 +118,15 @@ public function mesConventions()
      */
 public function edit(Stage $stage)
 {
-    $entreprises = \App\Models\Entreprise::all();
-    $tuteurs = \App\Models\Employe::all();
-    $etudiants = \App\Models\User::role('Etudiant')->get();
-    $duree = $stage->date_debut->diffInWeeks($stage->date_fin);
+    $stage->load(['entreprise.employes', 'etudiant', 'maitreDeStage']);
 
-    return view('stages.edit', compact('stage', 'entreprises', 'tuteurs', 'etudiants', 'duree'));
+    // Employés de l'entreprise du stage uniquement
+    $employes = $stage->entreprise?->employes ?? collect();
+    $duree    = ($stage->date_debut && $stage->date_fin)
+        ? (int) $stage->date_debut->diffInWeeks($stage->date_fin)
+        : 6;
+
+    return view('stages.edit', compact('stage', 'employes', 'duree'));
 }
 
     /**
@@ -127,7 +145,7 @@ public function edit(Stage $stage)
 
         // Recalcul de la date de fin
         $date_debut = Carbon::parse($request->date_debut);
-        $date_fin = $date_debut->copy()->addWeeks($request->duree);
+        $date_fin = $date_debut->copy()->addWeeks((int) $request->duree);
 
         $stage->update([
             'date_debut'         => $date_debut,

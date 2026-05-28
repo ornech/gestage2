@@ -21,7 +21,8 @@ class Stage extends Model
         'etudiant_id',
         'professeur_id',
         'classe',
-
+        'statut_validation',
+        'note_rejet',
     ];
 
     protected $casts = [

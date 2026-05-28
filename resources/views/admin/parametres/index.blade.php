@@ -134,7 +134,7 @@
                         </label>
                         <input class="input" type="text" id="date-fin-{{ $key }}"
                                value="{{ $cfg?->stage_date_fin?->format('d/m/Y') }}"
-                               readonly style="background:#f5f5f5; cursor:default;">
+                               readonly>
                     </div>
                 </div>
             </div>
@@ -176,7 +176,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 function calculerDateFin(key) {
     const debut    = document.querySelector(`input[name="${key}[stage_date_debut]"]`);
     const selectSem = document.getElementById(`semaines-${key}`);

@@ -70,8 +70,7 @@
                             <span class="has-text-grey is-size-7">(calculée automatiquement)</span>
                         </label>
                         <input class="input" type="number" name="promo" id="promo-input"
-                               value="{{ old('promo', $user->promo) }}" readonly
-                               style="background:#f5f5f5; cursor:not-allowed;">
+                               value="{{ old('promo', $user->promo) }}" readonly>
                     </div>
 
                     <div class="field">
@@ -158,7 +157,7 @@
     @endrole
 </div>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 const promos = { 'SIO1': {{ $currentYear + 2 }}, 'SIO2': {{ $currentYear + 1 }} };
 
 function updatePromo() {
