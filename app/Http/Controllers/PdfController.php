@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class PdfController extends Controller
 {
+    public function attestation(Stage $stage)
+    {
+        // TODO : générer l'attestation de stage au format PDF
+        return response('%PDF-1.4', 200)
+            ->header('Content-Type', 'application/pdf');
+    }
+
     public function convention(Stage $stage)
     {
         // Vérification stricte : entreprise doit avoir un SIRET

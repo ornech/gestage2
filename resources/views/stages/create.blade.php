@@ -55,7 +55,7 @@
                 <label class="label">Maître de stage</label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select name="employe_id" required>
+                        <select name="maitre_de_stage_id" required>
                             <option value="">Sélectionner</option>
                             @foreach($employes as $employe)
                                 <option value="{{ $employe->id }}">

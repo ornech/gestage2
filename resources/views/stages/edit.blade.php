@@ -17,7 +17,7 @@
                         @foreach($entreprises as $entreprise)
                             <option value="{{ $entreprise->id }}"
                                 {{ old('entreprise_id', $stage->entreprise_id) == $entreprise->id ? 'selected' : '' }}>
-                                {{ $entreprise->nom }}
+                                {{ $entreprise->raison_sociale }}
                             </option>
                         @endforeach
                     </select>
@@ -59,7 +59,7 @@
                     <select name="duree" required>
                         @foreach([1,2,3,4,6] as $semaines)
                             <option value="{{ $semaines }}"
-                                {{ old('duree', $stage->duree) == $semaines ? 'selected' : '' }}>
+                                {{ old('duree', $duree) == $semaines ? 'selected' : '' }}>
                                 {{ $semaines }} semaines
                             </option>
                         @endforeach

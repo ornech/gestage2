@@ -60,10 +60,10 @@ class StageController extends Controller
 
         // Validation
         $request->validate([
-            'entreprise_id' => 'required',
-            'employe_id' => 'required',
-            'date_debut' => 'required|date',
-            'duree' => 'required|integer|min:1',
+            'entreprise_id'      => 'required|exists:entreprises,id',
+            'maitre_de_stage_id' => 'required|exists:employes,id',
+            'date_debut'         => 'required|date',
+            'duree'              => 'required|integer|min:1',
         ]);
 
         // Calcul de la date de fin
@@ -72,13 +72,12 @@ class StageController extends Controller
 
         // Création du stage
         Stage::create([
-            'entreprise_id' => $request->entreprise_id,
-            'employe_id' => $request->employe_id,
-            'etudiant_id' => $user->id,
-            'classe' => $user->classe,
-            'date_debut' => $date_debut,
-            'date_fin' => $date_fin,
-            'duree' => $request->duree,
+            'entreprise_id'      => $request->entreprise_id,
+            'maitre_de_stage_id' => $request->maitre_de_stage_id,
+            'etudiant_id'        => $user->id,
+            'classe'             => $user->classe,
+            'date_debut'         => $date_debut,
+            'date_fin'           => $date_fin,
         ]);
 
         return redirect()->route('entreprises.show', $request->entreprise_id)
@@ -92,6 +91,13 @@ public function mesConventions()
     return view('etudiant.conventions', compact('stages'));
 }
 
+    public function show(Stage $stage)
+    {
+        $stage->load(['entreprise', 'maitreDeStage', 'etudiant', 'professeur', 'journalEntries']);
+
+        return view('stages.show', compact('stage'));
+    }
+
     /**
      * Formulaire d'édition
      */
@@ -100,8 +106,9 @@ public function edit(Stage $stage)
     $entreprises = \App\Models\Entreprise::all();
     $tuteurs = \App\Models\Employe::all();
     $etudiants = \App\Models\User::role('Etudiant')->get();
+    $duree = $stage->date_debut->diffInWeeks($stage->date_fin);
 
-    return view('stages.edit', compact('stage', 'entreprises', 'tuteurs', 'etudiants'));
+    return view('stages.edit', compact('stage', 'entreprises', 'tuteurs', 'etudiants', 'duree'));
 }
 
     /**
@@ -113,9 +120,9 @@ public function edit(Stage $stage)
         $this->authorize('update', $stage);
 
         $request->validate([
-            'date_debut' => 'required|date',
-            'duree' => 'required|integer|min:1',
-            'employe_id' => 'required|exists:employes,id',
+            'date_debut'         => 'required|date',
+            'duree'              => 'required|integer|min:1',
+            'maitre_de_stage_id' => 'required|exists:employes,id',
         ]);
 
         // Recalcul de la date de fin
@@ -123,10 +130,9 @@ public function edit(Stage $stage)
         $date_fin = $date_debut->copy()->addWeeks($request->duree);
 
         $stage->update([
-            'date_debut' => $date_debut,
-            'date_fin' => $date_fin,
-            'duree' => $request->duree,
-            'employe_id' => $request->employe_id,
+            'date_debut'         => $date_debut,
+            'date_fin'           => $date_fin,
+            'maitre_de_stage_id' => $request->maitre_de_stage_id,
         ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');

@@ -13,11 +13,6 @@
         </div>
     @endif
 
-    {{-- Bouton pour accéder au formulaire de création d'un nouvel employé --}}
-    <a href="{{ route('employes.create') }}" class="btn btn-primary mb-3">
-        Ajouter un employé
-    </a>
-
     {{-- Tableau affichant la liste des employés --}}
     <table class="table table-bordered">
         <thead>
@@ -43,7 +38,7 @@
                     <td>{{ $employe->prenom }}</td>
                     <td>{{ $employe->email }}</td>
                     <td>{{ $employe->telephone }}</td>
-                    <td>{{ $employe->entreprise }}</td>
+                    <td>{{ $employe->entreprise->raison_sociale ?? '—' }}</td>
 
                     <td class="d-flex gap-2">
 

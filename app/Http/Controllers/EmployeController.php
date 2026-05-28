@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employe;
+use App\Models\Entreprise;
 
 class EmployeController extends Controller
 {
@@ -42,12 +43,11 @@ class EmployeController extends Controller
     ]);
 
     Employe::create([
-        'nom' => $request->nom,
-        'prenom' => $request->prenom,
-        'email' => $request->email,
-        'telephone' => $request->telephone,
+        'nom'           => $request->nom,
+        'prenom'        => $request->prenom,
+        'email'         => $request->email,
+        'telephone'     => $request->telephone,
         'entreprise_id' => $request->entreprise_id,
-        'is_maitre_de_stage' => true,
     ]);
 
     return redirect()
@@ -69,8 +69,8 @@ class EmployeController extends Controller
      */
     public function edit(Employe $employe)
     {
-        // Afficher le formulaire d'édition pour l'employé sélectionné
-        return view('employes.edit', compact('employe'));
+        $entreprises = Entreprise::orderBy('raison_sociale')->get();
+        return view('employes.edit', compact('employe', 'entreprises'));
     }
    
 

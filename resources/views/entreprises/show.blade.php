@@ -46,13 +46,7 @@
             <td>{{ $employe->prenom }} {{ $employe->nom }}</td>
             <td>{{ $employe->email }}</td>
             <td>{{ $employe->telephone ?? '—' }}</td>
-            <td>
-                @if($employe->is_maitre_de_stage)
-                    Maître de stage
-                @else
-                    Employé
-                @endif
-            </td>
+            <td>Contact</td>
             <td>
                 <a href="{{ route('employes.show', $employe->id) }}" class="button is-small is-link">
                     Voir
@@ -98,8 +92,8 @@
             <td>{{ $stage->date_debut }}</td>
             <td>{{ $stage->date_fin }}</td>
             <td>
-    @if($stage->employe)
-        {{ $stage->employe->prenom }} {{ $stage->employe->nom }}
+    @if($stage->maitreDeStage)
+        {{ $stage->maitreDeStage->prenom }} {{ $stage->maitreDeStage->nom }}
     @else
         <span class="has-text-grey">Non défini</span>
     @endif

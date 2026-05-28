@@ -21,10 +21,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Enregistrement des alias de Spatie pour la gestion des rôles et permissions
         $middleware->alias([
-            'role' => RoleMiddleware::class,
-            'permission' => PermissionMiddleware::class,
-            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'role'                    => RoleMiddleware::class,
+            'permission'              => PermissionMiddleware::class,
+            'role_or_permission'      => RoleOrPermissionMiddleware::class,
+            'cgu'                     => \App\Http\Middleware\EnsureCguAccepted::class,
+            'force_password_change'   => \App\Http\Middleware\ForcePasswordChange::class,
+            'student_active'          => \App\Http\Middleware\EnsureStudentActive::class,
         ]);
+
+        $middleware->appendToGroup('web', \App\Http\Middleware\ForcePasswordChange::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureStudentActive::class);
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {

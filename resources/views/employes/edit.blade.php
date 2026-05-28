@@ -50,8 +50,15 @@
 
         {{-- Champ Entreprise --}}
         <div class="mb-3">
-            <label for="entreprise" class="form-label">Entreprise</label>
-            <input type="text" name="entreprise" id="entreprise" class="form-control" value="{{ old('entreprise', $employe->entreprise) }}">
+            <label for="entreprise_id" class="form-label">Entreprise</label>
+            <select name="entreprise_id" id="entreprise_id" class="form-control">
+                @foreach($entreprises as $entreprise)
+                    <option value="{{ $entreprise->id }}"
+                        {{ old('entreprise_id', $employe->entreprise_id) == $entreprise->id ? 'selected' : '' }}>
+                        {{ $entreprise->raison_sociale }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         {{-- Bouton pour enregistrer les modifications --}}

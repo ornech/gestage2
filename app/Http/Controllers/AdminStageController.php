@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Stage;
 use App\Models\Employe;
+use Illuminate\Http\Request;
+
 class AdminStageController extends Controller
 {
     /**
