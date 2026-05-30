@@ -48,9 +48,15 @@
             <td>{{ $employe->telephone ?? '—' }}</td>
             <td>Contact</td>
             <td>
-                <a href="{{ route('employes.show', $employe->id) }}" class="button is-small is-link">
-                    Voir
-                </a>
+                @role('Administrateur')
+                    <a href="{{ route('employes.edit', $employe->id) }}" class="button is-small is-warning" title="Modifier">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                @else
+                    <a href="{{ route('employes.show', $employe->id) }}" class="button is-small is-info is-light" title="Voir">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                @endrole
             </td>
         </tr>
         @endforeach
@@ -87,10 +93,18 @@
     <tbody>
         @foreach($entreprise->stages as $stage)
         <tr>
-            <td>{{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}</td>
-            <td>{{ $stage->etudiant->classe }}</td>
-            <td>{{ $stage->date_debut }}</td>
-            <td>{{ $stage->date_fin }}</td>
+            <td>
+                @if($stage->etudiant)
+                    <a href="{{ route('admin.users.edit', $stage->etudiant) }}" class="has-text-link">
+                        {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
+                    </a>
+                @else
+                    <span class="has-text-grey">—</span>
+                @endif
+            </td>
+            <td>{{ $stage->etudiant?->classe_courante ?? $stage->etudiant?->classe ?? '—' }}</td>
+            <td>{{ $stage->date_debut?->format('d/m/Y') ?? '—' }}</td>
+            <td>{{ $stage->date_fin?->format('d/m/Y') ?? '—' }}</td>
             <td>
     @if($stage->maitreDeStage)
         {{ $stage->maitreDeStage->prenom }} {{ $stage->maitreDeStage->nom }}

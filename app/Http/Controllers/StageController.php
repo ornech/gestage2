@@ -16,12 +16,7 @@ class StageController extends Controller
      */
     public function index()
     {
-        // Autoriser uniquement les étudiants à voir la liste des stages
-        $this->authorize('viewAny', Stage::class);
-
-        $stages = Stage::with(['entreprise', 'maitreDeStage'])->paginate(10);
-
-        return view('stages.index', compact('stages'));
+        return redirect()->route('admin.stages.index');
     }
 
     /**

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-6" style="max-width:700px;">
+<div class="container mt-6">
 
     <h1 class="title has-text-centered mb-5">Créer un stage</h1>
 

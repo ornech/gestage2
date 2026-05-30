@@ -59,9 +59,9 @@ class EmployeController extends Controller
     /**
      * Display the specified resource.
      */
-    // Afficher les détails d'un employé spécifique
     public function show(Employe $employe)
     {
+        $employe->load('entreprise');
         return view('employes.show', compact('employe'));
     }
     /**

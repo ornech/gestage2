@@ -1,111 +1,119 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="container mt-5">
 
-    <h1 class="title is-3">Annuaire entreprises</h1>
-    <p class="subtitle is-6">Liste des entreprises approchées ou ayant accueilli des stagiaires</p>
-
-    {{-- Compteurs --}}
-    <div class="columns mt-4">
-
-        <div class="column is-narrow">
-            <div class="tags has-addons is-medium">
-                <span class="tag is-dark">Entreprises :</span>
-                <span class="tag is-link"><b>{{ $nbEntreprises }}</b></span>
+    <div class="level mb-2">
+        <div class="level-left">
+            <div>
+                <h1 class="title is-3 mb-0">Annuaire entreprises</h1>
+                <p class="subtitle is-6 has-text-grey">Filtrage en temps réel — {{ $nbEntreprises }} entreprises</p>
             </div>
         </div>
-
-        <div class="column is-narrow">
-            <div class="tags has-addons is-medium">
-                <span class="tag is-dark">Stages :</span>
+        <div class="level-right">
+            <div class="tags has-addons mr-3">
+                <span class="tag is-dark">Stages</span>
                 <span class="tag is-success"><b>{{ $nbStages }}</b></span>
             </div>
-        </div>
-
-        <div class="column is-narrow">
-            <div class="tags has-addons is-medium">
-                <span class="tag is-dark">Contacts :</span>
+            <div class="tags has-addons">
+                <span class="tag is-dark">Contacts</span>
                 <span class="tag is-warning"><b>{{ $nbContacts }}</b></span>
             </div>
         </div>
-
     </div>
 
-    {{-- Filtres --}}
-    <div class="box mt-4">
-        <form method="GET" action="">
-            <div class="columns is-multiline">
-
-                <div class="column is-3">
-                    <label class="label">Nom entreprise</label>
-                    <input type="text" name="nom" class="input" placeholder="Rechercher..." value="{{ request('nom') }}">
-                </div>
-
-                <div class="column is-3">
-                    <label class="label">Adresse</label>
-                    <input type="text" name="adresse" class="input" value="{{ request('adresse') }}">
-                </div>
-
-                <div class="column is-2">
-                    <label class="label">Ville</label>
-                    <input type="text" name="ville" class="input" value="{{ request('ville') }}">
-                </div>
-
-                <div class="column is-2">
-                    <label class="label">Code postal</label>
-                    <input type="text" name="cp" class="input" value="{{ request('cp') }}">
-                </div>
-
-                <div class="column is-2">
-                    <label class="label">NAF</label>
-                    <input type="text" name="naf" class="input" value="{{ request('naf') }}">
-                </div>
-
-            </div>
-
-            <button class="button is-link mt-2">Filtrer</button>
-        </form>
+    {{-- Filtres en ligne --}}
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;" class="mb-3">
+        <div class="control">
+            <input class="input is-small" type="text" id="f-nom"   placeholder="Nom entreprise…">
+        </div>
+        <div class="control">
+            <input class="input is-small" type="text" id="f-ville" placeholder="Ville…">
+        </div>
+        <div class="control">
+            <input class="input is-small" type="text" id="f-cp"    placeholder="Code postal…">
+        </div>
+        <div class="control">
+            <input class="input is-small" type="text" id="f-naf"   placeholder="Code NAF…">
+        </div>
+        <div class="control">
+            <button class="button is-small is-light" id="btn-reset">✕ Réinitialiser</button>
+        </div>
+        <span id="compteur" class="is-size-7 has-text-grey" style="align-self:center;"></span>
     </div>
 
     {{-- Tableau --}}
-    <div class="table-container mt-5">
-        <table class="table is-striped is-hoverable is-fullwidth">
-            <thead>
-                <tr>
-                    <th>Nom entreprise</th>
-                    <th>Adresse</th>
-                    <th>Ville</th>
-                    <th>NAF</th>
-                    <th>Code postal</th>
-                    <th>Stage</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach ($entreprises as $entreprise)
-                    <tr>
-                       <td>
-                        <a href="{{ route('entreprises.show', $entreprise) }}">
-                            {{ $entreprise->raison_sociale }}
-                        </a>
-                    </td>
-
-                        <td>{{ $entreprise->adresse }}</td>
-                        <td>{{ $entreprise->ville }}</td>
-                        <td>{{ $entreprise->code_naf }}</td>
-                        <td>{{ $entreprise->code_postal }}</td>
-                        <td>
-                            {{ $entreprise->stages->count() > 0 ? $entreprise->stages->count() : '-' }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-
-        </table>
-    </div>
+    <table class="table is-striped is-hoverable is-fullwidth is-size-7" id="tbl-entreprises">
+        <thead>
+            <tr>
+                <th>Nom entreprise</th>
+                <th>Adresse</th>
+                <th>Ville</th>
+                <th>CP</th>
+                <th>NAF</th>
+                <th>Stages</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($entreprises as $e)
+            <tr
+                data-nom="{{ strtolower($e->raison_sociale) }}"
+                data-ville="{{ strtolower($e->ville ?? '') }}"
+                data-cp="{{ $e->code_postal ?? '' }}"
+                data-naf="{{ strtolower($e->code_naf ?? '') }}"
+            >
+                <td>
+                    <a href="{{ route('entreprises.show', $e) }}" class="has-text-link">
+                        {{ $e->raison_sociale }}
+                    </a>
+                </td>
+                <td>{{ $e->adresse ?? '—' }}</td>
+                <td>{{ $e->ville ?? '—' }}</td>
+                <td>{{ $e->code_postal ?? '—' }}</td>
+                <td>{{ $e->code_naf ?? '—' }}</td>
+                <td>{{ $e->stages_count > 0 ? $e->stages_count : '—' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 
 </div>
 
+<script nonce="{{ $cspNonce ?? '' }}">
+document.addEventListener('DOMContentLoaded', function () {
+    const ids    = ['f-nom', 'f-ville', 'f-cp', 'f-naf'];
+    const rows   = Array.from(document.querySelectorAll('#tbl-entreprises tbody tr'));
+    const counter = document.getElementById('compteur');
+
+    function filtrer() {
+        const nom   = document.getElementById('f-nom').value.toLowerCase().trim();
+        const ville = document.getElementById('f-ville').value.toLowerCase().trim();
+        const cp    = document.getElementById('f-cp').value.trim();
+        const naf   = document.getElementById('f-naf').value.toLowerCase().trim();
+
+        let visible = 0;
+        rows.forEach(function(row) {
+            const match =
+                row.dataset.nom.includes(nom)     &&
+                row.dataset.ville.includes(ville)  &&
+                row.dataset.cp.startsWith(cp)      &&
+                row.dataset.naf.includes(naf);
+
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        counter.textContent = visible < rows.length ? visible + ' résultat(s)' : '';
+    }
+
+    ids.forEach(function(id) {
+        document.getElementById(id).addEventListener('input', filtrer);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+        ids.forEach(function(id) { document.getElementById(id).value = ''; });
+        filtrer();
+    });
+});
+</script>
 @endsection

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5" style="max-width:960px;">
+<div class="container mt-5">
 
     <h1 class="title">Paramètres des stages</h1>
 

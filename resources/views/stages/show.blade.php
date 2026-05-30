@@ -12,9 +12,33 @@
     <div class="box">
         <div class="columns">
             <div class="column">
-                <p><strong>Entreprise :</strong> {{ $stage->entreprise->raison_sociale ?? '—' }}</p>
-                <p><strong>Étudiant :</strong> {{ $stage->etudiant->prenom ?? '' }} {{ $stage->etudiant->nom ?? '—' }}</p>
-                <p><strong>Maître de stage :</strong> {{ $stage->maitreDeStage->prenom ?? '' }} {{ $stage->maitreDeStage->nom ?? '—' }}</p>
+                <p>
+                    <strong>Entreprise :</strong>
+                    @if($stage->entreprise)
+                        <a href="{{ route('entreprises.show', $stage->entreprise) }}" class="has-text-link">
+                            {{ $stage->entreprise->raison_sociale }}
+                        </a>
+                    @else —
+                    @endif
+                </p>
+                <p>
+                    <strong>Étudiant :</strong>
+                    @if($stage->etudiant)
+                        <a href="{{ route('admin.users.edit', $stage->etudiant) }}" class="has-text-link">
+                            {{ $stage->etudiant->prenom }} {{ $stage->etudiant->nom }}
+                        </a>
+                    @else —
+                    @endif
+                </p>
+                <p>
+                    <strong>Maître de stage :</strong>
+                    @if($stage->maitreDeStage)
+                        <a href="{{ route('employes.show', $stage->maitreDeStage) }}" class="has-text-link">
+                            {{ $stage->maitreDeStage->prenom }} {{ $stage->maitreDeStage->nom }}
+                        </a>
+                    @else —
+                    @endif
+                </p>
             </div>
             <div class="column">
                 <p><strong>Date de début :</strong> {{ $stage->date_debut?->format('d/m/Y') }}</p>

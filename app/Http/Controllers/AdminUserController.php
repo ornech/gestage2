@@ -59,9 +59,26 @@ class AdminUserController extends Controller
             'demissionnaires'=> User::role('Etudiant')->where('statut', 'demissionnaire')->count(),
         ];
 
-        // ── Requête selon le filtre ──────────────────────────────────────
+        // ── Vue "Anciennes promos" ───────────────────────────────────────
+        if ($filtre === 'anciens') {
+            $users = User::role('Etudiant')
+                ->where(function ($q) use ($syActif) {
+                    // Diplômés (promo <= année active) OU démissionnaires
+                    $q->where('promo', '<=', $syActif)
+                      ->orWhere('statut', 'demissionnaire');
+                })
+                ->orderByDesc('promo')
+                ->orderBy('nom')
+                ->paginate(30)
+                ->withQueryString();
+
+            $sy = $syActif;
+            return view('admin.users.anciens', compact('users', 'sy'));
+        }
+
+        // ── Requête standard : actifs de l'année en cours ────────────────
         $query = User::role('Etudiant')
-                     ->whereIn('statut', ['actif']); // toujours actifs uniquement
+                     ->whereIn('statut', ['actif']);
 
         // Filtre par classe (depuis le menu navbar ?classe=SIO1/SIO2)
         if ($classeParam === 'SIO1') {

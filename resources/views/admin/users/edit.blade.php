@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4" style="max-width:1000px;">
+<div class="container mt-4">
 
     {{-- En-tête compact --}}
     <div class="level mb-4">

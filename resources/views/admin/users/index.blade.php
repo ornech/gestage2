@@ -6,7 +6,12 @@
     {{-- ── En-tête ─────────────────────────────────────────────────────── --}}
     <div class="level">
         <div class="level-left">
-            <h1 class="title mb-0">Étudiants</h1>
+            <h1 class="title mb-0">
+                Étudiants
+                @if(isset($classeParam) && $classeParam && $classeParam !== 'tous')
+                    <span class="tag {{ $classeParam === 'SIO1' ? 'is-info' : 'is-primary' }} is-medium ml-2">{{ $classeParam }}</span>
+                @endif
+            </h1>
         </div>
         <div class="level-right">
             <a href="{{ route('imports.pronote.form') }}" class="button is-primary">
@@ -19,47 +24,29 @@
         <div class="notification is-success is-light">{{ session('success') }}</div>
     @endif
 
-    {{-- ── Années + stats + recherche sur une seule ligne ───────────── --}}
-    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;" class="mb-3">
+    {{-- ── Stats (gauche) + Année dropdown (droite) ──────────────────── --}}
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;" class="mb-3">
 
-        {{-- Sélecteur d'années --}}
-        <span class="has-text-grey is-size-7">Année :</span>
-        <div class="buttons has-addons are-small mb-0">
-            @foreach($annees as $annee)
-                <a href="{{ route('admin.users.index', array_merge(request()->except('annee','page'), ['annee' => $annee])) }}"
-                   class="button is-small {{ $annee === $anneeSelectionnee ? 'is-link' : 'is-light' }}">
-                    {{ $annee }}
-                    @if($annee === $anneeActive)
-                        <span style="font-size:0.55rem; margin-left:3px;">●</span>
-                    @endif
-                </a>
-            @endforeach
+        {{-- Stats gauche --}}
+        <div style="display:flex; gap:8px; align-items:center;">
+            <span class="tag is-info is-light is-medium">
+                {{ $stats['actifs'] }} actif(s)
+                @if($classeParam && $classeParam !== 'tous') — {{ $classeParam }} @endif
+            </span>
+            <span class="tag is-danger is-light is-medium">{{ $stats['demissionnaires'] }} démiss.</span>
         </div>
 
-        <span class="has-text-grey">|</span>
-
-        {{-- Stats compactes --}}
-        <span class="tag is-info is-light is-medium">
-            {{ $stats['actifs'] }} actif(s)
-            @if($classeParam && $classeParam !== 'tous') ({{ $classeParam }}) @endif
-        </span>
-        <span class="tag is-danger is-light is-medium">{{ $stats['demissionnaires'] }} démiss.</span>
-
-        <span class="has-text-grey">|</span>
-
-        {{-- Recherche --}}
-        <form method="GET" style="flex:1; min-width:200px;">
-            <input type="hidden" name="annee"  value="{{ $anneeSelectionnee }}">
+        {{-- Année dropdown droite --}}
+        <form method="GET">
             <input type="hidden" name="classe" value="{{ $classeParam }}">
-            <div class="control has-icons-left" style="display:flex; gap:4px;">
-                <input class="input is-small" type="text" name="search"
-                       placeholder="Nom, prénom ou email…"
-                       value="{{ request('search') }}">
-                <span class="icon is-left is-small"><i class="fas fa-search"></i></span>
-                @if(request('search'))
-                    <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'classe' => $classeParam]) }}"
-                       class="button is-small is-light">✕</a>
-                @endif
+            <div class="select is-small">
+                <select name="annee" onchange="this.form.submit()">
+                    @foreach($annees as $annee)
+                        <option value="{{ $annee }}" {{ $annee === $anneeSelectionnee ? 'selected' : '' }}>
+                            {{ $annee }}{{ $annee === $anneeActive ? ' ●' : '' }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </form>
 

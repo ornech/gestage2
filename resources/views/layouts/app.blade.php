@@ -11,15 +11,24 @@
     {{-- Petit style perso pour l'ombre du menu --}}
     <style>
         .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        /* Pas de retour à la ligne dans les cellules, alignement vertical centré */
-        td, th { white-space: nowrap; vertical-align: middle !important; padding: 0.5em 0.75em !important; }
-        /* Tous les conteneurs flex dans les td restent sur une ligne */
+
+        /* ── Marges identiques sur toutes les pages ── */
+        main .container { margin-top: 2rem !important; padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+
+        /* ── Taille de police uniforme ── */
+        body { font-size: 0.9375rem; }
+        .table td, .table th { font-size: 0.875rem; }
+        .input, .select select, .textarea { font-size: 0.875rem !important; }
+        .label { font-size: 0.875rem !important; }
+        .is-size-7 { font-size: 0.8125rem !important; }
+        .help { font-size: 0.8125rem !important; }
+        .tag { font-size: 0.8125rem !important; }
+
+        /* ── Tableaux : pas de retour à la ligne ── */
+        td, th { white-space: nowrap; vertical-align: middle !important; padding: 0.6em 0.75em !important; }
         td > div  { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 4px; }
-        /* Les formulaires dans les td ne créent pas de rupture de ligne */
         td form   { display: inline !important; }
-        /* Wrapping normal hors tableaux */
         .notification, .box, .message, p, label, .help { white-space: normal; }
-        /* Scroll horizontal : le tableau scroll, pas toute la page */
         .table-scroll { overflow-x: auto; width: 100%; }
         table { min-width: 100%; }
     </style>

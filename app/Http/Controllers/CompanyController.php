@@ -11,49 +11,20 @@ use App\Models\Employe;
 class CompanyController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Entreprise::query();
+    {
+        // Toutes les entreprises chargées d'un coup — filtrage en temps réel côté client
+        $entreprises = Entreprise::withCount(['stages', 'employes'])
+            ->orderBy('raison_sociale')
+            ->get();
 
-    // Filtre par nom
-    if ($request->filled('nom')) {
-        $query->where('raison_sociale', 'like', '%' . $request->nom . '%');
+        $nbEntreprises = $entreprises->count();
+        $nbStages      = Stage::count();
+        $nbContacts    = Employe::count();
+
+        return view('entreprises.index', compact(
+            'entreprises', 'nbEntreprises', 'nbStages', 'nbContacts'
+        ));
     }
-
-    // Filtre par adresse
-    if ($request->filled('adresse')) {
-        $query->where('adresse', 'like', '%' . $request->adresse . '%');
-    }
-
-    // Filtre par ville
-    if ($request->filled('ville')) {
-        $query->where('ville', 'like', '%' . $request->ville . '%');
-    }
-
-    // Filtre par code postal
-    if ($request->filled('cp')) {
-        $query->where('code_postal', 'like', '%' . $request->cp . '%');
-    }
-
-    // Filtre par NAF
-    if ($request->filled('naf')) {
-        $query->where('code_naf', 'like', '%' . $request->naf . '%');
-    }
-
-    // Pagination + conservation des filtres
-    $entreprises = $query->paginate(15)->withQueryString();
-
-    // Statistiques
-    $nbEntreprises = Entreprise::count();
-    $nbStages = Stage::count();
-    $nbContacts = Employe::count();
-
-    return view('entreprises.index', compact(
-        'entreprises',
-        'nbEntreprises',
-        'nbStages',
-        'nbContacts'
-    ));
-}
 
 
 
