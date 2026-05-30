@@ -11,6 +11,13 @@
     {{-- Petit style perso pour l'ombre du menu --}}
     <style>
         .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        /* Interdire les retours à la ligne dans toutes les cellules de tableau */
+        td, th { white-space: nowrap; }
+        /* Permettre le scroll horizontal si le contenu dépasse */
+        .table-wrapper { overflow-x: auto; }
+        /* Boutons d'action sur une seule ligne */
+        .buttons { flex-wrap: nowrap !important; }
+        td .buttons, td form { display: inline-flex; flex-wrap: nowrap; }
     </style>
     @stack('styles')
 </head>
