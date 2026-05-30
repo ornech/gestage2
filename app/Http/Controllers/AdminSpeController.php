@@ -10,7 +10,7 @@ class AdminSpeController extends Controller
     public function index()
     {
         $classes = User::role('Etudiant')
-            ->whereIn('statut', ['actif', 'redoublant'])
+            ->whereIn('statut', ['actif'])
             ->whereNotNull('classe')
             ->distinct()
             ->orderBy('classe')
@@ -23,7 +23,7 @@ class AdminSpeController extends Controller
     {
         $etudiants = User::role('Etudiant')
             ->where('classe', $classe)
-            ->whereIn('statut', ['actif', 'redoublant'])
+            ->whereIn('statut', ['actif'])
             ->orderBy('nom')
             ->get();
 

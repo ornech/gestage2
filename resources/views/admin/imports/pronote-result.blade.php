@@ -13,7 +13,7 @@
                     <td class="has-text-right"><strong>{{ $counts['cree'] }}</strong></td>
                 </tr>
                 <tr>
-                    <td><span class="tag is-warning is-light is-medium">Redoublants</span></td>
+                    <td><span class="tag is-warning is-light is-medium">Promo incrémentée</span></td>
                     <td class="has-text-right"><strong>{{ $counts['redoublant'] }}</strong></td>
                 </tr>
                 <tr>

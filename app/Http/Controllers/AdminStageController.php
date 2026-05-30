@@ -53,7 +53,7 @@ class AdminStageController extends Controller
 
         // ── Requête étudiant-centrique ────────────────────────────────────
         $query = User::role('Etudiant')
-            ->whereIn('statut', ['actif', 'redoublant'])
+            ->whereIn('statut', ['actif'])
             ->whereIn('promo', $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2])
             ->with([
                 'stages'         => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),

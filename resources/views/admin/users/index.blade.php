@@ -19,109 +19,51 @@
         <div class="notification is-success is-light">{{ session('success') }}</div>
     @endif
 
-    {{-- ── Sélecteur d'années ──────────────────────────────────────────── --}}
-    <div class="box p-3 mb-4">
-        <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
-            <span class="has-text-grey is-size-7 mr-2">Année :</span>
+    {{-- ── Années + stats + recherche sur une seule ligne ───────────── --}}
+    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;" class="mb-3">
+
+        {{-- Sélecteur d'années --}}
+        <span class="has-text-grey is-size-7">Année :</span>
+        <div class="buttons has-addons are-small mb-0">
             @foreach($annees as $annee)
-            @php $syAnnee = (int) explode('-', $annee)[0]; $isFuture = $syAnnee > $syActif; @endphp
                 <a href="{{ route('admin.users.index', array_merge(request()->except('annee','page'), ['annee' => $annee])) }}"
-                   class="button is-small {{ $annee === $anneeSelectionnee ? ($isFuture ? 'is-warning' : 'is-link') : 'is-light' }}"
-                   title="{{ $isFuture ? 'Anticipation — rentrée de septembre' : '' }}">
+                   class="button is-small {{ $annee === $anneeSelectionnee ? 'is-link' : 'is-light' }}">
                     {{ $annee }}
                     @if($annee === $anneeActive)
-                        <span class="tag is-success ml-1" style="font-size:0.6rem; padding:2px 4px;">●</span>
-                    @elseif($isFuture)
-                        <span class="tag is-warning is-light ml-1" style="font-size:0.6rem; padding:2px 4px;">à venir</span>
+                        <span style="font-size:0.55rem; margin-left:3px;">●</span>
                     @endif
                 </a>
             @endforeach
         </div>
-        @if((int) explode('-', $anneeSelectionnee)[0] > $syActif)
-        <p class="is-size-7 has-text-warning mt-2">
-            <i class="fas fa-info-circle mr-1"></i>
-            Anticipation : affichage des classes telles qu'elles seront à la rentrée {{ $anneeSelectionnee }}.
-        </p>
-        @endif
+
+        <span class="has-text-grey">|</span>
+
+        {{-- Stats compactes --}}
+        <span class="tag is-info is-light is-medium">
+            {{ $stats['actifs'] }} actif(s)
+            @if($classeParam && $classeParam !== 'tous') ({{ $classeParam }}) @endif
+        </span>
+        <span class="tag is-danger is-light is-medium">{{ $stats['demissionnaires'] }} démiss.</span>
+
+        <span class="has-text-grey">|</span>
+
+        {{-- Recherche --}}
+        <form method="GET" style="flex:1; min-width:200px;">
+            <input type="hidden" name="annee"  value="{{ $anneeSelectionnee }}">
+            <input type="hidden" name="classe" value="{{ $classeParam }}">
+            <div class="control has-icons-left" style="display:flex; gap:4px;">
+                <input class="input is-small" type="text" name="search"
+                       placeholder="Nom, prénom ou email…"
+                       value="{{ request('search') }}">
+                <span class="icon is-left is-small"><i class="fas fa-search"></i></span>
+                @if(request('search'))
+                    <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'classe' => $classeParam]) }}"
+                       class="button is-small is-light">✕</a>
+                @endif
+            </div>
+        </form>
+
     </div>
-
-    {{-- ── Statistiques ────────────────────────────────────────────────── --}}
-    <div class="columns is-mobile mb-4">
-        <div class="column">
-            <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'filtre' => 'sio1']) }}"
-               class="box has-text-centered" style="border-bottom: 3px solid #3273dc;">
-                <p class="heading">SIO1</p>
-                <p class="title is-4">{{ $stats['sio1'] }}</p>
-                <p class="is-size-7 has-text-grey">actifs</p>
-            </a>
-        </div>
-        <div class="column">
-            <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'filtre' => 'sio2']) }}"
-               class="box has-text-centered" style="border-bottom: 3px solid #00d1b2;">
-                <p class="heading">SIO2</p>
-                <p class="title is-4">{{ $stats['sio2'] }}</p>
-                <p class="is-size-7 has-text-grey">actifs</p>
-            </a>
-        </div>
-        <div class="column">
-            <div class="box has-text-centered" style="border-bottom: 3px solid #ffdd57;">
-                <p class="heading">Redoublants</p>
-                <p class="title is-4">{{ $stats['redoublants'] }}</p>
-                <p class="is-size-7 has-text-grey">cette année</p>
-            </div>
-        </div>
-        <div class="column">
-            <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'filtre' => 'anciens']) }}"
-               class="box has-text-centered" style="border-bottom: 3px solid #f14668;">
-                <p class="heading">Démissionnaires</p>
-                <p class="title is-4">{{ $stats['demissionnaires'] }}</p>
-                <p class="is-size-7 has-text-grey">total</p>
-            </a>
-        </div>
-    </div>
-
-    {{-- ── Filtres ─────────────────────────────────────────────────────── --}}
-    <form method="GET" class="mb-3">
-        <input type="hidden" name="annee" value="{{ $anneeSelectionnee }}">
-        <div class="columns is-vcentered is-mobile">
-            <div class="column">
-                <div class="control has-icons-left">
-                    <input class="input is-small" type="text" name="search"
-                           placeholder="Nom, prénom ou email…"
-                           value="{{ request('search') }}">
-                    <span class="icon is-left is-small"><i class="fas fa-search"></i></span>
-                </div>
-            </div>
-            <div class="column is-narrow">
-                <div class="buttons has-addons are-small">
-                    @foreach(['sio1' => 'SIO1', 'sio2' => 'SIO2', 'tout' => 'Tout afficher'] as $val => $label)
-                        <a href="{{ route('admin.users.index', array_merge(request()->except('filtre','search','page'), ['annee' => $anneeSelectionnee, 'filtre' => $val])) }}"
-                           class="button {{ $filtre === $val ? 'is-link' : '' }}">
-                            {{ $label }}
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-            @if(request('search'))
-            <div class="column is-narrow">
-                <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'filtre' => $filtre]) }}"
-                   class="button is-small is-light">✕</a>
-            </div>
-            @endif
-        </div>
-    </form>
-
-    {{-- Indicateur recherche globale --}}
-    @if(request('search'))
-        <div class="notification is-info is-light py-2 mb-3">
-            <i class="fas fa-search mr-2"></i>
-            Recherche dans <strong>tous les étudiants</strong> pour
-            « {{ request('search') }} » —
-            <a href="{{ route('admin.users.index', ['annee' => $anneeSelectionnee, 'filtre' => $filtre]) }}">
-                Effacer la recherche
-            </a>
-        </div>
-    @endif
 
     {{-- ── Tableau ─────────────────────────────────────────────────────── --}}
     <table class="table is-striped is-fullwidth is-hoverable is-size-7">
@@ -145,13 +87,11 @@
 
                 $statutColor = match($user->statut) {
                     'actif'          => 'is-success is-light',
-                    'redoublant'     => 'is-warning is-light',
                     'demissionnaire' => 'is-danger is-light',
                     default          => 'is-light',
                 };
                 $statutLabel = match($user->statut) {
                     'actif'          => 'Actif',
-                    'redoublant'     => 'Redoublant',
                     'demissionnaire' => 'Démiss.',
                     default          => '—',
                 };

@@ -29,12 +29,12 @@ class ProfesseurController extends Controller
 
             $etudiants = User::role('Etudiant')
                 ->where('promo', $promo)
-                ->whereIn('statut', ['actif', 'redoublant', 'demissionnaire'])
+                ->whereIn('statut', ['actif', 'demissionnaire'])
                 ->with('conventionPapier')
                 ->get();
 
             $actifs        = $etudiants->whereIn('statut', ['actif']);
-            $redoublants   = $etudiants->where('statut', 'redoublant');
+            
             $demissionnaires = $etudiants->where('statut', 'demissionnaire');
 
             // Conventions numériques
@@ -53,12 +53,12 @@ class ProfesseurController extends Controller
                                         ->with('profPrincipal')
                                         ->first(),
                 // Effectifs
-                'total'            => $etudiants->whereIn('statut', ['actif', 'redoublant'])->count(),
-                'slam'             => $etudiants->where('spe', 'SLAM')->whereIn('statut', ['actif','redoublant'])->count(),
-                'sisr'             => $etudiants->where('spe', 'SISR')->whereIn('statut', ['actif','redoublant'])->count(),
+                'total'            => $etudiants->whereIn('statut', ['actif'])->count(),
+                'slam'             => $etudiants->where('spe', 'SLAM')->whereIn('statut', ['actif'])->count(),
+                'sisr'             => $etudiants->where('spe', 'SISR')->whereIn('statut', ['actif'])->count(),
                 // Statuts administratifs
                 'actifs'           => $actifs->count(),
-                'redoublants'      => $redoublants->count(),
+                
                 'demissionnaires'  => $demissionnaires->count(),
                 // Conventions (numérique + papier)
                 'a_faire_signer'   => (clone $baseStages)->where('statut_convention', 'a_faire_signer')->count()
@@ -68,10 +68,10 @@ class ProfesseurController extends Controller
                 'remis'            => (clone $baseStages)->where('statut_convention', 'validee')->count()
                                       + $papierFn('validee'),
                 // Stages manquants
-                'sans_stage'       => $etudiants->whereIn('statut', ['actif','redoublant'])
+                'sans_stage'       => $etudiants->whereIn('statut', ['actif'])
                                         ->filter(fn($u) => !Stage::where('etudiant_id', $u->id)->exists() && !$u->conventionPapier)
                                         ->count(),
-                'papier_pending'   => $etudiants->whereIn('statut', ['actif','redoublant'])
+                'papier_pending'   => $etudiants->whereIn('statut', ['actif'])
                                         ->filter(fn($u) => !Stage::where('etudiant_id', $u->id)->exists() && $u->conventionPapier)
                                         ->count(),
             ];

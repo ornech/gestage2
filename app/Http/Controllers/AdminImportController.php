@@ -59,11 +59,13 @@ class AdminImportController extends Controller
                 $counts['cree']++;
 
             } elseif ($row['action'] === 'redoublant') {
+                // Un redoublant reste actif, sa promo est incrémentée
+                $existing = User::find($row['existing_id']);
                 User::where('id', $row['existing_id'])->update([
                     'classe'      => $row['classe'],
-                    'promo'       => $row['promo'],
+                    'promo'       => $existing ? $existing->promo + 1 : $row['promo'],
                     'date_entree' => $row['date_entree'],
-                    'statut'      => 'redoublant',
+                    'statut'      => 'actif',
                 ]);
                 $counts['redoublant']++;
 

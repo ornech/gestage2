@@ -15,71 +15,66 @@
         <div class="notification is-success is-light py-2">{{ session('success') }}</div>
     @endif
 
-    {{-- Sélecteur d'années --}}
-    <div class="box p-3 mb-4">
-        <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
-            <span class="has-text-grey is-size-7 mr-2">Année :</span>
-            @foreach($annees as $annee)
-            @php $isFuture = (int) explode('-', $annee)[0] > (int) explode('-', $anneeActive)[0]; @endphp
-                <a href="{{ route('admin.stages.index', ['annee' => $annee, 'filtre' => $filtre]) }}"
-                   class="button is-small {{ $annee === $anneeSelectionnee ? ($isFuture ? 'is-warning' : 'is-link') : 'is-light' }}">
-                    {{ $annee }}
-                    @if($annee === $anneeActive)
-                        <span class="tag is-success ml-1" style="font-size:0.6rem;padding:2px 4px;">●</span>
-                    @endif
-                </a>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- ── Filtres cumulables (classe + statut + recherche) ─────────── --}}
+    {{-- ── Tous les filtres sur une seule ligne ──────────────────────── --}}
     <div class="box p-3 mb-3">
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
 
-        {{-- Ligne 1 : Classe --}}
-        <div class="level is-mobile mb-2">
-            <div class="level-left">
-                <span class="has-text-grey is-size-7 mr-3">Classe :</span>
-                <div class="buttons has-addons are-small">
-                    @foreach(['tous' => 'Toutes', 'sio1' => 'SIO1', 'sio2' => 'SIO2'] as $val => $label)
-                        <a href="{{ route('admin.stages.index', array_merge(request()->except('classe','page'), ['annee' => $anneeSelectionnee, 'classe' => $val])) }}"
-                           class="button {{ $classe === $val ? 'is-link' : '' }}">{{ $label }}</a>
-                    @endforeach
+            {{-- Année --}}
+            <div class="buttons has-addons are-small mb-0">
+                @foreach($annees as $annee)
+                @php $isFuture = (int) explode('-', $annee)[0] > (int) explode('-', $anneeActive)[0]; @endphp
+                    <a href="{{ route('admin.stages.index', ['annee' => $annee, 'classe' => $classe, 'filtre' => $filtre]) }}"
+                       class="button is-small {{ $annee === $anneeSelectionnee ? ($isFuture ? 'is-warning' : 'is-link') : 'is-light' }}">
+                        {{ $annee }}
+                        @if($annee === $anneeActive)
+                            <span style="font-size:0.55rem; margin-left:3px;">●</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+
+            <span class="has-text-grey" style="font-size:0.75rem;">|</span>
+
+            {{-- Classe --}}
+            <div class="buttons has-addons are-small mb-0">
+                @foreach(['tous' => 'Toutes', 'sio1' => 'SIO1', 'sio2' => 'SIO2'] as $val => $label)
+                    <a href="{{ route('admin.stages.index', array_merge(request()->except('classe','page'), ['annee' => $anneeSelectionnee, 'classe' => $val])) }}"
+                       class="button is-small {{ $classe === $val ? 'is-link' : '' }}">{{ $label }}</a>
+                @endforeach
+            </div>
+
+            <span class="has-text-grey" style="font-size:0.75rem;">|</span>
+
+            {{-- Convention --}}
+            <div class="buttons are-small mb-0" style="gap:3px;">
+                @foreach([
+                    'tous'           => ['Tous',       ''],
+                    'sans_stage'     => ['Sans stage', 'is-light'],
+                    'a_faire_signer' => ['À signer',   'is-warning is-light'],
+                    'en_attente'     => ['En attente', 'is-info is-light'],
+                    'validee'        => ['Validée ✓',  'is-success is-light'],
+                ] as $val => [$label, $color])
+                    <a href="{{ route('admin.stages.index', array_merge(request()->except('filtre','page'), ['annee' => $anneeSelectionnee, 'filtre' => $val])) }}"
+                       class="button is-small {{ $filtre === $val ? 'is-link' : $color }}">{{ $label }}</a>
+                @endforeach
+            </div>
+
+            <span class="has-text-grey" style="font-size:0.75rem;">|</span>
+
+            {{-- Recherche --}}
+            <form method="GET" style="flex:1; min-width:160px;">
+                <input type="hidden" name="annee"  value="{{ $anneeSelectionnee }}">
+                <input type="hidden" name="classe" value="{{ $classe }}">
+                <input type="hidden" name="filtre" value="{{ $filtre }}">
+                <div class="control has-icons-left">
+                    <input class="input is-small" type="text" name="search"
+                           placeholder="Nom ou prénom…"
+                           value="{{ request('search') }}">
+                    <span class="icon is-left is-small"><i class="fas fa-search"></i></span>
                 </div>
-            </div>
+            </form>
+
         </div>
-
-        {{-- Ligne 2 : Statut convention --}}
-        <div class="level is-mobile mb-2">
-            <div class="level-left">
-                <span class="has-text-grey is-size-7 mr-3">Convention :</span>
-                <div class="buttons are-small" style="flex-wrap:wrap; gap:4px;">
-                    @foreach([
-                        'tous'         => ['Tous',                              ''],
-                        'sans_stage'   => ['Sans stage',                        'is-light'],
-                        'a_faire_signer' => ["À faire signer par l'employeur", 'is-warning is-light'],
-                        'en_attente'   => ['En attente',                       'is-info is-light'],
-                        'validee'      => ['Validée ✓',                        'is-success is-light'],
-                    ] as $val => [$label, $color])
-                        <a href="{{ route('admin.stages.index', array_merge(request()->except('filtre','page'), ['annee' => $anneeSelectionnee, 'filtre' => $val])) }}"
-                           class="button {{ $filtre === $val ? 'is-link' : $color }}">{{ $label }}</a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Ligne 3 : Recherche --}}
-        <form method="GET">
-            <input type="hidden" name="annee"   value="{{ $anneeSelectionnee }}">
-            <input type="hidden" name="classe"  value="{{ $classe }}">
-            <input type="hidden" name="filtre"  value="{{ $filtre }}">
-            <div class="control has-icons-left">
-                <input class="input is-small" type="text" name="search"
-                       placeholder="Nom ou prénom…"
-                       value="{{ request('search') }}">
-                <span class="icon is-left is-small"><i class="fas fa-search"></i></span>
-            </div>
-        </form>
-
     </div>
 
     @if(request('search'))
@@ -173,14 +168,7 @@
                 <td>{{ $stage->date_debut?->format('d/m/Y') }}</td>
                 <td>{{ $stage->date_fin?->format('d/m/Y') }}</td>
                 <td>
-                    {{-- Validation du stage --}}
-                    <span class="tag {{ $valBadge[0] }}" title="{{ $stage->note_rejet ?? '' }}">
-                        {{ $valBadge[1] }}
-                    </span>
-                    {{-- Statut de la convention --}}
-                    <span class="tag {{ $statutConvBadge[0] }} is-small mt-1" style="display:block; width:fit-content;">
-                        {{ $statutConvBadge[1] }}
-                    </span>
+                    <span class="tag {{ $statutConvBadge[0] }}">{{ $statutConvBadge[1] }}</span>
                 </td>
                 <td>
                     <div style="display:flex; gap:4px; align-items:center;">

@@ -116,8 +116,8 @@
                     @if($c['actifs'] > 0)
                         <span class="tag is-success is-light">{{ $c['actifs'] }} actif(s)</span>
                     @endif
-                    @if($c['redoublants'] > 0)
-                        <span class="tag is-warning is-light">{{ $c['redoublants'] }} redoublant(s)</span>
+                    @if()
+                        
                     @endif
                     @if($c['demissionnaires'] > 0)
                         <span class="tag is-danger is-light">{{ $c['demissionnaires'] }} démissionnaire(s)</span>
