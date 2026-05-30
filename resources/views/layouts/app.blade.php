@@ -11,13 +11,17 @@
     {{-- Petit style perso pour l'ombre du menu --}}
     <style>
         .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        /* Interdire les retours à la ligne dans toutes les cellules de tableau */
-        td, th { white-space: nowrap; }
-        /* Permettre le scroll horizontal si le contenu dépasse */
-        .table-wrapper { overflow-x: auto; }
-        /* Boutons d'action sur une seule ligne */
-        .buttons { flex-wrap: nowrap !important; }
-        td .buttons, td form { display: inline-flex; flex-wrap: nowrap; }
+        /* Pas de retour à la ligne dans les cellules, alignement vertical centré */
+        td, th { white-space: nowrap; vertical-align: middle !important; padding: 0.5em 0.75em !important; }
+        /* Tous les conteneurs flex dans les td restent sur une ligne */
+        td > div  { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 4px; }
+        /* Les formulaires dans les td ne créent pas de rupture de ligne */
+        td form   { display: inline !important; }
+        /* Wrapping normal hors tableaux */
+        .notification, .box, .message, p, label, .help { white-space: normal; }
+        /* Scroll horizontal : le tableau scroll, pas toute la page */
+        .table-scroll { overflow-x: auto; width: 100%; }
+        table { min-width: 100%; }
     </style>
     @stack('styles')
 </head>

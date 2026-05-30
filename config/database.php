@@ -113,6 +113,23 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // Connexion à l'ancienne base de données (btssio17_gestion_stage) pour la migration.
+        // Utilisée uniquement par la commande : php artisan import:legacy-db
+        // Le charset latin1 est intentionnel : les données UTF-8 y sont stockées avec
+        // du mojibake (double-encodage), et la commande d'import corrige ça à la volée.
+        'legacy' => [
+            'driver'    => 'mysql',
+            'host'      => env('DB_LEGACY_HOST', '127.0.0.1'),
+            'port'      => env('DB_LEGACY_PORT', '3306'),
+            'database'  => env('DB_LEGACY_DATABASE', 'btssio17_gestion_stage'),
+            'username'  => env('DB_LEGACY_USERNAME', 'root'),
+            'password'  => env('DB_LEGACY_PASSWORD', ''),
+            'charset'   => 'latin1',
+            'collation' => 'latin1_swedish_ci',
+            'prefix'    => '',
+            'strict'    => false,
+        ],
+
     ],
 
     /*

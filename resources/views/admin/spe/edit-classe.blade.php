@@ -16,7 +16,7 @@
         @csrf
 
         <div class="table-container">
-            <table class="table is-striped is-fullwidth">
+            <div class="table-scroll"><table class="table is-striped is-fullwidth">
                 <thead>
                     <tr>
                         <th>Nom</th>
@@ -52,7 +52,7 @@
                     </tr>
                     @endforeach
                 </tbody>
-            </table>
+            </table></div>
         </div>
 
         <div class="field is-grouped mt-4">

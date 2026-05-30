@@ -66,7 +66,7 @@
     </div>
 
     {{-- ── Tableau ─────────────────────────────────────────────────────── --}}
-    <table class="table is-striped is-fullwidth is-hoverable is-size-7">
+    <div class="table-scroll"><table class="table is-striped is-fullwidth is-hoverable is-size-7">
         <thead>
             <tr>
                 <th>Nom</th>
@@ -127,7 +127,7 @@
             </tr>
             @endforelse
         </tbody>
-    </table>
+    </table></div>
 
     {{ $users->withQueryString()->links() }}
 

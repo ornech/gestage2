@@ -38,7 +38,7 @@
         </div>
     </form>
 
-    <table class="table is-striped is-fullwidth is-hoverable">
+    <div class="table-scroll"><table class="table is-striped is-fullwidth is-hoverable">
         <thead>
             <tr>
                 <th>Nom</th>
@@ -80,7 +80,7 @@
             </tr>
             @endforelse
         </tbody>
-    </table>
+    </table></div>
 
     {{ $users->withQueryString()->links() }}
 

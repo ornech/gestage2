@@ -91,6 +91,7 @@
 
     <p class="is-size-7 has-text-grey mb-2">{{ $etudiants->count() }} étudiant(s) — {{ $classeStr }}</p>
 
+    <div class="table-scroll">
     <table class="table is-striped is-fullwidth is-hoverable is-size-7 stages-table">
         <thead>
             <tr>
@@ -303,6 +304,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
     @endif
 
 </div>
