@@ -85,7 +85,10 @@ class StageController extends Controller
 
         $entreprise = \App\Models\Entreprise::find($request->entreprise_id);
 
-        Stage::create([
+        // Transférer le statut de la convention papier si elle existe
+        $convPapier = \App\Models\ConventionPapier::where('etudiant_id', $user->id)->first();
+
+        $stage = Stage::create([
             'titre'              => "Stage chez {$entreprise->raison_sociale}",
             'entreprise_id'      => $request->entreprise_id,
             'maitre_de_stage_id' => $request->maitre_de_stage_id,
@@ -93,7 +96,12 @@ class StageController extends Controller
             'classe'             => $user->classe_courante ?? $request->classe,
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
+            'statut_convention'  => $convPapier?->statut ?? 'a_faire_signer',
+            'statut_validation'  => $convPapier ? 'valide' : 'en_attente',
         ]);
+
+        // Supprimer la convention papier maintenant que le stage est saisi
+        $convPapier?->delete();
 
         return redirect()->route('entreprises.show', $request->entreprise_id)
                          ->with('success', 'Stage ajouté avec succès.');
@@ -151,6 +159,8 @@ public function edit(Stage $stage)
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
             'maitre_de_stage_id' => $request->maitre_de_stage_id,
+            'statut_convention'  => 'aucune',   // Toute modification remet en cycle de signature
+            'statut_validation'  => 'en_attente',
         ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');

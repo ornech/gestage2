@@ -9,6 +9,7 @@
         <div class="notification is-success is-light">{{ session('success') }}</div>
     @endif
 
+
     @if($stages->isEmpty())
         <div class="notification is-light">
             Vous n'avez pas encore de stage enregistré.
@@ -23,13 +24,22 @@
                 </div>
                 <div class="level-right">
                     @php
-                        $badge = match($stage->statut_validation) {
-                            'valide'  => ['is-success', 'Validé par un professeur'],
-                            'rejete'  => ['is-danger',  'Rejeté — correction demandée'],
-                            default   => ['is-warning', 'En attente de validation'],
+                        $badgeVal = match($stage->statut_validation) {
+                            'valide'  => ['is-success is-light', 'Stage validé'],
+                            'rejete'  => ['is-danger is-light',  'Rejeté'],
+                            default   => ['is-warning is-light', 'En attente de validation'],
+                        };
+                        $badgeConv = match($stage->statut_convention) {
+                            'a_faire_signer'       => ['is-warning', "Convention à faire signer par l'employeur"],
+                            'en_attente' => ['is-info',    'En attente du proviseur'],
+                            'validee'      => ['is-success', 'Convention validée ✓'],
+                            default                => ['is-light',   '—'],
                         };
                     @endphp
-                    <span class="tag {{ $badge[0] }}">{{ $badge[1] }}</span>
+                    <div class="tags">
+                        <span class="tag {{ $badgeVal[0] }}">{{ $badgeVal[1] }}</span>
+                        <span class="tag {{ $badgeConv[0] }}">{{ $badgeConv[1] }}</span>
+                    </div>
                 </div>
             </div>
 

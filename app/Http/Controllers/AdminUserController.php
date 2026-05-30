@@ -11,10 +11,19 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        $anneeActive       = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        // Année scolaire : depuis Parametre, ou auto (septembre=nouvelle année)
+        $mois      = (int) date('m');
+        $anneeCalc = $mois >= 9
+            ? date('Y').'-'.((int) date('Y') + 1)
+            : ((int) date('Y') - 1).'-'.date('Y');
+
+        $anneeActive       = Parametre::get('annee_scolaire', $anneeCalc);
         $anneeSelectionnee = $request->get('annee', $anneeActive);
         $syInt             = (int) explode('-', $anneeSelectionnee)[0];
-        $filtre            = $request->get('filtre', 'annee');   // annee | sio1 | sio2 | tout
+
+        // Paramètre de classe : vient du menu (?classe=SIO1) ou de l'ancien filtre
+        $classeParam = $request->get('classe', 'tous'); // SIO1 | SIO2 | tous
+        $filtre      = $request->get('filtre', 'annee');
 
         // ── Années disponibles (depuis les promos + configurations) ──────
         $annees = User::role('Etudiant')
@@ -59,14 +68,21 @@ class AdminUserController extends Controller
             $query->orderBy('promo')->orderBy('nom');
 
         } else {
-            // Filtrage par année scolaire sélectionnée (filtre=annee|sio1|sio2)
-            $query->whereIn('promo', [$promoSio1, $promoSio2])
-                  ->whereIn('statut', ['actif', 'redoublant']);
+            $query->whereIn('statut', ['actif', 'redoublant']);
 
-            if ($filtre === 'sio1') {
+            // Filtre par classe — via ?classe=SIO1 (navbar) ou ?filtre=sio1 (ancien)
+            $classeEffective = match(true) {
+                $classeParam === 'SIO1' || $filtre === 'sio1' => 'SIO1',
+                $classeParam === 'SIO2' || $filtre === 'sio2' => 'SIO2',
+                default => null,
+            };
+
+            if ($classeEffective === 'SIO1') {
                 $query->where('promo', $promoSio1);
-            } elseif ($filtre === 'sio2') {
+            } elseif ($classeEffective === 'SIO2') {
                 $query->where('promo', $promoSio2);
+            } else {
+                $query->whereIn('promo', [$promoSio1, $promoSio2]);
             }
 
             $query->orderBy('promo')->orderBy('nom');
@@ -90,11 +106,10 @@ class AdminUserController extends Controller
     public function edit(User $user)
     {
         $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
-        $isOpen      = Parametre::isOpen('spe_assignments_open');
-        $annee       = Parametre::get('annee_scolaire', '2025-2026');
+        $annee       = \App\Models\Parametre::get('annee_scolaire', '2025-2026');
         $currentYear = (int) explode('-', $annee)[0];
 
-        return view('admin.users.edit', compact('user', 'tuteurs', 'isOpen', 'currentYear'));
+        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear'));
     }
 
     public function update(Request $request, User $user)
@@ -105,7 +120,7 @@ class AdminUserController extends Controller
             'email'     => 'required|email|unique:users,email,'.$user->id,
             'classe'    => 'nullable|in:SIO1,SIO2',
             'promo'     => 'nullable|integer',
-            'spe'       => 'nullable|in:SLAM,SISR',
+            'spe'       => 'nullable|in:SLAM,SISR,',
             'tuteur_id' => 'nullable|exists:users,id',
         ]);
 

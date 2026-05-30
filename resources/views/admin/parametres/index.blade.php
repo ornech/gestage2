@@ -149,30 +149,6 @@
         </div>
     </form>
 
-    {{-- ── Spécialités (admin uniquement) ─────────────────────────────── --}}
-    @role('Administrateur')
-    @php $isOpen = \App\Models\Parametre::isOpen('spe_assignments_open'); @endphp
-    <div class="box mt-5">
-        <p class="menu-label">Affectation des spécialités SLAM/SISR</p>
-        <div class="level">
-            <div class="level-left">
-                <span class="tag is-medium {{ $isOpen ? 'is-success' : 'is-warning' }}">
-                    <i class="fas fa-{{ $isOpen ? 'lock-open' : 'lock' }} mr-2"></i>
-                    {{ $isOpen ? 'Ouvert' : 'Fermé' }}
-                </span>
-            </div>
-            <div class="level-right">
-                <form action="{{ route('admin.parametres.toggle-spe') }}" method="POST">
-                    @csrf
-                    <button type="submit"
-                            class="button is-small {{ $isOpen ? 'is-danger is-light' : 'is-success is-light' }}">
-                        {{ $isOpen ? 'Fermer' : 'Ouvrir au second semestre' }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-    @endrole
 
 </div>
 

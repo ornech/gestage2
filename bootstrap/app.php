@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'cgu'                     => \App\Http\Middleware\EnsureCguAccepted::class,
             'force_password_change'   => \App\Http\Middleware\ForcePasswordChange::class,
             'student_active'          => \App\Http\Middleware\EnsureStudentActive::class,
+            'student_has_stage'       => \App\Http\Middleware\EnsureStudentHasStage::class,
         ]);
 
         $middleware->appendToGroup('web', \App\Http\Middleware\ForcePasswordChange::class);

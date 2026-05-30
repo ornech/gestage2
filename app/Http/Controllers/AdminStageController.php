@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConfigurationStage;
+use App\Models\ConventionPapier;
 use App\Models\Employe;
 use App\Models\Parametre;
 use App\Models\Stage;
@@ -32,49 +33,60 @@ class AdminStageController extends Controller
             ->sortDesc()
             ->values();
 
-        $query = Stage::with(['etudiant', 'entreprise', 'maitreDeStage']);
-
-        // Recherche globale : ignore les filtres d'année
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('etudiant', fn($s) =>
-                        $s->where('nom', 'like', "%$search%")->orWhere('prenom', 'like', "%$search%"))
-                  ->orWhereHas('entreprise', fn($s) =>
-                        $s->where('raison_sociale', 'like', "%$search%"));
-            });
-
-        } elseif ($filtre === 'tout') {
-            // Tout afficher sans restriction d'année
-
-        } else {
-            // Filtrage par année scolaire sélectionnée
-            $query->whereHas('etudiant', fn($q) => $q->whereIn('promo', [$promoSio1, $promoSio2]));
-
-            if ($filtre === 'sio1') {
-                $query->whereHas('etudiant', fn($q) => $q->where('promo', $promoSio1));
-            } elseif ($filtre === 'sio2') {
-                $query->whereHas('etudiant', fn($q) => $q->where('promo', $promoSio2));
-            } elseif ($filtre === 'sans_maitre') {
-                $query->whereNull('maitre_de_stage_id');
-            }
-        }
-
-        $stages  = $query->orderBy('date_debut')->paginate(20)->withQueryString();
         $tuteurs = Employe::orderBy('nom')->get();
 
-        $stats = [
-            'total'       => Stage::whereHas('etudiant', fn($q) => $q->whereIn('promo', [$promoSio1, $promoSio2]))->count(),
-            'sio1'        => Stage::whereHas('etudiant', fn($q) => $q->where('promo', $promoSio1))->count(),
-            'sio2'        => Stage::whereHas('etudiant', fn($q) => $q->where('promo', $promoSio2))->count(),
-            'sans_maitre' => Stage::whereNull('maitre_de_stage_id')
-                                ->whereHas('etudiant', fn($q) => $q->whereIn('promo', [$promoSio1, $promoSio2]))
-                                ->count(),
-        ];
+        // ── 3 filtres indépendants et cumulables ─────────────────────────
+        $classe     = $request->get('classe', 'tous');  // tous | sio1 | sio2
+        $filtre     = $request->get('filtre', 'tous');  // tous | sans_stage | a_faire_signer | en_attente | validee
+
+        $classeFiltre = match($classe) {
+            'sio1'  => $promoSio1,
+            'sio2'  => $promoSio2,
+            default => null,
+        };
+
+        $classeStr = match($classe) {
+            'sio1'  => 'SIO1',
+            'sio2'  => 'SIO2',
+            default => 'SIO1 + SIO2',
+        };
+
+        // ── Requête étudiant-centrique ────────────────────────────────────
+        $query = User::role('Etudiant')
+            ->whereIn('statut', ['actif', 'redoublant'])
+            ->whereIn('promo', $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2])
+            ->with([
+                'stages'         => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),
+                'conventionPapier',
+            ]);
+
+        // Filtre convention (indépendant de la classe)
+        if ($filtre === 'sans_stage') {
+            $query->whereDoesntHave('stages')->whereDoesntHave('conventionPapier');
+        } elseif (in_array($filtre, ['a_faire_signer', 'en_attente', 'validee'])) {
+            $query->where(function ($q) use ($filtre) {
+                $q->whereHas('stages', fn($s) => $s->where('statut_convention', $filtre))
+                  ->orWhere(function ($q2) use ($filtre) {
+                      $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', $filtre))
+                         ->whereDoesntHave('stages');
+                  });
+            });
+        }
+
+        // Recherche par nom/prénom (préservée avec les autres filtres)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(fn($q) => $q
+                ->where('nom',    'like', "%$search%")
+                ->orWhere('prenom', 'like', "%$search%")
+            );
+        }
+
+        $etudiants = $query->orderBy('promo')->orderBy('nom')->get();
 
         return view('admin.stages.index', compact(
-            'stages', 'tuteurs', 'annees', 'anneeSelectionnee', 'anneeActive',
-            'syInt', 'filtre', 'stats'
+            'etudiants', 'tuteurs', 'annees', 'anneeSelectionnee', 'anneeActive',
+            'syInt', 'filtre', 'classe', 'classeStr'
         ));
     }
 
@@ -87,6 +99,86 @@ class AdminStageController extends Controller
         $stage->update(['maitre_de_stage_id' => $request->maitre_de_stage_id]);
 
         return back()->with('success', 'Maître de stage assigné.');
+    }
+
+    public function updateConvention(Stage $stage, string $statut)
+    {
+        $valides = ['a_faire_signer', 'en_attente', 'validee'];
+
+        abort_unless(in_array($statut, $valides), 422);
+
+        $data = ['statut_convention' => $statut];
+
+        // Déposer la convention pour signature = valider implicitement le stage
+        if ($statut === 'en_attente' && $stage->statut_validation === 'en_attente') {
+            $data['statut_validation'] = 'valide';
+            $data['note_rejet']        = null;
+        }
+
+        $stage->update($data);
+
+        return back();
+    }
+
+    /**
+     * Crée un stage placeholder quand un étudiant a remis sa convention
+     * directement sans passer par l'application.
+     */
+    public function marquerHorsAppli(User $user)
+    {
+        // La convention papier est remise par l'étudiant au prof :
+        // l'employeur a déjà signé → on démarre directement à "en_attente" (prête à déposer à la direction)
+        ConventionPapier::updateOrCreate(
+            ['etudiant_id' => $user->id],
+            ['statut' => 'en_attente']
+        );
+
+        return back();
+    }
+
+    public function avancerConventionPapier(ConventionPapier $convention)
+    {
+        $suivant = $convention->statutSuivant();
+
+        if ($suivant) {
+            $convention->update(['statut' => $suivant]);
+        }
+
+        return back();
+    }
+
+    public function revertConventionPapier(ConventionPapier $convention)
+    {
+        $precedent = $convention->statutPrecedent();
+
+        if ($precedent) {
+            $convention->update(['statut' => $precedent]);
+        } else {
+            // Retour depuis le 1er statut = suppression (l'étudiant n'a pas de convention)
+            $convention->delete();
+        }
+
+        return back();
+    }
+
+    public function revertConvention(Stage $stage)
+    {
+        $precedent = [
+            'en_attente' => 'a_faire_signer',
+            'validee'      => 'en_attente',
+        ];
+
+        $prev = $precedent[$stage->statut_convention] ?? null;
+
+        if ($prev) {
+            $data = ['statut_convention' => $prev];
+            if ($prev === 'a_faire_signer') {
+                $data['statut_validation'] = 'en_attente';
+            }
+            $stage->update($data);
+        }
+
+        return back();
     }
 
     public function valider(Stage $stage)

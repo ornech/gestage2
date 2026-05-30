@@ -132,13 +132,15 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
     Route::get('/etudiant/conventions', [StageController::class, 'mesConventions'])
         ->name('etudiant.conventions.index');
 
-    // Journal de bord — UC_JDB
-    Route::get('/stages/{stage}/journal',                   [JournalController::class, 'index'])  ->name('stages.journal.index');
-    Route::get('/stages/{stage}/journal/create',            [JournalController::class, 'create']) ->name('stages.journal.create');
-    Route::post('/stages/{stage}/journal',                  [JournalController::class, 'store'])  ->name('stages.journal.store');
-    Route::get('/stages/{stage}/journal/{entry}/edit',      [JournalController::class, 'edit'])   ->name('stages.journal.edit');
-    Route::put('/stages/{stage}/journal/{entry}',           [JournalController::class, 'update']) ->name('stages.journal.update');
-    Route::delete('/stages/{stage}/journal/{entry}',        [JournalController::class, 'destroy'])->name('stages.journal.destroy');
+    // Journal de bord — accessible uniquement si l'étudiant a un stage saisi
+    Route::middleware('student_has_stage')->group(function () {
+        Route::get('/stages/{stage}/journal',              [JournalController::class, 'index'])  ->name('stages.journal.index');
+        Route::get('/stages/{stage}/journal/create',       [JournalController::class, 'create']) ->name('stages.journal.create');
+        Route::post('/stages/{stage}/journal',             [JournalController::class, 'store'])  ->name('stages.journal.store');
+        Route::get('/stages/{stage}/journal/{entry}/edit', [JournalController::class, 'edit'])   ->name('stages.journal.edit');
+        Route::put('/stages/{stage}/journal/{entry}',      [JournalController::class, 'update']) ->name('stages.journal.update');
+        Route::delete('/stages/{stage}/journal/{entry}',   [JournalController::class, 'destroy'])->name('stages.journal.destroy');
+    });
 });
 
 
@@ -150,9 +152,8 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 
 Route::middleware(['auth', 'role:Professeur'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('dashboards.professeur');
-    })->name('professeur.dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\ProfesseurController::class, 'dashboard'])
+        ->name('professeur.dashboard');
 });
 
 // Gestion des étudiants — Prof ET Admin
@@ -169,8 +170,13 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
     Route::get('/admin/stages',                       [AdminStageController::class, 'index'])  ->name('admin.stages.index');
     Route::put('/admin/stages/{stage}/assign',        [AdminStageController::class, 'assign']) ->name('admin.stages.assign');
-    Route::patch('/admin/stages/{stage}/valider',     [AdminStageController::class, 'valider'])->name('admin.stages.valider');
-    Route::patch('/admin/stages/{stage}/rejeter',     [AdminStageController::class, 'rejeter'])->name('admin.stages.rejeter');
+    Route::patch('/admin/stages/{stage}/valider',             [AdminStageController::class, 'valider'])          ->name('admin.stages.valider');
+    Route::patch('/admin/stages/{stage}/rejeter',             [AdminStageController::class, 'rejeter'])          ->name('admin.stages.rejeter');
+    Route::patch('/admin/stages/{stage}/convention/{statut}', [AdminStageController::class, 'updateConvention'])  ->name('admin.stages.convention');
+    Route::patch('/admin/stages/hors-appli/{user}',                    [AdminStageController::class, 'marquerHorsAppli'])          ->name('admin.stages.hors-appli');
+    Route::patch('/admin/conventions-papier/{convention}/avancer',     [AdminStageController::class, 'avancerConventionPapier'])    ->name('admin.conventions-papier.avancer');
+    Route::delete('/admin/conventions-papier/{convention}/revert',     [AdminStageController::class, 'revertConventionPapier'])     ->name('admin.conventions-papier.revert');
+    Route::delete('/admin/stages/{stage}/revert',                      [AdminStageController::class, 'revertConvention'])           ->name('admin.stages.revert');
 
     Route::get('/admin/parametres',  [AdminParametreController::class, 'index'])       ->name('admin.parametres.index');
     Route::put('/admin/parametres',  [AdminParametreController::class, 'update'])      ->name('admin.parametres.update');

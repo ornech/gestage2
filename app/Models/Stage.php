@@ -23,6 +23,7 @@ class Stage extends Model
         'classe',
         'statut_validation',
         'note_rejet',
+        'statut_convention',
     ];
 
     protected $casts = [

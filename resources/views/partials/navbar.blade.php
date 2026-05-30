@@ -54,30 +54,29 @@
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link"><i class="fas fa-user-graduate mr-2"></i> Étudiants</a>
                             <div class="navbar-dropdown">
-                                <a href="{{ route('admin.users.index') }}" class="navbar-item">
-                                    <i class="fas fa-users mr-2"></i> Actifs
+                                <a href="{{ route('admin.users.index', ['classe' => 'SIO1']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO1
                                 </a>
-                                <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item">
-                                    <i class="fas fa-history mr-2"></i> Anciens
+                                <a href="{{ route('admin.users.index', ['classe' => 'SIO2']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO2
                                 </a>
-                                <hr class="navbar-divider">
-                                <a href="{{ route('imports.pronote.form') }}" class="navbar-item">
-                                    <i class="fas fa-file-import mr-2"></i> Import Pronote
-                                </a>
-                                <a href="{{ route('spe.index') }}" class="navbar-item">
-                                    <i class="fas fa-code-branch mr-2"></i> Spécialités SLAM/SISR
+                                <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item has-text-grey">
+                                    <i class="fas fa-history mr-2"></i> Anciennes promos
                                 </a>
                             </div>
                         </div>
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link"><i class="fas fa-briefcase mr-2"></i> Stages</a>
                             <div class="navbar-dropdown">
-                                <a href="{{ route('admin.stages.index') }}" class="navbar-item">
-                                    <i class="fas fa-list mr-2"></i> Tous les stages
+                                <a href="{{ route('admin.stages.index', ['classe' => 'sio1']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO1
+                                </a>
+                                <a href="{{ route('admin.stages.index', ['classe' => 'sio2']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO2
                                 </a>
                                 <hr class="navbar-divider">
                                 <a href="{{ route('admin.parametres.index') }}" class="navbar-item">
-                                    <i class="fas fa-sliders-h mr-2"></i> Paramètres des stages
+                                    <i class="fas fa-calendar-alt mr-2"></i> Définir les dates de stages
                                 </a>
                             </div>
                         </div>
@@ -102,30 +101,29 @@
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link"><i class="fas fa-user-graduate mr-2"></i> Étudiants</a>
                             <div class="navbar-dropdown">
-                                <a href="{{ route('admin.users.index') }}" class="navbar-item">
-                                    <i class="fas fa-users mr-2"></i> Actifs
+                                <a href="{{ route('admin.users.index', ['classe' => 'SIO1']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO1
                                 </a>
-                                <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item">
-                                    <i class="fas fa-history mr-2"></i> Anciens
+                                <a href="{{ route('admin.users.index', ['classe' => 'SIO2']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO2
                                 </a>
-                                <hr class="navbar-divider">
-                                <a href="{{ route('imports.pronote.form') }}" class="navbar-item">
-                                    <i class="fas fa-file-import mr-2"></i> Import Pronote
-                                </a>
-                                <a href="{{ route('spe.index') }}" class="navbar-item">
-                                    <i class="fas fa-code-branch mr-2"></i> Spécialités SLAM/SISR
+                                <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item has-text-grey">
+                                    <i class="fas fa-history mr-2"></i> Anciennes promos
                                 </a>
                             </div>
                         </div>
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link"><i class="fas fa-briefcase mr-2"></i> Stages</a>
                             <div class="navbar-dropdown">
-                                <a href="{{ route('admin.stages.index') }}" class="navbar-item">
-                                    <i class="fas fa-list mr-2"></i> Gestion des stages
+                                <a href="{{ route('admin.stages.index', ['classe' => 'sio1']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO1
+                                </a>
+                                <a href="{{ route('admin.stages.index', ['classe' => 'sio2']) }}" class="navbar-item">
+                                    <i class="fas fa-users mr-2"></i> SIO2
                                 </a>
                                 <hr class="navbar-divider">
                                 <a href="{{ route('admin.parametres.index') }}" class="navbar-item">
-                                    <i class="fas fa-sliders-h mr-2"></i> Paramètres des stages
+                                    <i class="fas fa-calendar-alt mr-2"></i> Définir les dates de stages
                                 </a>
                             </div>
                         </div>
