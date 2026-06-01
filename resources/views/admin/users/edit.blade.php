@@ -41,6 +41,7 @@
         {{-- Colonne gauche : Identité + Statut --}}
         <div class="column is-two-fifths">
 
+            @php $readOnly = !auth()->user()->hasRole('Administrateur'); @endphp
             <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant">
                 @csrf @method('PUT')
 
@@ -49,17 +50,17 @@
                     <div class="field">
                         <label class="label is-small">Nom</label>
                         <input class="input is-small" type="text" name="nom"
-                               value="{{ old('nom', $user->nom) }}" required>
+                               value="{{ old('nom', $user->nom) }}" required {{ $readOnly ? 'disabled' : '' }}>
                     </div>
                     <div class="field">
                         <label class="label is-small">Prénom</label>
                         <input class="input is-small" type="text" name="prenom"
-                               value="{{ old('prenom', $user->prenom) }}" required>
+                               value="{{ old('prenom', $user->prenom) }}" required {{ $readOnly ? 'disabled' : '' }}>
                     </div>
                     <div class="field">
                         <label class="label is-small">Email</label>
                         <input class="input is-small" type="email" name="email"
-                               value="{{ old('email', $user->email) }}" required>
+                               value="{{ old('email', $user->email) }}" required {{ $readOnly ? 'disabled' : '' }}>
                     </div>
                 </div>
 
@@ -70,7 +71,7 @@
                             <div class="field">
                                 <label class="label is-small">Classe</label>
                                 <div class="select is-fullwidth is-small">
-                                    <select name="classe" id="classe-select" onchange="updatePromo()">
+                                    <select name="classe" id="classe-select" onchange="updatePromo()" {{ $readOnly ? 'disabled' : '' }}>
                                         <option value="">—</option>
                                         @foreach(['SIO1', 'SIO2'] as $c)
                                         @php $current = $user->classe_courante ?? $user->classe; @endphp
@@ -87,14 +88,14 @@
                                     <span class="has-text-grey is-size-7"></span>
                                 </label>
                                 <input class="input is-small" type="number" name="promo" id="promo-input"
-                                       value="{{ old('promo', $user->promo) }}" min="2020" max="2040">
+                                       value="{{ old('promo', $user->promo) }}" min="2020" max="2040" {{ $readOnly ? 'disabled' : '' }}>
                             </div>
                         </div>
                     </div>
                     <div class="field">
                         <label class="label is-small">Spécialité</label>
                         <div class="select is-fullwidth is-small">
-                            <select name="spe">
+                            <select name="spe" {{ $readOnly ? 'disabled' : '' }}>
                                 <option value="">— Non définie —</option>
                                 <option value="SLAM" {{ old('spe', $user->spe) === 'SLAM' ? 'selected' : '' }}>SLAM</option>
                                 <option value="SISR" {{ old('spe', $user->spe) === 'SISR' ? 'selected' : '' }}>SISR</option>
@@ -104,7 +105,7 @@
                     <div class="field">
                         <label class="label is-small">Tuteur référent</label>
                         <div class="select is-fullwidth is-small">
-                            <select name="tuteur_id">
+                            <select name="tuteur_id" {{ $readOnly ? 'disabled' : '' }}>
                                 <option value="">— Aucun —</option>
                                 @foreach($tuteurs as $tuteur)
                                     <option value="{{ $tuteur->id }}"
@@ -118,11 +119,13 @@
                 </div>
 
                 <div class="field is-grouped">
+                    @unless($readOnly)
                     <div class="control">
                         <button type="submit" class="button is-primary is-small">
                             <i class="fas fa-save mr-1"></i> Enregistrer
                         </button>
                     </div>
+                    @endunless
                     <div class="control">
                         <a href="{{ route('admin.users.index', ['classe' => $user->classe_courante ?? $user->classe]) }}"
                            class="button is-light is-small">Annuler</a>

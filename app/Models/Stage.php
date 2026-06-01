@@ -24,11 +24,13 @@ class Stage extends Model
         'statut_validation',
         'note_rejet',
         'statut_convention',
+        'mail_bienvenue_envoye_at',
     ];
 
     protected $casts = [
-        'date_debut' => 'date',
-        'date_fin' => 'date',
+        'date_debut'               => 'date',
+        'date_fin'                 => 'date',
+        'mail_bienvenue_envoye_at' => 'datetime',
     ];
 
     public function entreprise(): BelongsTo

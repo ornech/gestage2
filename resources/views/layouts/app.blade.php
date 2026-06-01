@@ -49,7 +49,73 @@
         @yield('content')
     </main>
 
+    <footer style="background:#1a1a2e; color:#b0b0c8; margin-top:4rem; padding:2.5rem 1.5rem 1.5rem;">
+        <div class="container">
+            <div class="columns is-variable is-6 mb-4">
+
+                {{-- Colonne 1 : identité de l'appli --}}
+                <div class="column is-one-third">
+                    <p style="color:#fff; font-weight:700; font-size:1.1rem; margin-bottom:.4rem;">
+                        <i class="fas fa-graduation-cap mr-2" style="color:#7c6fe0;"></i>{{ config('app.name') }}
+                    </p>
+                    <p style="font-size:.82rem; line-height:1.6;">
+                        Application de gestion des stages<br>
+                        BTS Services Informatiques aux Organisations<br>
+                        <span style="color:#7c6fe0;">Section SIO — Lycée Merleau-Ponty</span>
+                    </p>
+                </div>
+
+                {{-- Colonne 2 : liens utiles --}}
+                <div class="column">
+                    <p style="color:#fff; font-weight:600; font-size:.85rem; margin-bottom:.6rem; text-transform:uppercase; letter-spacing:.05em;">
+                        Liens utiles
+                    </p>
+                    <ul style="font-size:.82rem; line-height:2;">
+                        <li><a href="{{ route('cgu.show') }}" style="color:#b0b0c8;">
+                            <i class="fas fa-file-contract mr-1"></i> Conditions générales d'utilisation
+                        </a></li>
+                        @auth
+                        <li><a href="{{ route('profile.show') }}" style="color:#b0b0c8;">
+                            <i class="fas fa-user-circle mr-1"></i> Mon profil
+                        </a></li>
+                        @endauth
+                        @role('Administrateur')
+                        <li><a href="{{ route('admin.communication.index') }}" style="color:#b0b0c8;">
+                            <i class="fas fa-user-shield mr-1"></i> RGPD &amp; Communications
+                        </a></li>
+                        @endrole
+                    </ul>
+                </div>
+
+                {{-- Colonne 3 : infos techniques --}}
+                <div class="column">
+                    <p style="color:#fff; font-weight:600; font-size:.85rem; margin-bottom:.6rem; text-transform:uppercase; letter-spacing:.05em;">
+                        Informations
+                    </p>
+                    <ul style="font-size:.82rem; line-height:2; color:#b0b0c8;">
+                        @php $annee = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y')+1)); @endphp
+                        <li><i class="fas fa-calendar-alt mr-1"></i> Année scolaire {{ $annee }}</li>
+                        <li><i class="fas fa-code-branch mr-1"></i> Laravel {{ app()->version() }}</li>
+                        <li><i class="fas fa-shield-alt mr-1"></i> Données hébergées en France</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            {{-- Barre de copyright --}}
+            <div style="border-top:1px solid #2e2e4e; padding-top:1rem; display:flex; justify-content:space-between; align-items:center; font-size:.78rem; flex-wrap:wrap; gap:.5rem;">
+                <span>
+                    &copy; {{ date('Y') }} Lycée Merleau-Ponty — Application réalisée dans le cadre du BTS SIO.
+                </span>
+                <span style="color:#4a4a6a;">
+                    Données personnelles traitées conformément au <abbr title="Règlement Général sur la Protection des Données" style="cursor:help; color:#7c6fe0;">RGPD</abbr>
+                </span>
+            </div>
+        </div>
+    </footer>
+
     {{-- Script JavaScript minimaliste de Bulma pour faire fonctionner le menu sur Mobile --}}
+    @stack('scripts')
     <script nonce="{{ $cspNonce ?? '' }}">
 
         document.addEventListener('DOMContentLoaded', () => {

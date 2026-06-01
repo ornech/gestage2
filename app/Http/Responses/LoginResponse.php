@@ -23,7 +23,7 @@ class LoginResponse implements LoginResponseContract
             return redirect('/dashboard');
         }
         if ($user->hasRole('Etudiant')) {
-            return redirect('/stages');
+            return redirect('/etudiant');
         }
 
         // si aucun role ne correspond, on redirige vers la page d'accueil

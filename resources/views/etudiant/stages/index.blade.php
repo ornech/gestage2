@@ -70,6 +70,9 @@
                         <i class="fas fa-pen mr-1"></i> Modifier
                     </a>
                 @endcan
+                <a href="{{ route('stages.journal.index', $stage) }}" class="button is-info">
+                    <i class="fas fa-book-open mr-1"></i> Journal de bord
+                </a>
                 <a href="{{ route('pdf.convention', $stage) }}" class="button is-link">
                     <i class="fas fa-file-pdf mr-1"></i> Convention PDF
                 </a>

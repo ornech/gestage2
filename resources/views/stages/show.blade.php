@@ -3,7 +3,14 @@
 @section('content')
 <div class="container mt-5">
 
-    <h1 class="title">Détail du stage</h1>
+    <h1 class="title">
+        Stage
+        @if($stage->classe)
+            <span class="tag {{ $stage->classe === 'SIO1' ? 'is-info' : 'is-primary' }} is-medium ml-2" style="vertical-align: middle;">
+                {{ $stage->classe }}
+            </span>
+        @endif
+    </h1>
 
     @if(session('success'))
         <div class="notification is-success">{{ session('success') }}</div>
@@ -47,6 +54,27 @@
             </div>
         </div>
     </div>
+
+    {{-- ── Journal de stage ── --}}
+    @if($stage->date_debut && $stage->date_fin)
+    @php
+        $nbSemaines        = max(1, (int) ceil($stage->date_debut->diffInDays($stage->date_fin) / 7));
+        $entriesParSemaine = $stage->journalEntries->groupBy('semaine')->map->count();
+    @endphp
+    <div class="box mb-4">
+        <p class="heading mb-2">Journal de stage</p>
+        <div class="buttons are-small mb-0" style="flex-wrap:wrap; gap:4px;">
+            @for($s = 1; $s <= $nbSemaines; $s++)
+            @php $count = $entriesParSemaine->get($s, 0); @endphp
+            <a href="{{ route('stages.journal.index', $stage) }}?semaine={{ $s }}"
+               class="button is-small {{ $count > 0 ? 'is-success' : 'is-light has-text-grey' }}"
+               title="Semaine {{ $s }} — {{ $count > 0 ? $count.' réalisation(s)' : 'Aucune réalisation' }}">
+                S{{ $s }}
+            </a>
+            @endfor
+        </div>
+    </div>
+    @endif
 
     <div class="buttons">
         <a href="{{ route('stages.journal.index', $stage) }}" class="button is-info">

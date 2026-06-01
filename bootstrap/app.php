@@ -35,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Lien RGPD signé expiré → page lisible plutôt qu'une erreur 403 brute
+        $exceptions->render(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e, $request) {
+            return response()->view('mail.rgpd-lien-expire', [], 410);
+        });
     })
     ->create();

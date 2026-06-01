@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Employe;
 use App\Models\Entreprise;
+use App\Mail\BienvenueMaitreDeStage;
+use Illuminate\Support\Facades\Mail;
 
 class EmployeController extends Controller
 {
@@ -42,7 +44,7 @@ class EmployeController extends Controller
         'entreprise_id' => 'required|exists:entreprises,id',
     ]);
 
-    Employe::create([
+    $employe = Employe::create([
         'nom'           => $request->nom,
         'prenom'        => $request->prenom,
         'email'         => $request->email,
@@ -88,8 +90,24 @@ class EmployeController extends Controller
             'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Mettre à jour l'employé avec les données validées
+            $emailChange = $employe->email !== $request->email;
             $employe->update($request->validated());
-        // Rediriger vers la liste des employés avec un message de succès
+
+            // Si l'email change, renvoyer immédiatement le mail sur les stages déjà validés
+            if ($emailChange && $request->email) {
+                $stagesValides = $employe->stages()
+                    ->where('statut_convention', 'validee')
+                    ->with('etudiant.tuteur')
+                    ->get();
+
+                foreach ($stagesValides as $stage) {
+                    Mail::to($request->email)->send(
+                        new BienvenueMaitreDeStage($employe, $stage->etudiant, $stage->etudiant->tuteur)
+                    );
+                    $stage->update(['mail_bienvenue_envoye_at' => now()]);
+                }
+            }
+
         return redirect()->route('employes.index')
                          ->with('success', 'Employé mis à jour avec succès.');
      }
@@ -99,11 +117,20 @@ class EmployeController extends Controller
      */
     public function destroy(Employe $employe)
     {
-        // Supprimer l'employé
         $employe->delete();
 
         return redirect()->route('employes.index')
                          ->with('success', 'Employé supprimé avec succès.');
     }
-    
+
+    public function supprimerEmailRgpd(Employe $employe)
+    {
+        $employe->update([
+            'email'             => null,
+            'telephone'         => null,
+            'email_supprime_at' => now(),
+        ]);
+
+        return view('mail.rgpd-confirmation');
+    }
 }

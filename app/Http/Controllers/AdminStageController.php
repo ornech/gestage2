@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BienvenueMaitreDeStage;
 use App\Models\ConfigurationStage;
 use App\Models\ConventionPapier;
 use App\Models\Employe;
@@ -9,6 +10,7 @@ use App\Models\Parametre;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AdminStageController extends Controller
 {
@@ -56,7 +58,7 @@ class AdminStageController extends Controller
             ->whereIn('statut', ['actif'])
             ->whereIn('promo', $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2])
             ->with([
-                'stages'         => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),
+                'stages'         => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->withCount('journalEntries')->orderBy('date_debut', 'desc'),
                 'conventionPapier',
             ]);
 
@@ -116,6 +118,18 @@ class AdminStageController extends Controller
         }
 
         $stage->update($data);
+
+        // Mail de bienvenue au maître de stage — une seule fois, à la validation de la convention
+        if ($statut === 'validee' && $stage->mail_bienvenue_envoye_at === null) {
+            $stage->load(['maitreDeStage', 'etudiant.tuteur']);
+            $employe = $stage->maitreDeStage;
+            if ($employe?->email) {
+                Mail::to($employe->email)->send(
+                    new BienvenueMaitreDeStage($employe, $stage->etudiant, $stage->etudiant->tuteur)
+                );
+                $stage->update(['mail_bienvenue_envoye_at' => now()]);
+            }
+        }
 
         return back();
     }

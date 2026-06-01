@@ -9,10 +9,10 @@
 @section('content')
 <div class="container mt-5">
 
-    <h1 class="title">
+    <h1 class="title mb-4">
         Stages
         @if($classe !== 'tous')
-            <span class="tag {{ $classe === 'sio1' ? 'is-info' : 'is-primary' }} is-medium ml-2">{{ strtoupper($classe) }}</span>
+            <span class="tag {{ $classe === 'sio1' ? 'is-info' : 'is-primary' }} is-large ml-2" style="vertical-align:middle;">{{ strtoupper($classe) }}</span><span class="tag is-large" style="vertical-align:middle; background:#e0e0e0; color:#555;">{{ $classe === 'sio1' ? 'Première année' : 'Deuxième année' }}</span>
         @endif
     </h1>
 
@@ -121,7 +121,7 @@
                 <td><strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}</td>
                 <td>
                     @if($classeTag)
-                        <span class="tag is-info is-light">{{ $classeTag }}</span>
+                        <span class="tag {{ $classeTag === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeTag }}</span>
                     @else
                         <span class="has-text-grey">—</span>
                     @endif
@@ -174,9 +174,38 @@
                     </div>
                 </td>
                 <td>
+                    @php
+                        $hasJournal      = $stage->journal_entries_count > 0;
+                        $convValidee     = $stage->statut_convention === 'validee';
+                        [$jColor, $jTitle] = match(true) {
+                            $hasJournal && !$convValidee => [
+                                '#f97316',
+                                "⚠ {$stage->journal_entries_count} réalisation(s) saisie(s) — convention non encore validée informatiquement",
+                            ],
+                            $hasJournal => [
+                                '#3273dc',
+                                "{$stage->journal_entries_count} réalisation(s) saisie(s)",
+                            ],
+                            default => [
+                                '#dbdbdb',
+                                'Journal vide',
+                            ],
+                        };
+                    @endphp
+                    <a href="{{ route('stages.journal.index', $stage) }}"
+                       class="button is-small"
+                       style="background:transparent; border:none; box-shadow:none;"
+                       title="{{ $jTitle }}">
+                        <i class="fas fa-book-open" style="color:{{ $jColor }}"></i>
+                    </a>
+                    <a href="{{ route('stages.show', $stage) }}" class="button is-small is-light" title="Voir le détail">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    @role('Administrateur')
                     <a href="{{ route('stages.edit', $stage) }}" class="button is-small is-light" title="Modifier">
                         <i class="fas fa-pen"></i>
                     </a>
+                    @endrole
                 </td>
             </tr>
 
@@ -196,12 +225,11 @@
                     'validee'      => ['label' => 'Validée ✓',                       'class' => 'is-success'],
                 ];
             @endphp
-            <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : '' }}"
-                class="{{ !$conv ? 'has-background-white-ter' : '' }}">
+            <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : (!$conv ? 'background-color:#fff0f0;' : '') }}">
                 <td><strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}</td>
                 <td>
                     @if($classeTag)
-                        <span class="tag {{ $conv ? 'is-info is-light' : 'is-light' }}">{{ $classeTag }}</span>
+                        <span class="tag {{ $classeTag === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeTag }}</span>
                     @else
                         <span class="has-text-grey">—</span>
                     @endif
@@ -255,7 +283,9 @@
                 </td>
                 @else
                 {{-- Aucune convention --}}
-                <td colspan="4" class="has-text-grey is-italic">Aucun stage saisi</td>
+                <td colspan="4" class="has-text-danger">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Aucun stage saisi
+                </td>
                 <td></td>
                 <td>
                     <form action="{{ route('admin.stages.hors-appli', $etudiant) }}"

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminAuditController;
+use App\Http\Controllers\AdminCommunicationController;
 use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AdminParametreController;
 use App\Http\Controllers\AdminSpeController;
@@ -33,6 +34,15 @@ Route::get('/', [RedirectController::class, 'index']);
 */
 
 Route::get('/cgu', [CguController::class, 'show'])->name('cgu.show');
+
+/*
+|--------------------------------------------------------------------------
+| RGPD — suppression email maître de stage (lien signé, public)
+|--------------------------------------------------------------------------
+*/
+Route::get('/rgpd/employe/{employe}/supprimer-email', [EmployeController::class, 'supprimerEmailRgpd'])
+    ->name('rgpd.employe.supprimer-email')
+    ->middleware('signed');
 Route::post('/cgu/accept', [CguController::class, 'accept'])
     ->name('cgu.accept')
     ->middleware('auth');
@@ -111,6 +121,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/entreprises/{entreprise}/stages/create', [StageController::class, 'create'])
         ->name('stages.create');
     Route::resource('stages', StageController::class)->except(['create']);
+
+    // Journal de bord — student_has_stage laisse passer les profs/admins, bloque les étudiants sans stage
+    Route::middleware('student_has_stage')->group(function () {
+        Route::get('/stages/{stage}/journal',              [JournalController::class, 'index'])  ->name('stages.journal.index');
+        Route::get('/stages/{stage}/journal/create',       [JournalController::class, 'create']) ->name('stages.journal.create');
+        Route::post('/stages/{stage}/journal',             [JournalController::class, 'store'])  ->name('stages.journal.store');
+        Route::get('/stages/{stage}/journal/{entry}/edit', [JournalController::class, 'edit'])   ->name('stages.journal.edit');
+        Route::put('/stages/{stage}/journal/{entry}',      [JournalController::class, 'update']) ->name('stages.journal.update');
+        Route::delete('/stages/{stage}/journal/{entry}',   [JournalController::class, 'destroy'])->name('stages.journal.destroy');
+    });
 });
 
 
@@ -132,15 +152,6 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
     Route::get('/etudiant/conventions', [StageController::class, 'mesConventions'])
         ->name('etudiant.conventions.index');
 
-    // Journal de bord — accessible uniquement si l'étudiant a un stage saisi
-    Route::middleware('student_has_stage')->group(function () {
-        Route::get('/stages/{stage}/journal',              [JournalController::class, 'index'])  ->name('stages.journal.index');
-        Route::get('/stages/{stage}/journal/create',       [JournalController::class, 'create']) ->name('stages.journal.create');
-        Route::post('/stages/{stage}/journal',             [JournalController::class, 'store'])  ->name('stages.journal.store');
-        Route::get('/stages/{stage}/journal/{entry}/edit', [JournalController::class, 'edit'])   ->name('stages.journal.edit');
-        Route::put('/stages/{stage}/journal/{entry}',      [JournalController::class, 'update']) ->name('stages.journal.update');
-        Route::delete('/stages/{stage}/journal/{entry}',   [JournalController::class, 'destroy'])->name('stages.journal.destroy');
-    });
 });
 
 
@@ -160,6 +171,8 @@ Route::middleware(['auth', 'role:Professeur'])->group(function () {
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
 
     Route::get('/admin/users',                        [AdminUserController::class, 'index'])       ->name('admin.users.index');
+    Route::get('/admin/users/create',                 [AdminUserController::class, 'create'])      ->name('admin.users.create');
+    Route::post('/admin/users',                       [AdminUserController::class, 'store'])       ->name('admin.users.store');
     Route::get('/admin/users/{user}/edit',            [AdminUserController::class, 'edit'])        ->name('admin.users.edit');
     Route::put('/admin/users/{user}',                 [AdminUserController::class, 'update'])      ->name('admin.users.update');
     Route::patch('/admin/users/{user}/statut',        [AdminUserController::class, 'updateStatut'])->name('admin.users.statut');
@@ -225,21 +238,27 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 
-    Route::get('/admin', function () {
-        return view('dashboards.admin');
-    })->name('admin.dashboard');
+    Route::get('/admin', [\App\Http\Controllers\AdminDashboardController::class, 'dashboard'])
+        ->name('admin.dashboard');
 
 
     // Opérations destructives — Admin uniquement
+    Route::get('/admin/professeurs',                  [AdminUserController::class, 'professeurs'])   ->name('admin.professeurs.index');
+    Route::patch('/admin/users/{user}/toggle-admin',  [AdminUserController::class, 'toggleAdmin'])   ->name('admin.users.toggle-admin');
+    Route::get('/admin/reset-password',               [AdminUserController::class, 'resetPasswordForm']) ->name('admin.reset-password');
+    Route::post('/admin/reset-password',              [AdminUserController::class, 'resetPassword'])     ->name('admin.reset-password.do');
     Route::delete('/admin/users/{user}',          [AdminUserController::class, 'destroy'])  ->name('admin.users.destroy');
     Route::patch('/admin/users/{user}/anonymize', [AdminUserController::class, 'anonymize'])->name('admin.users.anonymize');
 
     // Import Pronote — UC_PRONOTE
     // Import Pronote accessible via /imports/pronote (Prof|Admin)
 
-    // Journal d'actions — UC_AUDIT
+    // Journal d'actions — UC_AUDIT (conservé, non affiché en nav)
     Route::get('/admin/audit', [AdminAuditController::class, 'index'])->name('admin.audit.index');
 
-    // Journal d'actions — UC_AUDIT
-    // Bascule SPE et journal restent admin uniquement
+    // Communication — envoi, templates, suivi RGPD
+    Route::get('/admin/communication',                    [AdminCommunicationController::class, 'index'])          ->name('admin.communication.index');
+    Route::post('/admin/communication/envoyer',           [AdminCommunicationController::class, 'envoyer'])        ->name('admin.communication.envoyer');
+    Route::put('/admin/communication/template',           [AdminCommunicationController::class, 'updateTemplate']) ->name('admin.communication.template');
+    Route::get('/admin/communication/preview/bienvenue',  [AdminCommunicationController::class, 'previewBienvenue'])->name('admin.communication.preview.bienvenue');
 });

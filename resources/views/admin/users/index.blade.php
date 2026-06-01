@@ -9,7 +9,7 @@
             <h1 class="title mb-0">
                 Étudiants
                 @if(isset($classeParam) && $classeParam && $classeParam !== 'tous')
-                    <span class="tag {{ $classeParam === 'SIO1' ? 'is-info' : 'is-primary' }} is-medium ml-2">{{ $classeParam }}</span>
+                    <span class="tag {{ $classeParam === 'SIO1' ? 'is-info' : 'is-primary' }} is-large ml-2" style="vertical-align:middle;">{{ $classeParam }}</span><span class="tag is-large" style="vertical-align:middle; background:#e0e0e0; color:#555;">{{ $classeParam === 'SIO1' ? 'Première année' : 'Deuxième année' }}</span>
                 @endif
             </h1>
         </div>
@@ -29,7 +29,7 @@
 
         {{-- Stats gauche --}}
         <div style="display:flex; gap:8px; align-items:center;">
-            <span class="tag is-info is-light is-medium">
+            <span class="tag {{ $classeParam === 'SIO2' ? 'is-primary' : 'is-info' }} is-light is-medium">
                 {{ $stats['actifs'] }} actif(s)
                 @if($classeParam && $classeParam !== 'tous') — {{ $classeParam }} @endif
             </span>
@@ -89,7 +89,7 @@
                 <td>{{ $user->email }}</td>
                 <td>
                     @if($classeAnnee)
-                        <span class="tag is-info is-light">{{ $classeAnnee }}</span>
+                        <span class="tag {{ $classeAnnee === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeAnnee }}</span>
                     @elseif($user->promo && $user->promo <= $syInt)
                         <span class="tag is-success is-light">Diplômé {{ $user->promo }}</span>
                     @else
@@ -100,10 +100,17 @@
                 <td>{{ $user->promo ?? '—' }}</td>
                 <td><span class="tag {{ $statutColor }}">{{ $statutLabel }}</span></td>
                 <td>
-                    <a href="{{ route('admin.users.edit', $user) }}"
-                       class="button is-small is-warning" title="Modifier">
-                        <i class="fas fa-pen"></i>
-                    </a>
+                    @role('Administrateur')
+                        <a href="{{ route('admin.users.edit', $user) }}"
+                           class="button is-small is-warning" title="Modifier">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('admin.users.edit', $user) }}"
+                           class="button is-small is-light" title="Voir le profil">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    @endrole
                 </td>
             </tr>
             @empty

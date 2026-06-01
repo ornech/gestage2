@@ -111,6 +111,91 @@ class AdminUserController extends Controller
         ));
     }
 
+    public function create()
+    {
+        $annee       = \App\Models\Parametre::get('annee_scolaire', '2025-2026');
+        $currentYear = (int) explode('-', $annee)[0];
+        $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
+
+        return view('admin.users.create', compact('tuteurs', 'currentYear'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nom'       => 'required|string|max:255',
+            'prenom'    => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email',
+            'role'      => 'required|in:Etudiant,Professeur,Administrateur',
+            'classe'    => 'nullable|in:SIO1,SIO2',
+            'promo'     => 'nullable|integer|min:2020|max:2040',
+            'spe'       => 'nullable|in:SLAM,SISR',
+            'tuteur_id' => 'nullable|exists:users,id',
+        ]);
+
+        $user = User::create([
+            'nom'       => strtoupper($request->nom),
+            'prenom'    => $request->prenom,
+            'email'     => $request->email,
+            'password'  => bcrypt('achanger'),
+            'classe'    => $request->classe,
+            'promo'     => $request->promo,
+            'spe'       => $request->spe,
+            'tuteur_id' => $request->tuteur_id,
+            'statut'    => 'actif',
+            'force_password_change' => true,
+        ]);
+
+        $user->assignRole($request->role);
+
+        return redirect()
+            ->route('admin.users.edit', $user)
+            ->with('success', "{$user->prenom} {$user->nom} créé(e). Un mot de passe devra être défini à la première connexion.");
+    }
+
+    public function professeurs()
+    {
+        $professeurs = User::role('Professeur')
+            ->with('roles')
+            ->orderBy('nom')
+            ->get();
+
+        return view('admin.users.professeurs', compact('professeurs'));
+    }
+
+    public function resetPasswordForm()
+    {
+        $users = User::orderBy('nom')->get(['id', 'nom', 'prenom', 'email']);
+        return view('admin.users.reset-password', compact('users'));
+    }
+
+    public function resetPassword(\Illuminate\Http\Request $request)
+    {
+        $request->validate(['user_id' => 'required|exists:users,id']);
+
+        $user = User::findOrFail($request->user_id);
+
+        $user->update([
+            'password'              => bcrypt('achanger'),
+            'force_password_change' => true,
+        ]);
+
+        return back()->with('success', "Mot de passe de {$user->prenom} {$user->nom} réinitialisé. Il devra se connecter avec « achanger » et en choisir un nouveau.");
+    }
+
+    public function toggleAdmin(User $user)
+    {
+        if ($user->hasRole('Administrateur')) {
+            $user->removeRole('Administrateur');
+            $msg = "{$user->prenom} {$user->nom} n'est plus administrateur.";
+        } else {
+            $user->assignRole('Administrateur');
+            $msg = "{$user->prenom} {$user->nom} est maintenant administrateur.";
+        }
+
+        return back()->with('success', $msg);
+    }
+
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));

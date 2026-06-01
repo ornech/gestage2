@@ -18,12 +18,20 @@ class Employe extends Model
         'nom',
         'prenom',
         'email',
+        'email_supprime_at',
         'telephone',
         'service',
         'fonction',
         'contact_valide',
         'newsletter',
         'jury',
+    ];
+
+    protected $casts = [
+        'email_supprime_at' => 'datetime',
+        'newsletter'        => 'boolean',
+        'jury'              => 'boolean',
+        'contact_valide'    => 'boolean',
     ];
     public function entreprise(): BelongsTo
     {

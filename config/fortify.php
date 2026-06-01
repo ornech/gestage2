@@ -38,7 +38,6 @@ return [
 
     'features' => [
     
-        Features::registration(),   
         Features::resetPasswords(),
         // Features::emailVerification(), // Optionnel
         Features::updateProfileInformation(),

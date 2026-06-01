@@ -42,6 +42,11 @@ class User extends Authenticatable
         return $this->hasMany(Stage::class, 'etudiant_id');
     }
 
+    public function tuteur(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'tuteur_id');
+    }
+
     public function conventionPapier(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(\App\Models\ConventionPapier::class, 'etudiant_id');

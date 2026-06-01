@@ -46,8 +46,8 @@
                         </div>
                     @endrole
 
-                    {{-- ======== PROFESSEUR ======== --}}
-                    @role('Professeur')
+                    {{-- ======== PROFESSEUR (non admin) ======== --}}
+                    @if(auth()->user()->hasRole('Professeur') && !auth()->user()->hasRole('Administrateur'))
                         <a href="{{ route('professeur.dashboard') }}" class="navbar-item">
                             <i class="fas fa-chart-line mr-2"></i> Tableau de bord
                         </a>
@@ -91,7 +91,7 @@
                                 </a>
                             </div>
                         </div>
-                    @endrole
+                    @endif
 
                     {{-- ======== ADMINISTRATEUR ======== --}}
                     @role('Administrateur')
@@ -142,10 +142,10 @@
                             </div>
                         </div>
                         <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link"><i class="fas fa-shield-alt mr-2"></i> Traçabilité</a>
+                            <a class="navbar-link"><i class="fas fa-bullhorn mr-2"></i> Communication</a>
                             <div class="navbar-dropdown">
-                                <a href="{{ route('admin.audit.index') }}" class="navbar-item">
-                                    <i class="fas fa-history mr-2"></i> Journal d'actions
+                                <a href="{{ route('admin.communication.index') }}" class="navbar-item">
+                                    <i class="fas fa-paper-plane mr-2"></i> Envoyer / RGPD / Templates
                                 </a>
                             </div>
                         </div>

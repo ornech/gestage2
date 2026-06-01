@@ -34,6 +34,15 @@ class StagePolicy
             && in_array($stage->statut_validation, ['en_attente', 'rejete']);
     }
 
+    public function manageJournal(User $user, Stage $stage): bool
+    {
+        if ($user->hasAnyRole(['Professeur', 'Administrateur'])) {
+            return true;
+        }
+
+        return $user->id === $stage->etudiant_id;
+    }
+
     public function validate(User $user): bool
     {
         return $user->hasAnyRole(['Professeur', 'Administrateur']);

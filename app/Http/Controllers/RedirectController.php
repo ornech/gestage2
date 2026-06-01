@@ -32,7 +32,7 @@ class RedirectController extends Controller
         }
 
         if ($user->hasRole('Etudiant')) {
-            return redirect('/stages');
+            return redirect('/etudiant');
         }
 
         // Sécurité de repli si le compte a un bug de rôle

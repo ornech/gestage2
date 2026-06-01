@@ -19,11 +19,14 @@ class AdminImportController extends Controller
     public function pronotePreview(Request $request)
     {
         $request->validate([
-            'fichier' => 'required|file|mimes:csv,txt|max:5120',
+            'fichier'       => 'required|file|mimes:csv,txt|max:5120',
+            'classe_forcee' => 'required|in:SIO1,SIO2',
+        ], [
+            'classe_forcee.required' => 'Sélectionnez la classe à importer (SIO1 ou SIO2).',
         ]);
 
         $rows    = $this->parseCsv($request->file('fichier'));
-        $preview = $this->analyzeRows($rows);
+        $preview = $this->analyzeRows($rows, $request->classe_forcee);
 
         session(['pronote_preview' => $preview]);
 
@@ -59,7 +62,6 @@ class AdminImportController extends Controller
                 $counts['cree']++;
 
             } elseif ($row['action'] === 'redoublant') {
-                // Un redoublant reste actif, sa promo est incrémentée
                 $existing = User::find($row['existing_id']);
                 User::where('id', $row['existing_id'])->update([
                     'classe'      => $row['classe'],
@@ -70,12 +72,20 @@ class AdminImportController extends Controller
                 $counts['redoublant']++;
 
             } elseif ($row['action'] === 'update') {
-                User::where('id', $row['existing_id'])->update([
+                $updateData = [
                     'classe'      => $row['classe'],
                     'promo'       => $row['promo'],
                     'date_entree' => $row['date_entree'],
                     'statut'      => $row['statut'],
-                ]);
+                ];
+
+                // Remplacer un email placeholder par le vrai email Pronote
+                $existing = User::find($row['existing_id']);
+                if ($existing && str_ends_with($existing->email, '@import.local')) {
+                    $updateData['email'] = $row['email'];
+                }
+
+                User::where('id', $row['existing_id'])->update($updateData);
                 $counts['mis_a_jour']++;
 
             } elseif ($row['action'] === 'demissionnaire') {
@@ -100,18 +110,14 @@ class AdminImportController extends Controller
     {
         $content = file_get_contents($file->getRealPath());
 
-        // Supprimer le BOM UTF-8
         if (str_starts_with($content, "\xEF\xBB\xBF")) {
             $content = substr($content, 3);
         }
 
-        $lines = preg_split('/\r\n|\r|\n/', trim($content));
-
-        // Lire l'en-tête et repérer les colonnes par leur NOM
+        $lines      = preg_split('/\r\n|\r|\n/', trim($content));
         $headerLine = array_shift($lines);
         $header     = str_getcsv($headerLine, ';');
-
-        $idx = $this->resolveColumnIndices($header);
+        $idx        = $this->resolveColumnIndices($header);
 
         $rows = [];
         foreach ($lines as $line) {
@@ -120,8 +126,7 @@ class AdminImportController extends Controller
             }
 
             $fields = str_getcsv($line, ';');
-
-            $email = strtolower(trim($fields[$idx['email']] ?? '', " \t\n\r\0\x0B\""));
+            $email  = strtolower(trim($fields[$idx['email']] ?? '', " \t\n\r\0\x0B\""));
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 continue;
@@ -130,7 +135,6 @@ class AdminImportController extends Controller
             $rows[] = [
                 'eleve'       => trim($fields[$idx['eleve']]       ?? '', '"'),
                 'email'       => $email,
-                'classe'      => trim($fields[$idx['classe']]      ?? '', '"'),
                 'date_entree' => trim($fields[$idx['date_entree']] ?? '', '"'),
                 'date_sortie' => trim($fields[$idx['date_sortie']] ?? '', '"'),
             ];
@@ -141,48 +145,42 @@ class AdminImportController extends Controller
 
     private function resolveColumnIndices(array $header): array
     {
-        // Indices par défaut (format Pronote standard)
-        $idx = ['eleve' => 0, 'email' => 4, 'classe' => 5, 'date_entree' => 6, 'date_sortie' => 7];
+        $idx = ['eleve' => 0, 'email' => 4, 'date_entree' => 5, 'date_sortie' => 6];
 
         foreach ($header as $i => $col) {
-            // Normaliser : minuscules, sans accents ni caractères spéciaux
             $n = mb_strtolower(trim($col));
             $n = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $n);
             $n = preg_replace('/[^a-z0-9]/', '', $n);
 
-            if (str_contains($n, 'lve') || str_contains($n, 'lve')) $idx['eleve']       = $i; // Élèves
-            elseif ($n === 'classe')                                  $idx['classe']      = $i;
-            elseif (str_contains($n, 'mail'))                        $idx['email']       = $i;
-            elseif (str_contains($n, 'entre'))                       $idx['date_entree'] = $i; // Entrée
-            elseif (str_contains($n, 'sortie'))                      $idx['date_sortie'] = $i;
+            if (str_contains($n, 'lve'))       $idx['eleve']       = $i;
+            elseif (str_contains($n, 'mail'))  $idx['email']       = $i;
+            elseif (str_contains($n, 'entre')) $idx['date_entree'] = $i;
+            elseif (str_contains($n, 'sortie'))$idx['date_sortie'] = $i;
         }
 
         return $idx;
     }
 
-    private function analyzeRows(array $rows): array
+    private function analyzeRows(array $rows, string $classe): array
     {
+        $anneeClasse = (int) substr($classe, -1); // SIO1→1, SIO2→2
         $annee       = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
         $currentYear = (int) explode('-', $annee)[0];
+        $promo       = $currentYear + (3 - $anneeClasse);
 
         $preview = [];
 
         foreach ($rows as $row) {
             ['nom' => $nom, 'prenom' => $prenom] = $this->parseName($row['eleve']);
-            ['classe' => $classe, 'annee' => $anneeClasse] = $this->parseClasse($row['classe']);
 
-            // promo = année de début de l'année scolaire + années restantes
-            $promo = $currentYear + (3 - $anneeClasse);
-
-            $dateEntree  = $this->parseDate($row['date_entree']);
-            $dateSortie  = $this->parseDate($row['date_sortie']);
-
-            $statut = ($dateSortie && $dateSortie->isPast()) ? 'demissionnaire' : 'actif';
+            $dateEntree = $this->parseDate($row['date_entree']);
+            $dateSortie = $this->parseDate($row['date_sortie']);
+            $statut     = ($dateSortie && $dateSortie->isPast()) ? 'demissionnaire' : 'actif';
 
             // 1er filet : recherche par email
             $existing = User::where('email', $row['email'])->first();
 
-            // 2e filet : nom+prénom si email non trouvé (ex. faute de frappe dans le CSV)
+            // 2e filet : nom + prénom (cas email placeholder ou faute de frappe)
             if (!$existing) {
                 $existing = User::where('nom', $nom)
                     ->where('prenom', $prenom)
@@ -198,10 +196,9 @@ class AdminImportController extends Controller
                     && $dateEntree
                     && $existing->date_entree->format('Y-m-d') !== $dateEntree->format('Y-m-d')
                 ) {
-                    // Même classe mais nouvelle année d'entrée → redoublant réel
+                    // Même classe, date d'entrée différente → redoublant
                     $action = 'redoublant';
                 } else {
-                    // Même fichier réimporté ou passage de classe → mise à jour
                     $action = 'update';
                 }
             } else {
@@ -227,15 +224,14 @@ class AdminImportController extends Controller
 
     private function parseName(string $fullName): array
     {
-        $tokens      = explode(' ', trim($fullName));
-        $nomTokens   = [];
+        // Pronote sépare les noms composés avec '--' (ex. BARBAT--PATINAUD)
+        $fullName = preg_replace('/\s+/', ' ', str_replace('--', ' ', $fullName));
+
+        $nomTokens    = [];
         $prenomTokens = [];
 
-        foreach ($tokens as $token) {
-            if ($token === '' ) {
-                continue;
-            }
-            // Token tout en majuscules (hors accents) → nom de famille
+        foreach (explode(' ', trim($fullName)) as $token) {
+            if ($token === '') continue;
             if (preg_match('/^[A-ZÀÂÄÉÈÊËÎÏÔÙÛÜÇ\-]+$/u', $token)) {
                 $nomTokens[] = $token;
             } else {
@@ -243,7 +239,6 @@ class AdminImportController extends Controller
             }
         }
 
-        // Sécurité : si tout est en majuscules (ex. "DUPONT")
         if (empty($prenomTokens) && !empty($nomTokens)) {
             $prenomTokens = [array_pop($nomTokens)];
         }
@@ -254,23 +249,10 @@ class AdminImportController extends Controller
         ];
     }
 
-    private function parseClasse(string $classe): array
-    {
-        preg_match('/(\d+)\s*$/', $classe, $matches);
-        $annee = (int) ($matches[1] ?? 1);
-
-        return [
-            'classe' => 'SIO' . $annee,   // BTS SIO 1 → SIO1, BTS SIO 2 → SIO2
-            'annee'  => $annee,
-        ];
-    }
-
     private function parseDate(string $date): ?Carbon
     {
         $date = trim($date);
-        if (empty($date)) {
-            return null;
-        }
+        if (empty($date)) return null;
 
         try {
             return Carbon::createFromFormat('d/m/Y', $date);
