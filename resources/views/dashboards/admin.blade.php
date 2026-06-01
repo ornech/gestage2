@@ -154,16 +154,31 @@
 
                 <p class="heading mb-1">Spécialités</p>
                 <div class="tags mb-3">
-                    @if($c['slam'] > 0) <span class="tag is-info is-light">{{ $c['slam'] }} SLAM</span> @endif
-                    @if($c['sisr'] > 0) <span class="tag is-link is-light">{{ $c['sisr'] }} SISR</span> @endif
+                    @if($c['slam'] > 0)
+                        <a href="{{ route('admin.users.index', ['classe' => $classe, 'spe' => 'SLAM']) }}"
+                           class="tag is-info is-light">{{ $c['slam'] }} SLAM</a>
+                    @endif
+                    @if($c['sisr'] > 0)
+                        <a href="{{ route('admin.users.index', ['classe' => $classe, 'spe' => 'SISR']) }}"
+                           class="tag is-link is-light">{{ $c['sisr'] }} SISR</a>
+                    @endif
                     @php $sansSpe = $c['total'] - $c['slam'] - $c['sisr']; @endphp
-                    @if($sansSpe > 0) <span class="tag is-light has-text-grey">{{ $sansSpe }} non définie</span> @endif
+                    @if($sansSpe > 0)
+                        <a href="{{ route('admin.users.index', ['classe' => $classe, 'spe' => 'aucune']) }}"
+                           class="tag is-light has-text-grey">{{ $sansSpe }} non définie</a>
+                    @endif
                 </div>
 
                 <p class="heading mb-1">Statuts</p>
                 <div class="tags mb-3">
-                    @if($c['actifs'] > 0) <span class="tag is-success is-light">{{ $c['actifs'] }} actif(s)</span> @endif
-                    @if($c['demissionnaires'] > 0) <span class="tag is-danger is-light">{{ $c['demissionnaires'] }} démissionnaire(s)</span> @endif
+                    @if($c['actifs'] > 0)
+                        <a href="{{ route('admin.users.index', ['classe' => $classe]) }}"
+                           class="tag is-success is-light">{{ $c['actifs'] }} actif(s)</a>
+                    @endif
+                    @if($c['demissionnaires'] > 0)
+                        <a href="{{ route('admin.users.index', ['classe' => $classe, 'filtre' => 'anciens']) }}"
+                           class="tag is-danger is-light">{{ $c['demissionnaires'] }} démissionnaire(s)</a>
+                    @endif
                 </div>
 
                 <p class="heading mb-1">Conventions</p>
@@ -173,7 +188,8 @@
                            class="tag is-danger">{{ $c['sans_stage'] }} sans stage</a>
                     @endif
                     @if($c['papier_pending'] > 0)
-                        <span class="tag is-warning">{{ $c['papier_pending'] }} papier — à saisir</span>
+                        <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'sans_stage']) }}"
+                           class="tag is-warning">{{ $c['papier_pending'] }} papier — à saisir</a>
                     @endif
                     @if($c['a_faire_signer'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'a_faire_signer']) }}"

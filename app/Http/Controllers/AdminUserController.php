@@ -89,6 +89,16 @@ class AdminUserController extends Controller
             $query->whereIn('promo', [$promoSio1, $promoSio2]);
         }
 
+        // Filtre par spécialité
+        if ($request->filled('spe')) {
+            $spe = $request->spe;
+            if ($spe === 'aucune') {
+                $query->whereNull('spe')->orWhere('spe', '');
+            } else {
+                $query->where('spe', $spe);
+            }
+        }
+
         // Recherche par nom/prénom/email (globale mais toujours actifs)
         if ($request->filled('search')) {
             $search = $request->search;

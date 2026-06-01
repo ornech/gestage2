@@ -19,20 +19,37 @@
 <div class="container mt-5">
 
     {{-- En-tête --}}
-    <div class="is-flex is-justify-content-space-between is-align-items-flex-start mb-4" style="gap:1rem; flex-wrap:wrap;">
-        <div>
-            <h1 class="title mb-1">Journal de bord — {{ $stage->classe ?? '' }}</h1>
-            <h2 class="subtitle mb-0">
-                @if($stage->entreprise){{ $stage->entreprise->raison_sociale }} &mdash; @endif
-                @if($stage->date_debut && $stage->date_fin)
-                    du {{ $stage->date_debut->format('d/m/Y') }} au {{ $stage->date_fin->format('d/m/Y') }}
-                @endif
-            </h2>
+    <div class="level mb-4">
+        <div class="level-left">
+            <div>
+                <h1 class="title is-4 mb-0">
+                    <i class="fas fa-book-open mr-2 has-text-grey-light"></i>
+                    Journal de bord
+                    @if($stage->classe)
+                        <span class="tag {{ $stage->classe === 'SIO1' ? 'is-info' : 'is-primary' }} ml-2" style="vertical-align:middle;">{{ $stage->classe }}</span>
+                    @endif
+                </h1>
+                <p class="is-size-7 has-text-grey mt-1">
+                    @if($stage->entreprise)
+                        <a href="{{ route('entreprises.show', $stage->entreprise) }}" class="has-text-grey">{{ $stage->entreprise->raison_sociale }}</a>
+                        &nbsp;&middot;&nbsp;
+                    @endif
+                    @if($stage->date_debut && $stage->date_fin)
+                        du {{ $stage->date_debut->format('d/m/Y') }} au {{ $stage->date_fin->format('d/m/Y') }}
+                    @endif
+                </p>
+            </div>
         </div>
-        <button class="button is-primary" id="btn-add">
-            <span class="icon"><i class="fas fa-plus"></i></span>
-            <span>Ajouter une réalisation</span>
-        </button>
+        <div class="level-right">
+            <a href="{{ route('stages.show', $stage) }}" class="button is-light is-small mr-2">
+                <span class="icon"><i class="fas fa-arrow-left"></i></span>
+                <span>Retour</span>
+            </a>
+            <button class="button is-primary is-small" id="btn-add">
+                <span class="icon"><i class="fas fa-plus"></i></span>
+                <span>Ajouter une réalisation</span>
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
@@ -67,36 +84,38 @@
                 <div class="columns is-multiline">
                     @foreach($sEntries as $entry)
                     <div class="column is-{{ min($sEntries->count(), 2) === 1 ? '12' : '6' }}">
-                        <div class="box">
-                            <p class="title is-6 mb-2">{{ $entry->titre }}</p>
-                            <p class="mb-3" style="white-space: pre-line;">{{ $entry->activites }}</p>
+                        <div class="box p-4" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <p class="has-text-weight-semibold mb-2">{{ $entry->titre }}</p>
+                                <p class="is-size-7 has-text-grey-dark mb-3" style="white-space: pre-line; line-height:1.6;">{{ $entry->activites }}</p>
 
-                            @if($entry->competences)
-                            <div class="mb-3">
-                                <p class="has-text-weight-semibold is-size-7 mb-1">Compétences :</p>
-                                <div class="competence-tags">
-                                    @foreach($entry->competencesList() as $label)
-                                    <span class="tag is-info is-light">{{ $label }}</span>
-                                    @endforeach
+                                @if($entry->competences)
+                                <div class="mb-3">
+                                    <p class="menu-label mb-1">Compétences</p>
+                                    <div class="tags">
+                                        @foreach($entry->competencesList() as $label)
+                                        <span class="tag is-info is-light is-small">{{ $label }}</span>
+                                        @endforeach
+                                    </div>
                                 </div>
+                                @endif
                             </div>
-                            @endif
 
-                            <div class="is-flex mt-3" style="gap:8px;">
-                                <button class="button is-small is-warning js-edit-btn"
+                            <div class="is-flex mt-3" style="gap:6px; border-top:1px solid #f0f0f0; padding-top:10px;">
+                                <button class="button is-small is-light js-edit-btn"
                                     data-id="{{ $entry->id }}"
                                     data-semaine="{{ $entry->semaine }}"
                                     data-titre="{{ e($entry->titre) }}"
                                     data-activites="{{ e($entry->activites) }}"
                                     data-competences="{{ $entry->competences ?? 0 }}">
-                                    <span class="icon"><i class="fas fa-pen"></i></span>
+                                    <span class="icon is-small"><i class="fas fa-pen has-text-warning-dark"></i></span>
                                     <span>Modifier</span>
                                 </button>
                                 <form action="{{ route('stages.journal.destroy', [$stage, $entry]) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="button is-small is-danger"
+                                    <button type="submit" class="button is-small is-light"
                                         onclick="return confirm('Supprimer cette réalisation ?')">
-                                        <span class="icon"><i class="fas fa-trash"></i></span>
+                                        <span class="icon is-small"><i class="fas fa-trash has-text-danger"></i></span>
                                         <span>Supprimer</span>
                                     </button>
                                 </form>
@@ -110,10 +129,6 @@
         @endfor
     </div>
 
-    <a href="{{ route('stages.show', $stage) }}" class="button is-light">
-        <span class="icon"><i class="fas fa-arrow-left"></i></span>
-        <span>Retour au stage</span>
-    </a>
 </div>
 
 {{-- ═══════════════════════════════════════════════

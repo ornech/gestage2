@@ -87,18 +87,38 @@
             </p>
 
             <h3 class="subtitle is-6 mb-1 mt-3">4.2 Données collectées</h3>
-            <table class="table is-fullwidth is-size-7 is-bordered">
-                <thead>
-                    <tr><th>Catégorie</th><th>Données</th><th>Personnes concernées</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Identité</td><td>Nom, prénom, adresse e-mail</td><td>Étudiants, professeurs, maîtres de stage</td></tr>
-                    <tr><td>Scolarité</td><td>Classe, spécialité, promotion, statut, dates d'entrée/sortie</td><td>Étudiants</td></tr>
-                    <tr><td>Stages</td><td>Entreprise, dates, statut de convention, journal de bord</td><td>Étudiants</td></tr>
-                    <tr><td>Contacts pros</td><td>Nom, prénom, e-mail, téléphone des maîtres de stage</td><td>Maîtres de stage</td></tr>
-                    <tr><td>Traçabilité</td><td>Journaux d'actions administratives horodatés</td><td>Tous utilisateurs</td></tr>
-                </tbody>
-            </table>
+            <p class="is-size-7 has-text-grey mb-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                Seules les données des <strong>personnes physiques</strong> sont couvertes par le RGPD.
+                Les données des entreprises sont mentionnées à titre de transparence.
+            </p>
+
+            @foreach([
+                ['Identité', 'is-info', 'Étudiants &amp; professeurs',
+                    'Nom, prénom, adresse e-mail, numéro de téléphone.'],
+                ['Scolarité', 'is-info', 'Étudiants',
+                    'Classe, spécialité (SLAM/SISR), promotion, statut (actif/démissionnaire), dates d\'entrée et de sortie, acceptation des CGU.'],
+                ['Stages', 'is-info', 'Étudiants',
+                    'Titre, description, dates de début/fin, statut de convention et de validation, motif de rejet éventuel.'],
+                ['Journal de bord', 'is-info', 'Étudiants',
+                    'Semaine, dates, titre de la semaine, activités réalisées, compétences mobilisées.'],
+                ['Maîtres de stage', 'is-primary', 'Maîtres de stage',
+                    'Nom, prénom, e-mail, téléphone, service, fonction ; préférences de communication (jury, newsletter) ; date d\'exercice du droit RGPD si applicable.'],
+                ['Entreprises', 'is-light', 'Entités morales — hors RGPD',
+                    'Raison sociale, SIRET, code NAF, adresse complète, téléphone, type d\'établissement, effectif.'],
+            ] as [$cat, $color, $qui, $data])
+            <div style="display:flex; gap:.75rem; margin-bottom:.6rem; align-items:baseline;">
+                <div style="min-width:155px; max-width:155px;">
+                    <span class="tag {{ $color }} is-light" style="white-space:normal; height:auto; padding:.25rem .5rem;">
+                        <strong>{{ $cat }}</strong>
+                    </span><br>
+                    <span class="is-size-7 has-text-grey" style="font-style:italic;">{!! $qui !!}</span>
+                </div>
+                <div class="is-size-7" style="flex:1; border-left:2px solid #e8e8e8; padding-left:.75rem; padding-top:.1rem;">
+                    {!! $data !!}
+                </div>
+            </div>
+            @endforeach
 
             <h3 class="subtitle is-6 mb-1 mt-3">4.3 Base légale et finalités</h3>
             <p>
@@ -112,7 +132,6 @@
                 <li>Données des étudiants : durée de la scolarité + <strong>5 ans</strong> ;</li>
                 <li>Données des maîtres de stage : durée du stage + <strong>5 ans</strong> ;</li>
                 <li>Journal de bord : durée du stage + <strong>3 ans</strong> ;</li>
-                <li>Journaux de traçabilité : <strong>12 mois</strong> glissants.</li>
             </ul>
 
             <h3 class="subtitle is-6 mb-1 mt-3">4.5 Vos droits</h3>
@@ -158,7 +177,6 @@
                     ['fa-lock',               'Chiffrement',         'Communications chiffrées (HTTPS/TLS). Mots de passe stockés en bcrypt.'],
                     ['fa-id-badge',           'Authentification',    'Identifiant + mot de passe. Changement forcé à la 1ère connexion.'],
                     ['fa-shield-alt',         'Contrôle d\'accès',   'Ségrégation des rôles (Étudiant / Professeur / Admin). Principe du moindre privilège.'],
-                    ['fa-history',            'Traçabilité',         'Actions sensibles journalisées avec horodatage.'],
                     ['fa-exclamation-circle', 'Gestion d\'incidents','Tout incident de sécurité doit être signalé à l\'administrateur sous 24 h.'],
                     ['fa-code',               'Sécurité applicative','Protections intégrées contre SQLi, XSS, CSRF, clickjacking et fuite d\'information.'],
                 ] as [$icon, $titre, $desc])

@@ -3,6 +3,16 @@
 @push('styles')
 <style nonce="{{ $cspNonce ?? '' }}">
 .stages-table td, .stages-table th { vertical-align: middle; }
+.stages-table a.lien-cellule {
+    color: #363636;
+    text-decoration: none;
+    border-bottom: 1px dashed #aaa;
+}
+.stages-table a.lien-cellule:hover {
+    color: #3273dc;
+    border-bottom-color: #3273dc;
+    border-bottom-style: solid;
+}
 </style>
 @endpush
 
@@ -118,7 +128,11 @@
                 };
             @endphp
             <tr style="{{ $rowBg ? 'background-color:'.$rowBg.';' : '' }}">
-                <td><strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}</td>
+                <td>
+                    <a href="{{ route('admin.users.edit', $etudiant) }}" class="lien-cellule">
+                        <strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}
+                    </a>
+                </td>
                 <td>
                     @if($classeTag)
                         <span class="tag {{ $classeTag === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeTag }}</span>
@@ -127,11 +141,19 @@
                     @endif
                 </td>
                 <td title="{{ $stage->entreprise?->raison_sociale }}">
-                    {{ Str::limit($stage->entreprise?->raison_sociale ?? '—', 30) }}
+                    @if($stage->entreprise)
+                        <a href="{{ route('entreprises.show', $stage->entreprise) }}" class="lien-cellule">
+                            {{ Str::limit($stage->entreprise->raison_sociale, 30) }}
+                        </a>
+                    @else
+                        <span class="has-text-grey">—</span>
+                    @endif
                 </td>
                 <td>
                     @if($stage->maitreDeStage)
-                        {{ $stage->maitreDeStage->prenom }} {{ $stage->maitreDeStage->nom }}
+                        <a href="{{ route('employes.show', $stage->maitreDeStage) }}" class="lien-cellule">
+                            {{ $stage->maitreDeStage->prenom }} {{ $stage->maitreDeStage->nom }}
+                        </a>
                     @else
                         <span class="has-text-grey">—</span>
                     @endif
@@ -226,7 +248,11 @@
                 ];
             @endphp
             <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : (!$conv ? 'background-color:#fff0f0;' : '') }}">
-                <td><strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}</td>
+                <td>
+                    <a href="{{ route('admin.users.edit', $etudiant) }}" class="lien-cellule">
+                        <strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}
+                    </a>
+                </td>
                 <td>
                     @if($classeTag)
                         <span class="tag {{ $classeTag === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeTag }}</span>
