@@ -67,47 +67,45 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Entreprises — auth requis, accès commun à tous les rôles
+| Entreprises — lecture publique (auth), écriture réservée Professeur|Admin
 |--------------------------------------------------------------------------
 */
 
+// Lecture seule : tous les utilisateurs authentifiés (étudiants inclus)
 Route::middleware(['auth'])->group(function () {
+    Route::get('/entreprises',             [CompanyController::class, 'index']) ->name('entreprises.index');
+    Route::get('/entreprises/{entreprise}',[CompanyController::class, 'show'])  ->name('entreprises.show');
+});
 
-    Route::get('/entreprises',                       [CompanyController::class, 'index'])  ->name('entreprises.index');
-    Route::get('/entreprises/create',                [CompanyController::class, 'create']) ->name('entreprises.create');
-    Route::post('/entreprises',                      [CompanyController::class, 'store'])  ->name('entreprises.store');
-    Route::get('/entreprises/{entreprise}',          [CompanyController::class, 'show'])   ->name('entreprises.show');
-    Route::put('/entreprises/{entreprise}',          [CompanyController::class, 'update']) ->name('entreprises.update');
-
-    Route::get('/entreprises/import',  [CompanyController::class, 'importForm'])->name('entreprises.import.form');
-    Route::post('/entreprises/import', [CompanyController::class, 'import'])    ->name('entreprises.import');
+// Écriture : Professeur et Administrateur uniquement
+Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
+    Route::get('/entreprises/create',            [CompanyController::class, 'create'])    ->name('entreprises.create');
+    Route::post('/entreprises',                  [CompanyController::class, 'store'])     ->name('entreprises.store');
+    Route::put('/entreprises/{entreprise}',      [CompanyController::class, 'update'])    ->name('entreprises.update');
+    Route::get('/entreprises/import',            [CompanyController::class, 'importForm'])->name('entreprises.import.form');
+    Route::post('/entreprises/import',           [CompanyController::class, 'import'])    ->name('entreprises.import');
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| API SIRET — auth requis
+| Employés / Contacts — lecture limitée (auth), écriture réservée Prof|Admin
 |--------------------------------------------------------------------------
 */
 
+// Vue fiche contact : tous les auth (nécessaire pour les étudiants via le détail stage)
 Route::middleware(['auth'])->group(function () {
-    Route::post('/companies/import-siret', [CompanyController::class, 'importSiret']);
-    Route::post('/companies',              [CompanyController::class, 'store']);
+    Route::get('/employes/{employe}', [EmployeController::class, 'show'])->name('employes.show');
 });
 
-
-/*
-|--------------------------------------------------------------------------
-| Employés / Contacts — auth requis, accès commun à tous les rôles
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/entreprises/{entreprise}/employes/create', [EmployeController::class, 'create'])
-        ->name('employes.create');
-    Route::post('/entreprises/{entreprise}/employes', [EmployeController::class, 'store'])
-        ->name('employes.store');
-    Route::resource('employes', EmployeController::class);
+// CRUD complet : Professeur et Administrateur uniquement
+Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
+    Route::get('/employes',                                          [EmployeController::class, 'index'])  ->name('employes.index');
+    Route::get('/entreprises/{entreprise}/employes/create',          [EmployeController::class, 'create']) ->name('employes.create');
+    Route::post('/entreprises/{entreprise}/employes',                [EmployeController::class, 'store'])  ->name('employes.store');
+    Route::get('/employes/{employe}/edit',                           [EmployeController::class, 'edit'])   ->name('employes.edit');
+    Route::put('/employes/{employe}',                                [EmployeController::class, 'update']) ->name('employes.update');
+    Route::delete('/employes/{employe}',                             [EmployeController::class, 'destroy'])->name('employes.destroy');
 });
 
 
@@ -143,11 +141,20 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 
     Route::get('/etudiant', function () {
-        return view('dashboards.etudiant');
+        $user   = auth()->user();
+        $stages = $user->stages()->with(['entreprise', 'maitreDeStage', 'professeur'])->withCount('journalEntries')->latest()->get();
+        $convPapier = $user->conventionPapier;
+        return view('dashboards.etudiant', compact('user', 'stages', 'convPapier'));
     })->name('etudiant.dashboard');
 
     Route::get('/etudiant/stages', [StageController::class, 'mesStages'])
         ->name('etudiant.stages.index');
+
+    Route::get('/etudiant/stage/nouveau', [StageController::class, 'etudiantNouveau'])
+        ->name('etudiant.stage.nouveau');
+
+    Route::get('/etudiant/stage/recherche-siret', [StageController::class, 'rechercheSiret'])
+        ->name('etudiant.stage.recherche-siret');
 
     Route::get('/etudiant/conventions', [StageController::class, 'mesConventions'])
         ->name('etudiant.conventions.index');

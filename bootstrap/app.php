@@ -32,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->appendToGroup('web', \App\Http\Middleware\ForcePasswordChange::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureStudentActive::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureCguAccepted::class);
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {

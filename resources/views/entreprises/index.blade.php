@@ -3,19 +3,21 @@
 @section('content')
 <div class="container mt-5">
 
-    <div class="level mb-2">
+    <div class="level mb-3">
         <div class="level-left">
             <div>
-                <h1 class="title is-3 mb-0">Annuaire entreprises</h1>
-                <p class="subtitle is-6 has-text-grey">Filtrage en temps réel — {{ $nbEntreprises }} entreprises</p>
+                <h1 class="title is-4 mb-0">Annuaire des entreprises</h1>
+                <p class="is-size-7 has-text-grey mt-1">
+                    Filtrage en temps réel &nbsp;·&nbsp; {{ $nbEntreprises }} entreprises
+                </p>
             </div>
         </div>
-        <div class="level-right">
-            <div class="tags has-addons mr-3">
+        <div class="level-right" style="gap:.5rem; display:flex;">
+            <div class="tags has-addons mb-0">
                 <span class="tag is-dark">Stages</span>
                 <span class="tag is-success"><b>{{ $nbStages }}</b></span>
             </div>
-            <div class="tags has-addons">
+            <div class="tags has-addons mb-0">
                 <span class="tag is-dark">Contacts</span>
                 <span class="tag is-warning"><b>{{ $nbContacts }}</b></span>
             </div>

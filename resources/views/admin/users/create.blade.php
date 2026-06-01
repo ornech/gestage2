@@ -25,11 +25,10 @@
             <div class="field">
                 <label class="label is-small">Rôle</label>
                 <div class="select is-fullwidth">
-                    <select name="role" id="role-select" required onchange="toggleEtudiantFields()">
-                        <option value="">— Choisir —</option>
-                        <option value="Etudiant"       {{ old('role') === 'Etudiant'       ? 'selected' : '' }}>Étudiant</option>
-                        <option value="Professeur"     {{ old('role') === 'Professeur'     ? 'selected' : '' }}>Professeur</option>
-                        <option value="Administrateur" {{ old('role') === 'Administrateur' ? 'selected' : '' }}>Administrateur</option>
+                    <select name="role" id="role-select" required>
+                        <option value="Etudiant"       {{ old('role', 'Etudiant') === 'Etudiant'       ? 'selected' : '' }}>Étudiant</option>
+                        <option value="Professeur"     {{ old('role') === 'Professeur'                 ? 'selected' : '' }}>Professeur</option>
+                        <option value="Administrateur" {{ old('role') === 'Administrateur'             ? 'selected' : '' }}>Administrateur</option>
                     </select>
                 </div>
             </div>
@@ -64,29 +63,22 @@
                 <div class="columns">
                     <div class="column">
                         <div class="field">
-                            <label class="label is-small">Classe</label>
+                            <label class="label is-small">Classe <span class="has-text-danger">*</span></label>
                             <div class="select is-fullwidth">
-                                <select name="classe" id="classe-select" onchange="updatePromo()">
-                                    <option value="">—</option>
-                                    <option value="SIO1" {{ old('classe') === 'SIO1' ? 'selected' : '' }}>SIO1</option>
-                                    <option value="SIO2" {{ old('classe') === 'SIO2' ? 'selected' : '' }}>SIO2</option>
+                                <select name="classe" id="classe-select">
+                                    <option value="">— Choisir —</option>
+                                    <option value="SIO1" {{ old('classe') === 'SIO1' ? 'selected' : '' }}>SIO1 — 1ère année</option>
+                                    <option value="SIO2" {{ old('classe') === 'SIO2' ? 'selected' : '' }}>SIO2 — 2ème année</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="column">
                         <div class="field">
-                            <label class="label is-small">Promo</label>
-                            <input class="input" type="number" name="promo" id="promo-input"
-                                   value="{{ old('promo') }}" min="2020" max="2040">
-                        </div>
-                    </div>
-                    <div class="column">
-                        <div class="field">
-                            <label class="label is-small">Spécialité</label>
+                            <label class="label is-small">Spécialité <span class="has-text-grey is-size-7">(optionnel)</span></label>
                             <div class="select is-fullwidth">
                                 <select name="spe">
-                                    <option value="">—</option>
+                                    <option value="">— Non définie —</option>
                                     <option value="SLAM" {{ old('spe') === 'SLAM' ? 'selected' : '' }}>SLAM</option>
                                     <option value="SISR" {{ old('spe') === 'SISR' ? 'selected' : '' }}>SISR</option>
                                 </select>
@@ -94,8 +86,9 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="field">
-                    <label class="label is-small">Tuteur référent</label>
+                    <label class="label is-small">Tuteur référent <span class="has-text-grey is-size-7">(optionnel)</span></label>
                     <div class="select is-fullwidth">
                         <select name="tuteur_id">
                             <option value="">— Aucun —</option>
@@ -134,9 +127,13 @@ function toggleEtudiantFields() {
 
 function updatePromo() {
     const sel = document.getElementById('classe-select');
-    const inp = document.getElementById('promo-input');
-    if (sel.value && promos[sel.value]) inp.value = promos[sel.value];
+    if (sel && sel.value && promos[sel.value]) {
+        // La promo n'est plus affichée dans ce form, mais on la calcule côté serveur
+    }
 }
+
+document.getElementById('role-select').addEventListener('change', toggleEtudiantFields);
+document.getElementById('classe-select').addEventListener('change', updatePromo);
 
 toggleEtudiantFields();
 </script>

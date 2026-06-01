@@ -143,13 +143,22 @@ class AdminUserController extends Controller
             'tuteur_id' => 'nullable|exists:users,id',
         ]);
 
+        // Calcul automatique de la promo depuis la classe
+        $annee       = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $currentYear = (int) explode('-', $annee)[0];
+        $promo = match($request->classe) {
+            'SIO1' => $currentYear + 2,
+            'SIO2' => $currentYear + 1,
+            default => $request->promo,
+        };
+
         $user = User::create([
             'nom'       => strtoupper($request->nom),
             'prenom'    => $request->prenom,
             'email'     => $request->email,
             'password'  => bcrypt('achanger'),
             'classe'    => $request->classe,
-            'promo'     => $request->promo,
+            'promo'     => $promo,
             'spe'       => $request->spe,
             'tuteur_id' => $request->tuteur_id,
             'statut'    => 'actif',

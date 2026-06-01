@@ -35,8 +35,9 @@ return [
         ],
     ],
     'sirene' => [
-    'key' => env('SIRENE_API_KEY'),
-],
+        'key' => env('INSEE_API_KEY'),
+        'url' => 'https://api.insee.fr/api-sirene/3.11/siret/',
+    ],
 
 
 ];

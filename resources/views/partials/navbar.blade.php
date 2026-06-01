@@ -30,20 +30,9 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link"><i class="fas fa-building mr-2"></i> Entreprises</a>
-                            <div class="navbar-dropdown">
-                                <a href="{{ route('entreprises.index') }}" class="navbar-item">
-                                    <i class="fas fa-search mr-2"></i> Annuaire
-                                </a>
-                                <a href="{{ route('entreprises.create') }}" class="navbar-item">
-                                    <i class="fas fa-plus mr-2"></i> Ajouter (manuelle)
-                                </a>
-                                <a href="{{ route('entreprises.import.form') }}" class="navbar-item">
-                                    <i class="fas fa-cloud-download-alt mr-2"></i> Import SIRET
-                                </a>
-                            </div>
-                        </div>
+                        <a href="{{ route('entreprises.index') }}" class="navbar-item">
+                            <i class="fas fa-building mr-2"></i> Annuaire des entreprises
+                        </a>
                     @endrole
 
                     {{-- ======== PROFESSEUR (non admin) ======== --}}
