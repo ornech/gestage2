@@ -180,12 +180,14 @@ class AdminImportController extends Controller
             // 1er filet : recherche par email
             $existing = User::where('email', $row['email'])->first();
 
-            // 2e filet : nom + prénom (cas email placeholder ou faute de frappe)
+            // 2e filet : nom + prénom avec normalisation des espaces
+            // (gère les noms à particule : DE LA FONTAINE, LE GAL, DU BOIS…)
             if (!$existing) {
-                $existing = User::where('nom', $nom)
-                    ->where('prenom', $prenom)
+                $nomNorm = preg_replace('/\s+/', ' ', trim($nom));
+                $existing = User::where('prenom', $prenom)
                     ->role('Etudiant')
-                    ->first();
+                    ->get()
+                    ->first(fn($u) => preg_replace('/\s+/', ' ', trim($u->nom)) === $nomNorm);
             }
 
             if ($existing) {

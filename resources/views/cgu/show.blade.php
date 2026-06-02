@@ -28,7 +28,7 @@
                 <strong>{{ config('app.name') }}</strong> est une application interne au Lycée Merleau-Ponty
                 dédiée à la gestion administrative des stages des étudiants du BTS Services Informatiques
                 aux Organisations (SIO). Elle couvre la gestion des conventions de stage, le suivi
-                pédagogique, la communication avec les maîtres de stage et la tenue du journal de bord.
+                pédagogique, la communication avec les maîtres de stage et la tenue du journal de stage.
             </p>
             <p>
                 L'accès est réservé aux personnels autorisés (administrateurs, professeurs) et aux
@@ -100,7 +100,7 @@
                     'Classe, spécialité (SLAM/SISR), promotion, statut (actif/démissionnaire), dates d\'entrée et de sortie, acceptation des CGU.'],
                 ['Stages', 'is-info', 'Étudiants',
                     'Titre, description, dates de début/fin, statut de convention et de validation, motif de rejet éventuel.'],
-                ['Journal de bord', 'is-info', 'Étudiants',
+                ['Journal de stage', 'is-info', 'Étudiants',
                     'Semaine, dates, titre de la semaine, activités réalisées, compétences mobilisées.'],
                 ['Maîtres de stage', 'is-primary', 'Maîtres de stage',
                     'Nom, prénom, e-mail, téléphone, service, fonction ; préférences de communication (jury, newsletter) ; date d\'exercice du droit RGPD si applicable.'],
@@ -131,7 +131,7 @@
             <ul>
                 <li>Données des étudiants : durée de la scolarité + <strong>5 ans</strong> ;</li>
                 <li>Données des maîtres de stage : durée du stage + <strong>5 ans</strong> ;</li>
-                <li>Journal de bord : durée du stage + <strong>3 ans</strong> ;</li>
+                <li>Journal de stage : durée du stage + <strong>3 ans</strong> ;</li>
             </ul>
 
             <h3 class="subtitle is-6 mb-1 mt-3">4.5 Vos droits</h3>

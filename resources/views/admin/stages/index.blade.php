@@ -13,37 +13,54 @@
     border-bottom-color: #3273dc;
     border-bottom-style: solid;
 }
+
 </style>
 @endpush
 
 @section('content')
 <div class="container mt-5">
 
-    <h1 class="title mb-4">
-        Stages
+    {{-- ── En-tête ── --}}
+    <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <h1 class="title is-4 mb-0">Stages</h1>
+
         @if($classe !== 'tous')
-            <span class="tag {{ $classe === 'sio1' ? 'is-info' : 'is-primary' }} is-large ml-2" style="vertical-align:middle;">{{ strtoupper($classe) }}</span><span class="tag is-large" style="vertical-align:middle; background:#e0e0e0; color:#555;">{{ $classe === 'sio1' ? 'Première année' : 'Deuxième année' }}</span>
+        <div style="display:flex; align-items:center;">
+            <span class="tag is-medium {{ $classe === 'sio1' ? 'is-info' : 'is-primary' }}"
+                  style="border-radius:4px 0 0 4px; margin:0;">{{ strtoupper($classe) }}</span>
+            <span class="tag is-medium" style="border-radius:0 4px 4px 0; margin:0; background:#e0e0e0; color:#444; border:1px solid #ccc; border-left:none;">
+                {{ $classe === 'sio1' ? 'Première année' : 'Deuxième année' }}
+            </span>
+        </div>
         @endif
-    </h1>
+    </div>
 
     @if(session('success'))
         <div class="notification is-success is-light py-2">{{ session('success') }}</div>
     @endif
 
-    {{-- ── Filtres convention (gauche) + Année (droite) ─────────────── --}}
+    {{-- ── Filtres avec compteurs (gauche) + Année (droite) ───────────── --}}
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;" class="mb-3">
 
-        {{-- Convention : gauche --}}
-        <div class="buttons are-small mb-0" style="gap:3px;">
+        {{-- Filtres double tag ── --}}
+        <div style="display:flex; gap:5px; flex-wrap:wrap;">
             @foreach([
-                'tous'           => ['Tous',       ''],
-                'sans_stage'     => ['Sans stage', 'is-light'],
-                'a_faire_signer' => ['À signer',   'is-warning is-light'],
-                'en_attente'     => ['En attente', 'is-info is-light'],
-                'validee'        => ['Validée ✓',  'is-success is-light'],
-            ] as $val => [$label, $color])
-                <a href="{{ route('admin.stages.index', ['annee' => $anneeSelectionnee, 'classe' => $classe, 'filtre' => $val]) }}"
-                   class="button is-small {{ $filtre === $val ? 'is-link' : $color }}">{{ $label }}</a>
+                'tous'           => ['Tous',             'is-dark',    'is-dark'],
+                'sans_stage'     => ['Sans stage',       'is-danger',  'is-danger'],
+                'a_faire_signer' => ['À faire signer',   'is-warning', 'is-warning'],
+                'en_attente'     => ['Déposée direction','is-info',    'is-info'],
+                'validee'        => ['Remise étudiant ✓','is-success', 'is-success'],
+            ] as $val => [$label, $color, $actif])
+            @php $isActive = $filtre === $val; @endphp
+            <a href="{{ route('admin.stages.index', ['annee' => $anneeSelectionnee, 'classe' => $classe, 'filtre' => $val]) }}"
+               style="text-decoration:none; display:flex; align-items:center; border:1px solid #dbdbdb; border-radius:4px; overflow:hidden;">
+                <span class="tag {{ $isActive ? $color : $color.' is-light' }}"
+                      style="border-radius:0; margin:0; font-size:.75rem;">{{ $label }}</span>
+                <span class="tag is-white"
+                      style="border-radius:0; margin:0; border-left:1px solid #dbdbdb; font-size:.75rem; min-width:24px; text-align:center;">
+                    {{ $compteurs[$val] ?? 0 }}
+                </span>
+            </a>
             @endforeach
         </div>
 
@@ -247,7 +264,7 @@
                     'validee'      => ['label' => 'Validée ✓',                       'class' => 'is-success'],
                 ];
             @endphp
-            <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : (!$conv ? 'background-color:#fff0f0;' : '') }}">
+            <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : (!$conv ? 'background-color:#fdecea;' : '') }}">
                 <td>
                     <a href="{{ route('admin.users.edit', $etudiant) }}" class="lien-cellule">
                         <strong>{{ $etudiant->nom }}</strong> {{ $etudiant->prenom }}

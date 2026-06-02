@@ -71,19 +71,21 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// Lecture seule : tous les utilisateurs authentifiés (étudiants inclus)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/entreprises',             [CompanyController::class, 'index']) ->name('entreprises.index');
-    Route::get('/entreprises/{entreprise}',[CompanyController::class, 'show'])  ->name('entreprises.show');
-});
-
+// Routes fixes AVANT le wildcard {entreprise} pour éviter l'interception
 // Écriture : Professeur et Administrateur uniquement
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
     Route::get('/entreprises/create',            [CompanyController::class, 'create'])    ->name('entreprises.create');
-    Route::post('/entreprises',                  [CompanyController::class, 'store'])     ->name('entreprises.store');
-    Route::put('/entreprises/{entreprise}',      [CompanyController::class, 'update'])    ->name('entreprises.update');
     Route::get('/entreprises/import',            [CompanyController::class, 'importForm'])->name('entreprises.import.form');
     Route::post('/entreprises/import',           [CompanyController::class, 'import'])    ->name('entreprises.import');
+    Route::post('/entreprises',                  [CompanyController::class, 'store'])     ->name('entreprises.store');
+    Route::put('/entreprises/{entreprise}',      [CompanyController::class, 'update'])    ->name('entreprises.update');
+});
+
+// Lecture seule : tous les utilisateurs authentifiés (étudiants inclus)
+// {entreprise} en DERNIER pour ne pas intercepter /create et /import
+Route::middleware(['auth'])->group(function () {
+    Route::get('/entreprises',             [CompanyController::class, 'index']) ->name('entreprises.index');
+    Route::get('/entreprises/{entreprise}',[CompanyController::class, 'show'])  ->name('entreprises.show');
 });
 
 
@@ -120,7 +122,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('stages.create');
     Route::resource('stages', StageController::class)->except(['create']);
 
-    // Journal de bord — student_has_stage laisse passer les profs/admins, bloque les étudiants sans stage
+    // Journal de stage — student_has_stage laisse passer les profs/admins, bloque les étudiants sans stage
     Route::middleware('student_has_stage')->group(function () {
         Route::get('/stages/{stage}/journal',              [JournalController::class, 'index'])  ->name('stages.journal.index');
         Route::get('/stages/{stage}/journal/create',       [JournalController::class, 'create']) ->name('stages.journal.create');
@@ -199,8 +201,10 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::delete('/admin/conventions-papier/{convention}/revert',     [AdminStageController::class, 'revertConventionPapier'])     ->name('admin.conventions-papier.revert');
     Route::delete('/admin/stages/{stage}/revert',                      [AdminStageController::class, 'revertConvention'])           ->name('admin.stages.revert');
 
-    Route::get('/admin/parametres',  [AdminParametreController::class, 'index'])       ->name('admin.parametres.index');
-    Route::put('/admin/parametres',  [AdminParametreController::class, 'update'])      ->name('admin.parametres.update');
+    Route::get('/admin/parametres',  [AdminParametreController::class, 'index'])            ->name('admin.parametres.index');
+    Route::put('/admin/parametres',  [AdminParametreController::class, 'update'])           ->name('admin.parametres.update');
+    Route::get('/admin/parametres/convention',  [AdminParametreController::class, 'convention'])      ->name('admin.parametres.convention');
+    Route::put('/admin/parametres/convention',  [AdminParametreController::class, 'updateConvention'])->name('admin.parametres.convention.update');
     Route::post('/admin/parametres/nouvelle-annee', [AdminParametreController::class, 'nouvelleAnnee'])->name('admin.parametres.nouvelle-annee');
     Route::post('/admin/parametres/set-active',     [AdminParametreController::class, 'setActive'])    ->name('admin.parametres.set-active');
 });
@@ -262,6 +266,11 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 
     // Journal d'actions — UC_AUDIT (conservé, non affiché en nav)
     Route::get('/admin/audit', [AdminAuditController::class, 'index'])->name('admin.audit.index');
+
+    // Nettoyage comptes — comptes @import.local et doublons
+    Route::get('/admin/comptes/nettoyage',              [AdminUserController::class, 'nettoyage'])      ->name('admin.comptes.nettoyage');
+    Route::post('/admin/comptes/{user}/update-email',   [AdminUserController::class, 'updateEmail'])    ->name('admin.comptes.update-email');
+    Route::post('/admin/comptes/fusionner',             [AdminUserController::class, 'fusionner'])      ->name('admin.comptes.fusionner');
 
     // Communication — envoi, templates, suivi RGPD
     Route::get('/admin/communication',                    [AdminCommunicationController::class, 'index'])          ->name('admin.communication.index');

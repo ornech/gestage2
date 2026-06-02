@@ -56,9 +56,10 @@ class AdminDashboardController extends Controller
             ];
         }
 
+        // Conventions à faire signer par l'employeur (action directe du prof)
         $aValider = Stage::whereHas('etudiant',
             fn($q) => $q->whereIn('promo', [$promoSio1, $promoSio2])
-        )->where('statut_validation', 'en_attente')->count();
+        )->where('statut_convention', 'a_faire_signer')->count();
 
         return view('dashboards.admin', compact('annee', 'aValider', 'cartesSio'));
     }

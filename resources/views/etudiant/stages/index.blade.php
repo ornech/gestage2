@@ -107,7 +107,7 @@
                     </a>
                 @endcan
                 <a href="{{ route('stages.journal.index', $stage) }}" class="button is-light">
-                    <i class="fas fa-book-open has-text-link mr-1"></i> Journal de bord
+                    <i class="fas fa-book-open has-text-link mr-1"></i> Journal de stage
                 </a>
                 <a href="{{ route('pdf.convention', $stage) }}" class="button is-light">
                     <i class="fas fa-file-pdf has-text-danger mr-1"></i> Convention PDF

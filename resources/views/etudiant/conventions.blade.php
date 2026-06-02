@@ -4,7 +4,7 @@
 <div class="container">
 
     <h1 class="title is-3">Mes Conventions</h1>
-    <p class="subtitle is-6">Sélectionne ton stage pour obtenir la convention ou accéder au journal de bord.</p>
+    <p class="subtitle is-6">Sélectionne ton stage pour obtenir la convention ou accéder au journal de stage.</p>
 
     @if($stages->isEmpty())
         <div class="notification is-warning">
@@ -33,9 +33,9 @@
                         <i class="fas fa-file-pdf mr-2"></i> Télécharger la convention
                     </a>
 
-                    {{-- Journal de bord --}}
+                    {{-- Journal de stage --}}
                     <a href="#" class="button is-warning">
-                        <i class="fas fa-book mr-2"></i> Journal de bord
+                        <i class="fas fa-book mr-2"></i> Journal de stage
                     </a>
 
                     {{-- Détails du stage --}}

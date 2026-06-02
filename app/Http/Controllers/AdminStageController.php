@@ -58,11 +58,17 @@ class AdminStageController extends Controller
             ->whereIn('statut', ['actif'])
             ->whereIn('promo', $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2])
             ->with([
-                'stages'         => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->withCount('journalEntries')->orderBy('date_debut', 'desc'),
+                'stages' => fn($q) => $q
+                    ->with(['entreprise', 'maitreDeStage'])
+                    ->withCount('journalEntries')
+                    // Restreindre les stages chargés au filtre actif → cohérence couleurs
+                    ->when(in_array($filtre, ['a_faire_signer', 'en_attente', 'validee']),
+                        fn($s) => $s->where('statut_convention', $filtre))
+                    ->orderBy('date_debut', 'desc'),
                 'conventionPapier',
             ]);
 
-        // Filtre convention (indépendant de la classe)
+        // Filtre sur le statut de la convention (indépendant de la classe)
         if ($filtre === 'sans_stage') {
             $query->whereDoesntHave('stages')->whereDoesntHave('conventionPapier');
         } elseif (in_array($filtre, ['a_faire_signer', 'en_attente', 'validee'])) {
@@ -86,9 +92,30 @@ class AdminStageController extends Controller
 
         $etudiants = $query->orderBy('promo')->orderBy('nom')->get();
 
+        // ── Compteurs par statut pour les double tags ─────────────────────
+        $promos = $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2];
+        $baseCount = fn() => User::role('Etudiant')->whereIn('statut', ['actif'])->whereIn('promo', $promos);
+
+        $compteurs = [
+            'tous'           => ($baseCount)()->count(),
+            'sans_stage'     => ($baseCount)()->whereDoesntHave('stages')->whereDoesntHave('conventionPapier')->count(),
+            'a_faire_signer' => ($baseCount)()->where(fn($q) =>
+                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'a_faire_signer'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'a_faire_signer'))->whereDoesntHave('stages'))
+            )->count(),
+            'en_attente'     => ($baseCount)()->where(fn($q) =>
+                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'en_attente'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'en_attente'))->whereDoesntHave('stages'))
+            )->count(),
+            'validee'        => ($baseCount)()->where(fn($q) =>
+                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'validee'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'validee'))->whereDoesntHave('stages'))
+            )->count(),
+        ];
+
         return view('admin.stages.index', compact(
             'etudiants', 'tuteurs', 'annees', 'anneeSelectionnee', 'anneeActive',
-            'syInt', 'filtre', 'classe', 'classeStr'
+            'syInt', 'filtre', 'classe', 'classeStr', 'compteurs'
         ));
     }
 

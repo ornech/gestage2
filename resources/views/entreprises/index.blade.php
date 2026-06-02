@@ -48,12 +48,22 @@
     <table class="table is-striped is-hoverable is-fullwidth is-size-7" id="tbl-entreprises">
         <thead>
             <tr>
-                <th>Nom entreprise</th>
+                <th data-col="nom" style="cursor:pointer; user-select:none; white-space:nowrap;">
+                    Nom entreprise <i class="fas fa-sort has-text-grey-light ml-1 sort-icon" data-col="nom"></i>
+                </th>
                 <th>Adresse</th>
-                <th>Ville</th>
-                <th>CP</th>
-                <th>NAF</th>
-                <th>Stages</th>
+                <th data-col="ville" style="cursor:pointer; user-select:none; white-space:nowrap;">
+                    Ville <i class="fas fa-sort has-text-grey-light ml-1 sort-icon" data-col="ville"></i>
+                </th>
+                <th data-col="cp" style="cursor:pointer; user-select:none; white-space:nowrap;">
+                    CP <i class="fas fa-sort has-text-grey-light ml-1 sort-icon" data-col="cp"></i>
+                </th>
+                <th data-col="naf" style="cursor:pointer; user-select:none; white-space:nowrap;">
+                    NAF <i class="fas fa-sort has-text-grey-light ml-1 sort-icon" data-col="naf"></i>
+                </th>
+                <th data-col="stages" style="cursor:pointer; user-select:none; white-space:nowrap;">
+                    Stages <i class="fas fa-sort has-text-grey-light ml-1 sort-icon" data-col="stages"></i>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -63,6 +73,7 @@
                 data-ville="{{ strtolower($e->ville ?? '') }}"
                 data-cp="{{ $e->code_postal ?? '' }}"
                 data-naf="{{ strtolower($e->code_naf ?? '') }}"
+                data-stages="{{ $e->stages_count }}"
             >
                 <td>
                     <a href="{{ route('entreprises.show', $e) }}" class="has-text-link">
@@ -83,10 +94,12 @@
 
 <script nonce="{{ $cspNonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function () {
-    const ids    = ['f-nom', 'f-ville', 'f-cp', 'f-naf'];
-    const rows   = Array.from(document.querySelectorAll('#tbl-entreprises tbody tr'));
+    const ids     = ['f-nom', 'f-ville', 'f-cp', 'f-naf'];
+    const tbody   = document.querySelector('#tbl-entreprises tbody');
+    const rows    = Array.from(tbody.querySelectorAll('tr'));
     const counter = document.getElementById('compteur');
 
+    // ── Filtre ───────────────────────────────────────────────────────
     function filtrer() {
         const nom   = document.getElementById('f-nom').value.toLowerCase().trim();
         const ville = document.getElementById('f-ville').value.toLowerCase().trim();
@@ -96,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let visible = 0;
         rows.forEach(function(row) {
             const match =
-                row.dataset.nom.includes(nom)     &&
+                row.dataset.nom.includes(nom)      &&
                 row.dataset.ville.includes(ville)  &&
                 row.dataset.cp.startsWith(cp)      &&
                 row.dataset.naf.includes(naf);
@@ -104,17 +117,64 @@ document.addEventListener('DOMContentLoaded', function () {
             row.style.display = match ? '' : 'none';
             if (match) visible++;
         });
-
         counter.textContent = visible < rows.length ? visible + ' résultat(s)' : '';
     }
 
-    ids.forEach(function(id) {
-        document.getElementById(id).addEventListener('input', filtrer);
-    });
+    ids.forEach(id => document.getElementById(id).addEventListener('input', filtrer));
 
     document.getElementById('btn-reset').addEventListener('click', function() {
-        ids.forEach(function(id) { document.getElementById(id).value = ''; });
+        ids.forEach(id => { document.getElementById(id).value = ''; });
         filtrer();
+    });
+
+    // ── Tri ──────────────────────────────────────────────────────────
+    let sortCol = null;
+    let sortAsc = true;
+
+    function updateIcons(activeCol, asc) {
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            const col = icon.dataset.col;
+            icon.className = 'fas ml-1 sort-icon';
+            if (col === activeCol) {
+                icon.classList.add(asc ? 'fa-sort-up' : 'fa-sort-down');
+                icon.classList.add('has-text-link');
+            } else {
+                icon.classList.add('fa-sort', 'has-text-grey-light');
+            }
+        });
+    }
+
+    document.querySelectorAll('th[data-col]').forEach(th => {
+        th.addEventListener('click', function () {
+            const col = this.dataset.col;
+            if (sortCol === col) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = col;
+                sortAsc = true;
+            }
+            updateIcons(col, sortAsc);
+
+            const isNumeric = (col === 'stages');
+            rows.sort((a, b) => {
+                let va = a.dataset[col] ?? '';
+                let vb = b.dataset[col] ?? '';
+                if (isNumeric) {
+                    va = parseFloat(va) || 0;
+                    vb = parseFloat(vb) || 0;
+                    return sortAsc ? va - vb : vb - va;
+                }
+                return sortAsc
+                    ? va.localeCompare(vb, 'fr', { sensitivity: 'base' })
+                    : vb.localeCompare(va, 'fr', { sensitivity: 'base' });
+            });
+
+            // Réinsérer les lignes triées
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Réappliquer le filtre actif
+            filtrer();
+        });
     });
 });
 </script>

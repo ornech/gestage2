@@ -40,5 +40,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e, $request) {
             return response()->view('mail.rgpd-lien-expire', [], 410);
         });
+
+        // 403 Spatie (mauvais rôle) → redirection vers le bon dashboard
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+            if (!auth()->check()) {
+                return redirect()->route('login');
+            }
+            $user = auth()->user();
+            if ($user->hasRole('Administrateur') || $user->hasRole('Professeur')) {
+                return redirect()->route('admin.dashboard')
+                    ->with('error', 'Accès réservé aux étudiants.');
+            }
+            return redirect()->route('etudiant.dashboard')
+                ->with('error', 'Vous n\'avez pas accès à cette page.');
+        });
     })
     ->create();

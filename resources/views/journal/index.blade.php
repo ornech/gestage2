@@ -7,6 +7,15 @@
     .tab-pane.is-visible { display: block; }
     .competence-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tabs ul { flex-wrap: wrap; }
+
+    /* Troncature du texte des réalisations */
+    .journal-activites {
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        white-space: normal;
+    }
 </style>
 @endpush
 
@@ -24,7 +33,7 @@
             <div>
                 <h1 class="title is-4 mb-0">
                     <i class="fas fa-book-open mr-2 has-text-grey-light"></i>
-                    Journal de bord
+                    Journal de stage
                     @if($stage->classe)
                         <span class="tag {{ $stage->classe === 'SIO1' ? 'is-info' : 'is-primary' }} ml-2" style="vertical-align:middle;">{{ $stage->classe }}</span>
                     @endif
@@ -58,7 +67,7 @@
 
     {{-- Zone principale avec onglets --}}
     <div class="box">
-        {{-- Navigation par semaine --}}
+        {{-- Navigation par semaine + onglet tableau --}}
         <div class="tabs is-boxed">
             <ul id="tab-nav">
                 <li data-tab="all" class="{{ $selectedSemaine === 0 ? 'is-active' : '' }}">
@@ -69,6 +78,9 @@
                     <a>S{{ $s }}</a>
                 </li>
                 @endfor
+                <li data-tab="competences" id="tab-competences">
+                    <a><i class="fas fa-table mr-1"></i> Tableau des compétences</a>
+                </li>
             </ul>
         </div>
 
@@ -87,7 +99,7 @@
                         <div class="box p-4" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
                             <div>
                                 <p class="has-text-weight-semibold mb-2">{{ $entry->titre }}</p>
-                                <p class="is-size-7 has-text-grey-dark mb-3" style="white-space: pre-line; line-height:1.6;">{{ $entry->activites }}</p>
+                                <p class="is-size-7 has-text-grey-dark mb-3 journal-activites" style="line-height:1.6;">{{ $entry->activites }}</p>
 
                                 @if($entry->competences)
                                 <div class="mb-3">
@@ -111,6 +123,7 @@
                                     <span class="icon is-small"><i class="fas fa-pen has-text-warning-dark"></i></span>
                                     <span>Modifier</span>
                                 </button>
+                                @role('Etudiant')
                                 <form action="{{ route('stages.journal.destroy', [$stage, $entry]) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="button is-small is-light"
@@ -119,6 +132,7 @@
                                         <span>Supprimer</span>
                                     </button>
                                 </form>
+                                @endrole
                             </div>
                         </div>
                     </div>
@@ -127,6 +141,63 @@
             @endif
         </div>
         @endfor
+
+        {{-- ── Tableau des compétences ──────────────────────────────────── --}}
+        @php
+            $competences = \App\Models\JournalEntry::COMPETENCES;
+            $allEntries  = $entries->flatten()->sortBy('semaine');
+            // Abréviations C1-C6 dans l'ordre des clés bitmask
+            $abrevs = ['C1','C2','C3','C4','C5','C6'];
+        @endphp
+        <div id="semaine-competences" class="tab-pane">
+            @if($allEntries->isEmpty())
+                <p class="has-text-grey is-italic is-size-7">Aucune réalisation saisie.</p>
+            @else
+            {{-- Légende --}}
+            <div class="mb-3">
+                @foreach($competences as $i => $label)
+                @php $num = (int) log($i, 2) + 1; @endphp
+                <span class="is-size-7 has-text-grey mr-3">
+                    <strong>C{{ $num }}</strong> — {{ $label }}
+                </span>
+                @endforeach
+            </div>
+
+            <div class="table-container">
+                <table class="table is-fullwidth is-bordered is-hoverable is-size-7">
+                    <thead>
+                        <tr>
+                            <th style="min-width:200px;">Réalisation</th>
+                            @foreach($competences as $bit => $label)
+                            @php $num = (int) log($bit, 2) + 1; @endphp
+                            <th class="has-text-centered" style="width:48px;" title="{{ $label }}">C{{ $num }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($allEntries as $entry)
+                        @php $mask = (int) $entry->competences; @endphp
+                        <tr>
+                            <td>{{ $entry->titre }}</td>
+                            @foreach($competences as $bit => $label)
+                            <td class="has-text-centered">
+                                @if($mask & $bit)
+                                    <span class="has-text-success" title="{{ $label }}">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                @else
+                                    <span class="has-text-grey-lighter">·</span>
+                                @endif
+                            </td>
+                            @endforeach
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @endif
+        </div>
+
     </div>
 
 </div>
@@ -269,11 +340,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tabPanes.forEach(pane => {
                 if (target === 'all') {
-                    pane.classList.add('is-visible');
+                    // "Toutes" : affiche les semaines mais PAS le tableau des compétences
+                    pane.classList.toggle('is-visible', pane.id !== 'semaine-competences');
+                } else if (target === 'competences') {
+                    pane.classList.toggle('is-visible', pane.id === 'semaine-competences');
                 } else {
-                    pane.id === target
-                        ? pane.classList.add('is-visible')
-                        : pane.classList.remove('is-visible');
+                    pane.classList.toggle('is-visible', pane.id === target);
                 }
             });
         });

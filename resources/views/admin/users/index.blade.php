@@ -3,42 +3,47 @@
 @section('content')
 <div class="container mt-5">
 
+    @php $speActif = request('spe', ''); @endphp
+
     {{-- ── En-tête ─────────────────────────────────────────────────────── --}}
-    <div class="level">
-        <div class="level-left">
-            <h1 class="title mb-0">
-                Étudiants
-                @if(isset($classeParam) && $classeParam && $classeParam !== 'tous')
-                    <span class="tag {{ $classeParam === 'SIO1' ? 'is-info' : 'is-primary' }} is-large ml-2" style="vertical-align:middle;">{{ $classeParam }}</span><span class="tag is-large" style="vertical-align:middle; background:#e0e0e0; color:#555;">{{ $classeParam === 'SIO1' ? 'Première année' : 'Deuxième année' }}</span>
-                @endif
-            </h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; margin-bottom:1rem;">
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
+
+            <h1 class="title mb-0" style="line-height:1;">Étudiants</h1>
+
+            {{-- Double tag Classe + Année --}}
+            @if(isset($classeParam) && $classeParam && $classeParam !== 'tous')
+            <div style="display:flex; align-items:center;">
+                <span class="tag is-medium {{ $classeParam === 'SIO1' ? 'is-info' : 'is-primary' }}" style="border-radius:4px 0 0 4px; margin:0;">{{ $classeParam }}</span>
+                <span class="tag is-medium" style="border-radius:0 4px 4px 0; margin:0; background:#e0e0e0; color:#444; border:1px solid #ccc; border-left:none;">{{ $classeParam === 'SIO1' ? 'Première année' : 'Deuxième année' }}</span>
+            </div>
+            @endif
+
+            {{-- Séparateur --}}
+            <span class="has-text-grey-light" style="font-size:.8rem;">|</span>
+
+            {{-- Double tags spécialité avec compteurs --}}
+            @foreach([
+                [''     , 'Toutes', 'is-dark', $stats['actifs']],
+                ['SLAM' , 'SLAM',   'is-info',  $stats['slam']],
+                ['SISR' , 'SISR',   'is-link',  $stats['sisr']],
+            ] as [$val, $label, $color, $count])
+            <a href="{{ route('admin.users.index', array_merge(request()->except('spe'), array_filter(['classe' => $classeParam, 'spe' => $val]))) }}"
+               style="text-decoration:none; display:flex; align-items:center;">
+                <div style="display:flex; align-items:center; border:1px solid #dbdbdb; border-radius:4px; overflow:hidden;">
+                    <span class="tag {{ $speActif === $val ? $color : $color.' is-light' }}" style="border-radius:0; margin:0; height:1.75em;">{{ $label }}</span>
+                    <span class="tag is-white" style="border-radius:0; margin:0; border-left:1px solid #dbdbdb; height:1.75em;">{{ $count }}</span>
+                </div>
+            </a>
+            @endforeach
+
         </div>
         <div class="level-right">
-            <a href="{{ route('imports.pronote.form') }}" class="button is-primary">
-                <i class="fas fa-file-import mr-2"></i> Import Pronote
-            </a>
-        </div>
-    </div>
-
-    @if(session('success'))
-        <div class="notification is-success is-light">{{ session('success') }}</div>
-    @endif
-
-    {{-- ── Stats (gauche) + Année dropdown (droite) ──────────────────── --}}
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;" class="mb-3">
-
-        {{-- Stats gauche --}}
-        <div style="display:flex; gap:8px; align-items:center;">
-            <span class="tag {{ $classeParam === 'SIO2' ? 'is-primary' : 'is-info' }} is-light is-medium">
-                {{ $stats['actifs'] }} actif(s)
-                @if($classeParam && $classeParam !== 'tous') — {{ $classeParam }} @endif
-            </span>
-            <span class="tag is-danger is-light is-medium">{{ $stats['demissionnaires'] }} démiss.</span>
-        </div>
-
-        {{-- Année dropdown droite --}}
+               {{-- ── Année dropdown ──────────────────────────────────────────────── --}}
+    <div style="display:flex; justify-content:flex-end;" class="mb-3">
         <form method="GET">
             <input type="hidden" name="classe" value="{{ $classeParam }}">
+            @if($speActif) <input type="hidden" name="spe" value="{{ $speActif }}"> @endif
             <div class="select is-small">
                 <select name="annee" onchange="this.form.submit()">
                     @foreach($annees as $annee)
@@ -49,8 +54,15 @@
                 </select>
             </div>
         </form>
-
     </div>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="notification is-success is-light">{{ session('success') }}</div>
+    @endif
+
+ 
 
     {{-- ── Tableau ─────────────────────────────────────────────────────── --}}
     <div class="table-scroll"><table class="table is-striped is-fullwidth is-hoverable is-size-7">

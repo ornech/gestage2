@@ -105,4 +105,73 @@ class AdminParametreController extends Controller
         $etat = $current === '1' ? 'fermée' : 'ouverte';
         return back()->with('success', "Affectation des spécialités {$etat}.");
     }
+
+    public function convention()
+    {
+        $etablissement = [
+            'nom'      => Parametre::get('convention_etablissement_nom',   config('app.name')),
+            'proviseur_nom'   => Parametre::get('convention_proviseur_nom',   ''),
+            'proviseur_titre' => Parametre::get('convention_proviseur_titre', 'Proviseur(e)'),
+            'adresse'  => Parametre::get('convention_etablissement_adresse',  ''),
+            'bp'       => Parametre::get('convention_etablissement_bp',       ''),
+            'cp_ville' => Parametre::get('convention_etablissement_cp_ville', ''),
+            'tel'      => Parametre::get('convention_etablissement_tel',      ''),
+            'mel'      => Parametre::get('convention_etablissement_mel',      ''),
+            'lieu'     => Parametre::get('convention_lieu',                   ''),
+        ];
+
+        // Charger tous les articles depuis Parametre (avec valeurs par défaut vides)
+        $cles = [
+            'conv_art1','conv_art2','conv_art3','conv_art4','conv_art5','conv_art6',
+            'conv_art7','conv_art8','conv_art9','conv_art10','conv_art11',
+            'conv_part1','conv_part2',
+        ];
+        $articles = [];
+        foreach ($cles as $cle) {
+            $articles[$cle] = [
+                'titre' => Parametre::get($cle . '_titre', ''),
+                'corps' => Parametre::get($cle . '_corps', ''),
+            ];
+        }
+
+        return view('admin.parametres.convention', compact('etablissement', 'articles', 'cles'));
+    }
+
+    public function updateConvention(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'etablissement.nom'            => 'nullable|string|max:200',
+            'etablissement.proviseur_nom'  => 'nullable|string|max:100',
+            'etablissement.proviseur_titre'=> 'nullable|string|max:100',
+            'etablissement.adresse'        => 'nullable|string|max:200',
+            'etablissement.bp'             => 'nullable|string|max:50',
+            'etablissement.cp_ville'       => 'nullable|string|max:100',
+            'etablissement.tel'            => 'nullable|string|max:20',
+            'etablissement.mel'            => 'nullable|email|max:100',
+            'etablissement.lieu'           => 'nullable|string|max:100',
+        ]);
+
+        $map = [
+            'nom'            => 'convention_etablissement_nom',
+            'proviseur_nom'  => 'convention_proviseur_nom',
+            'proviseur_titre'=> 'convention_proviseur_titre',
+            'adresse'        => 'convention_etablissement_adresse',
+            'bp'             => 'convention_etablissement_bp',
+            'cp_ville'       => 'convention_etablissement_cp_ville',
+            'tel'            => 'convention_etablissement_tel',
+            'mel'            => 'convention_etablissement_mel',
+            'lieu'           => 'convention_lieu',
+        ];
+        foreach ($map as $champ => $cle) {
+            Parametre::set($cle, $request->input("etablissement.{$champ}", ''));
+        }
+
+        // Articles
+        foreach ($request->input('articles', []) as $cle => $data) {
+            Parametre::set($cle . '_titre', $data['titre'] ?? '');
+            Parametre::set($cle . '_corps', $data['corps'] ?? '');
+        }
+
+        return back()->with('success', 'Paramètres de la convention mis à jour.');
+    }
 }

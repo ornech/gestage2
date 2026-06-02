@@ -16,7 +16,7 @@
                     default                => $convPapier->statut,
                 } }}</strong>),
                 mais les informations de votre stage ne sont pas encore saisies dans l'application.
-                <strong>Vous devez les renseigner pour accéder au journal de bord.</strong>
+                <strong>Vous devez les renseigner pour accéder au journal de stage.</strong>
             </div>
             <a href="{{ route('entreprises.index') }}"
                class="button is-warning is-small ml-4" style="white-space:nowrap;">

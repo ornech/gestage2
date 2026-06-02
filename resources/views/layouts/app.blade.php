@@ -46,6 +46,13 @@
 
     {{-- Le contenu spécifique à chaque page viendra s'insérer là --}}
     <main class="mt-5">
+        @if(session('error'))
+            <div class="container" style="max-width:860px;">
+                <div class="notification is-warning is-light py-2 mb-0">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('error') }}
+                </div>
+            </div>
+        @endif
         @yield('content')
     </main>
 

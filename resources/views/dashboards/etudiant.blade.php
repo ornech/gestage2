@@ -174,7 +174,7 @@
             <a href="{{ route('stages.journal.index', $stages->first()) }}" class="box has-text-centered p-4"
                style="display:block; text-decoration:none; border:1px solid #e8e8e8;">
                 <span class="icon is-large has-text-grey mb-2"><i class="fas fa-book-open fa-2x"></i></span>
-                <p class="has-text-weight-semibold is-size-7">Journal de bord</p>
+                <p class="has-text-weight-semibold is-size-7">Journal de stage</p>
                 <p class="is-size-7 has-text-grey">
                     {{ $stages->first()->journal_entries_count }} réalisation(s) saisie(s)
                 </p>

@@ -55,8 +55,10 @@ class AdminUserController extends Controller
         }
 
         $stats = [
-            'actifs'         => $baseActifs->count(),
+            'actifs'         => (clone $baseActifs)->count(),
             'demissionnaires'=> User::role('Etudiant')->where('statut', 'demissionnaire')->count(),
+            'slam'           => (clone $baseActifs)->where('spe', 'SLAM')->count(),
+            'sisr'           => (clone $baseActifs)->where('spe', 'SISR')->count(),
         ];
 
         // ── Vue "Anciennes promos" ───────────────────────────────────────
@@ -305,5 +307,116 @@ class AdminUserController extends Controller
         $request->validate(['tuteur_id' => 'nullable|exists:users,id']);
         $user->update(['tuteur_id' => $request->tuteur_id]);
         return back()->with('success', 'Tuteur assigné.');
+    }
+
+    public function nettoyage()
+    {
+        // Comptes avec email placeholder
+        $importLocal = User::where('email', 'like', '%@import.local')
+            ->orderBy('nom')
+            ->get();
+
+        // Détection doublons (même nom normalisé + prénom + promo)
+        $tous = User::role('Etudiant')
+            ->whereIn('statut', ['actif', 'demissionnaire'])
+            ->get(['id', 'nom', 'prenom', 'promo', 'email', 'statut', 'classe']);
+
+        $doublons = $tous->groupBy(function ($u) {
+            return preg_replace('/\s+/', ' ', trim($u->nom)) . '|' .
+                   preg_replace('/\s+/', ' ', trim($u->prenom)) . '|' .
+                   $u->promo;
+        })->filter(fn($g) => $g->count() > 1)->values();
+
+        return view('admin.users.nettoyage', compact('importLocal', 'doublons'));
+    }
+
+    public function updateEmail(Request $request, User $user)
+    {
+        $request->validate(['email' => 'required|email|unique:users,email,' . $user->id]);
+        $user->update(['email' => $request->email]);
+        return back()->with('success', 'Email mis à jour pour ' . $user->prenom . ' ' . $user->nom . '.');
+    }
+
+    public function fusionner(Request $request)
+    {
+        $request->validate([
+            'garder_id'    => 'required|exists:users,id',
+            'supprimer_id' => 'required|exists:users,id|different:garder_id',
+        ]);
+
+        $garder    = User::with(['conventionPapier'])->findOrFail($request->garder_id);
+        $supprimer = User::with(['conventionPapier'])->findOrFail($request->supprimer_id);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($garder, $supprimer) {
+            $DB = \Illuminate\Support\Facades\DB::class;
+
+            // 1. Journal de stage — CRITIQUE : CASCADE DELETE sur user_id
+            //    À faire AVANT la suppression du compte
+            $DB::table('journal_entries')
+                ->where('user_id', $supprimer->id)
+                ->update(['user_id' => $garder->id]);
+
+            // 2. Stages étudiant
+            $DB::table('stages')
+                ->where('etudiant_id', $supprimer->id)
+                ->update(['etudiant_id' => $garder->id]);
+
+            // 3. Convention papier — contrainte UNIQUE sur etudiant_id
+            if ($supprimer->conventionPapier) {
+                if (!$garder->conventionPapier) {
+                    $DB::table('conventions_papier')
+                        ->where('etudiant_id', $supprimer->id)
+                        ->update(['etudiant_id' => $garder->id]);
+                } else {
+                    // Les deux ont une convention → on garde celle du compte conservé
+                    $DB::table('conventions_papier')
+                        ->where('etudiant_id', $supprimer->id)
+                        ->delete();
+                }
+            }
+
+            // 4. Rôles Spatie — CASCADE DELETE, il faut les transférer avant
+            $modelType    = get_class($garder);
+            $rolesGarder  = $DB::table('model_has_roles')
+                ->where('model_id', $garder->id)->where('model_type', $modelType)
+                ->pluck('role_id');
+            $rolesSuppr   = $DB::table('model_has_roles')
+                ->where('model_id', $supprimer->id)->where('model_type', $modelType)
+                ->pluck('role_id');
+
+            foreach ($rolesSuppr->diff($rolesGarder) as $roleId) {
+                $DB::table('model_has_roles')->insert([
+                    'role_id'    => $roleId,
+                    'model_type' => $modelType,
+                    'model_id'   => $garder->id,
+                ]);
+            }
+
+            // 5. Autres étudiants qui ont ce compte comme tuteur
+            $DB::table('users')
+                ->where('tuteur_id', $supprimer->id)
+                ->update(['tuteur_id' => $garder->id]);
+
+            // 6. Entreprises et employés créés par ce compte
+            $DB::table('entreprises')->where('user_id', $supprimer->id)->update(['user_id' => $garder->id]);
+            $DB::table('employes')->where('creator_id', $supprimer->id)->update(['creator_id' => $garder->id]);
+
+            // 7. Normaliser le nom + récupérer l'email réel si le compte conservé est @import.local
+            $emailFinal = $garder->email;
+            if (str_ends_with($garder->email, '@import.local') && !str_ends_with($supprimer->email, '@import.local')) {
+                $emailFinal = $supprimer->email;
+            }
+
+            $garder->update([
+                'nom'   => preg_replace('/\s+/', ' ', trim($garder->nom)),
+                'email' => $emailFinal,
+            ]);
+
+            // 8. Suppression — toutes les FK critiques ont été migrées
+            $supprimer->delete();
+        });
+
+        return back()->with('success',
+            'Comptes fusionnés — ' . $garder->prenom . ' ' . trim($garder->nom) . ' conservé (ID ' . $garder->id . ').');
     }
 }

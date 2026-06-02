@@ -96,6 +96,7 @@
             </a>
         </div>
 
+
         <div class="column is-3">
             <a href="{{ route('admin.communication.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
                onmouseover="this.style.borderColor='#3273dc'" onmouseout="this.style.borderColor='#dbdbdb'">
@@ -107,10 +108,10 @@
 
         @if($aValider > 0)
         <div class="column is-3">
-            <a href="{{ route('admin.stages.index', ['filtre' => 'en_attente']) }}" class="box has-text-centered p-4" style="display:block; border:2px solid #f14668; transition:.15s; text-decoration:none;">
-                <span class="icon is-large has-text-danger mb-2"><i class="fas fa-clock fa-2x"></i></span>
-                <p class="has-text-weight-semibold has-text-danger">{{ $aValider }} stage(s) à valider</p>
-                <p class="is-size-7 has-text-grey">En attente de validation</p>
+            <a href="{{ route('admin.stages.index', ['filtre' => 'a_faire_signer']) }}" class="box has-text-centered p-4" style="display:block; border:2px solid #f5a623; transition:.15s; text-decoration:none;">
+                <span class="icon is-large has-text-warning mb-2"><i class="fas fa-pen fa-2x"></i></span>
+                <p class="has-text-weight-semibold has-text-warning-dark">{{ $aValider }} convention(s) à faire signer</p>
+                <p class="is-size-7 has-text-grey">En attente de signature employeur</p>
             </a>
         </div>
         @endif

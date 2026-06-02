@@ -19,7 +19,7 @@ class EnsureStudentHasStage
         if (!$user->stages()->exists()) {
             return redirect()->route('etudiant.stages.index')
                 ->withErrors([
-                    'stage' => 'Vous devez saisir les informations de votre stage avant d\'accéder au journal de bord.',
+                    'stage' => 'Vous devez saisir les informations de votre stage avant d\'accéder au journal de stage.',
                 ]);
         }
 

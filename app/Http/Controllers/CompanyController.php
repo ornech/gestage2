@@ -44,19 +44,31 @@ class CompanyController extends Controller
 
     public function store(Request $request)
     {
-        $entreprise = Entreprise::create([
-            'raison_sociale' => $request->raison_sociale,
-            'adresse' => $request->adresse,
-            'code_postal' => $request->code_postal,
-            'ville' => $request->ville,
-            'siret' => $request->siret,
-            'est_valide' => false,
+        $request->validate([
+            'raison_sociale' => 'required|string|max:255',
+            'ville'          => 'required|string|max:100',
+            'siret'          => 'nullable|digits:14',
+            'code_postal'    => 'nullable|string|max:20',
+            'telephone'      => 'nullable|string|max:20',
+            'code_naf'       => 'nullable|string|max:10',
         ]);
 
-        
-    return redirect()
-        ->route('entreprises.show', $entreprise)
-        ->with('success', 'Entreprise créée avec succès.');
+        $entreprise = Entreprise::create([
+            'raison_sociale'  => strtoupper($request->raison_sociale),
+            'adresse'         => $request->adresse,
+            'code_postal'     => $request->code_postal,
+            'ville'           => strtoupper($request->ville),
+            'siret'           => $request->siret ?: null,
+            'telephone'       => $request->telephone,
+            'code_naf'        => $request->code_naf,
+            'departement_code'=> $request->code_postal ? substr($request->code_postal, 0, 2) : null,
+            'est_valide'      => true,
+            'user_id'         => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('entreprises.show', $entreprise)
+            ->with('success', 'Entreprise créée avec succès.');
     }
 
     public function importSiret(Request $request, SireneClient $sirene)
