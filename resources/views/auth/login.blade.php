@@ -5,7 +5,7 @@
     <div class="hero-body">
         <div class="container">
             <div class="columns is-centered">
-                <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+                <div class="column is-8-mobile is-6-tablet is-5-desktop is-4-widescreen">
                     
                     <div class="box shadow-lg">
                         <h1 class="title has-text-centered has-text-grey-dark">Connexion</h1>
@@ -63,9 +63,6 @@
                         </form>
                     </div>
 
-                    <p class="has-text-centered mt-4">
-                        <a href="/password/reset" class="has-text-grey">Mot de passe oublié ?</a>
-                    </p>
 
                 </div>
             </div>

@@ -11,6 +11,23 @@
         </div>
     @endif
 
+    {{-- ── Encart d'avertissement ─────────────────────────────────────────── --}}
+    <article class="message is-danger mb-4">
+        <div class="message-header">
+            <p><i class="fas fa-triangle-exclamation mr-2"></i>Import destructif — à lire avant de continuer</p>
+        </div>
+        <div class="message-body">
+            <p class="mb-2">
+                Crée ou <strong>écrase</strong> les comptes étudiants (nom, email, mot de passe) —
+                mauvaise classe = correction manuelle compte par compte.
+            </p>
+            <ul style="list-style: disc; padding-left: 1.25rem;">
+                <li class="mb-1"><strong>SIO1</strong> — attendre quelques semaines de cours (listes stabilisées).</li>
+                <li><strong>SIO2</strong> — déjà en base : utiliser <strong>« Redoubler »</strong> ou <em>Ajouter un compte</em>.</li>
+            </ul>
+        </div>
+    </article>
+
     <div class="box">
         <p class="mb-4">
             Exportez la liste des élèves depuis

@@ -8,6 +8,12 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Backup DB quotidien à 2h du matin
+Schedule::command('backup:run --only-db')->dailyAt('02:00');
+
+// Nettoyage des vieux backups selon la stratégie de rotation (backup.php)
+Schedule::command('backup:clean')->dailyAt('02:30');
+
 // Rappel hebdomadaire aux étudiants sans stage saisi — tous les lundis à 8h
 Schedule::command('stages:rappel')->weeklyOn(1, '08:00');
 

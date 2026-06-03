@@ -105,10 +105,12 @@
                         <input class="input date-debut"
                                type="date"
                                name="{{ $key }}[stage_date_debut]"
-                               data-target="date-fin-{{ $key }}"
-                               data-semaines="semaines-{{ $key }}"
-                               value="{{ $cfg?->stage_date_debut?->format('Y-m-d') }}"
-                               oninput="calculerDateFin('{{ $key }}')">
+                               id="debut-{{ $key }}"
+                               data-key="{{ $key }}"
+                               value="{{ $cfg?->stage_date_debut?->format('Y-m-d') }}">
+                        <p class="help is-danger" id="warn-lundi-{{ $key }}" style="display:none;">
+                            La date de début doit être un lundi.
+                        </p>
                     </div>
 
                     {{-- Durée en semaines --}}
@@ -117,7 +119,7 @@
                         <div class="select is-fullwidth">
                             <select name="{{ $key }}[duree_semaines]"
                                     id="semaines-{{ $key }}"
-                                    onchange="calculerDateFin('{{ $key }}')">
+                                    data-key="{{ $key }}">
                                 @for($s = 1; $s <= 16; $s++)
                                     <option value="{{ $s }}" {{ $semaines == $s ? 'selected' : '' }}>
                                         {{ $s }} semaine{{ $s > 1 ? 's' : '' }}
@@ -154,21 +156,35 @@
 
 <script nonce="{{ $cspNonce ?? '' }}">
 function calculerDateFin(key) {
-    const debut    = document.querySelector(`input[name="${key}[stage_date_debut]"]`);
-    const selectSem = document.getElementById(`semaines-${key}`);
-    const output   = document.getElementById(`date-fin-${key}`);
+    const debutInput = document.getElementById(`debut-${key}`);
+    const selectSem  = document.getElementById(`semaines-${key}`);
+    const output     = document.getElementById(`date-fin-${key}`);
+    const warnLundi  = document.getElementById(`warn-lundi-${key}`);
 
-    if (!debut.value || !selectSem.value) { output.value = ''; return; }
+    if (!debutInput.value || !selectSem.value) { output.value = ''; return; }
 
-    const d = new Date(debut.value);
-    d.setDate(d.getDate() + parseInt(selectSem.value) * 7);
+    // Utiliser les composantes locales pour éviter le décalage UTC
+    const [y, m, d] = debutInput.value.split('-').map(Number);
+    const debut = new Date(y, m - 1, d);
 
-    output.value = d.toLocaleDateString('fr-FR');
+    // Avertir si ce n'est pas un lundi (getDay() : 0=dim, 1=lun)
+    warnLundi.style.display = debut.getDay() === 1 ? 'none' : '';
+
+    // Fin = début + N×7 jours - 3 → atterrit le vendredi de la dernière semaine
+    const fin = new Date(debut);
+    fin.setDate(fin.getDate() + parseInt(selectSem.value) * 7 - 3);
+
+    output.value = fin.toLocaleDateString('fr-FR');
 }
 
-// Initialiser à l'ouverture de la page
 document.addEventListener('DOMContentLoaded', () => {
-    ['sio1', 'sio2'].forEach(k => calculerDateFin(k));
+    ['sio1', 'sio2'].forEach(key => {
+        const debutInput = document.getElementById(`debut-${key}`);
+        const selectSem  = document.getElementById(`semaines-${key}`);
+        if (debutInput) debutInput.addEventListener('change', () => calculerDateFin(key));
+        if (selectSem)  selectSem.addEventListener('change',  () => calculerDateFin(key));
+        calculerDateFin(key);
+    });
 });
 </script>
 @endsection

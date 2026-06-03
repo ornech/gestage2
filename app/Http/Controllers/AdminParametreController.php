@@ -46,7 +46,8 @@ class AdminParametreController extends Controller
         foreach (['SIO1' => 'sio1', 'SIO2' => 'sio2'] as $classe => $key) {
             $debut    = $request->input("{$key}.stage_date_debut") ?: null;
             $semaines = (int) ($request->input("{$key}.duree_semaines") ?: 6);
-            $fin      = $debut ? \Carbon\Carbon::parse($debut)->addWeeks($semaines)->format('Y-m-d') : null;
+            // Début = lundi, fin = vendredi de la N-ième semaine → +N×7j −3j
+            $fin      = $debut ? \Carbon\Carbon::parse($debut)->addDays($semaines * 7 - 3)->format('Y-m-d') : null;
 
             ConfigurationStage::updateOrCreate(
                 ['annee_scolaire' => $annee, 'classe' => $classe],

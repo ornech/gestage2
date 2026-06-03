@@ -45,7 +45,7 @@
             <input type="hidden" name="classe" value="{{ $classeParam }}">
             @if($speActif) <input type="hidden" name="spe" value="{{ $speActif }}"> @endif
             <div class="select is-small">
-                <select name="annee" onchange="this.form.submit()">
+                <select name="annee" id="annee-select">
                     @foreach($annees as $annee)
                         <option value="{{ $annee }}" {{ $annee === $anneeSelectionnee ? 'selected' : '' }}>
                             {{ $annee }}{{ $annee === $anneeActive ? ' ●' : '' }}
@@ -138,4 +138,10 @@
     {{ $users->withQueryString()->links() }}
 
 </div>
+
+<script nonce="{{ $cspNonce ?? '' }}">
+document.getElementById('annee-select').addEventListener('change', function () {
+    this.form.submit();
+});
+</script>
 @endsection

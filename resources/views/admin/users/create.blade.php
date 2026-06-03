@@ -51,7 +51,7 @@
             </div>
 
             <div class="field">
-                <label class="label is-small">Email</label>
+                <label class="label is-small">Email (login)</label>
                 <input class="input" type="email" name="email"
                        value="{{ old('email') }}" placeholder="marie.dupont@lycee.fr" required>
                 <p class="help">Le mot de passe initial sera <strong>achanger</strong>. L'utilisateur devra le modifier à sa première connexion.</p>
