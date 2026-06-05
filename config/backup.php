@@ -70,7 +70,12 @@ return [
             ],
         ],
 
-        'slack'   => ['webhook_url' => ''],
+        'slack' => [
+            'webhook_url' => '',
+            'channel'     => null,
+            'username'    => null,
+            'icon'        => null,
+        ],
         'discord' => ['webhook_url' => '', 'username' => '', 'avatar_url' => ''],
         'webhook' => ['url' => ''],
     ],
