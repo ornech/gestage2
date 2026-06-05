@@ -37,8 +37,6 @@ class FortifyServiceProvider extends ServiceProvider
         // Attention : On désactive l'ignorance des routes pour que Fortify gère le Login natif.
         // (Sauf si tu as recréé manuellement les routes de connexion dans web.php)
         // Fortify::ignoreRoutes();
-        Fortify::redirects('register', '/stages');
-
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
@@ -58,10 +56,6 @@ class FortifyServiceProvider extends ServiceProvider
         // ⭐ Vues Fortify
         Fortify::loginView(function () {
             return view('auth.login');
-        });
-
-        Fortify::registerView(function () {
-            return view('auth.register');
         });
 
         Fortify::requestPasswordResetLinkView(function () {
