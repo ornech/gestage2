@@ -36,8 +36,6 @@ return [
         'database_dump_file_extension' => '',
 
         'destination' => [
-            'compression_method' => ZipArchive::CM_DEFAULT,
-            'compression_level'  => 9,
             'filename_prefix'    => '',
             'disks'              => ['local'],
             'continue_on_failure'=> false,
