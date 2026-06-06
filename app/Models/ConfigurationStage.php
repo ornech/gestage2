@@ -30,7 +30,9 @@ class ConfigurationStage extends Model
     public function getDureeEnSemainesAttribute(): ?int
     {
         if (!$this->stage_date_debut || !$this->stage_date_fin) return null;
-        return (int) $this->stage_date_debut->diffInWeeks($this->stage_date_fin);
+        // La fin est stockée comme début + N×7 - 3j (lundi→vendredi)
+        // donc (diffInDays + 3) / 7 = N exactement
+        return (int) (($this->stage_date_debut->diffInDays($this->stage_date_fin) + 3) / 7);
     }
 
     public static function forAnnee(string $annee): \Illuminate\Support\Collection
