@@ -34,7 +34,7 @@
             </div>
             <div class="column is-narrow">
                 <div class="select">
-                    <select name="promo" onchange="this.form.submit()">
+                    <select id="promo-select" name="promo">
                         <option value="">Toutes les promos</option>
                         @foreach($promos as $p)
                             <option value="{{ $p }}" {{ $promoFiltre == $p ? 'selected' : '' }}>
@@ -98,3 +98,11 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+    document.getElementById('promo-select').addEventListener('change', function () {
+        this.closest('form').submit();
+    });
+</script>
+@endpush
