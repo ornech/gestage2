@@ -4,6 +4,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'version' => trim(shell_exec('git describe --tags --always 2>/dev/null') ?: 'dev'),
+
     'env' => env('APP_ENV', 'production'),
 
     'debug' => (bool) env('APP_DEBUG', false),

@@ -91,6 +91,9 @@
                             <i class="fas fa-user-shield mr-1"></i> RGPD &amp; Communications
                         </a></li>
                         @endrole
+                        <li><a href="https://github.com/ornech/gestage2/issues/new" target="_blank" rel="noopener" style="color:#b0b0c8;">
+                            <i class="fas fa-bug mr-1"></i> Signaler un bug
+                        </a></li>
                     </ul>
                 </div>
 
@@ -102,7 +105,7 @@
                     <ul style="font-size:.82rem; line-height:2; color:#b0b0c8;">
                         @php $annee = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y')+1)); @endphp
                         <li><i class="fas fa-calendar-alt mr-1"></i> Année scolaire {{ $annee }}</li>
-                        <li><i class="fas fa-code-branch mr-1"></i> Laravel {{ app()->version() }}</li>
+                        <li><i class="fas fa-code-branch mr-1"></i> Gestage {{ config('app.version') }} — Laravel {{ app()->version() }}</li>
                         <li><i class="fas fa-shield-alt mr-1"></i> Données hébergées en France</li>
                     </ul>
                 </div>
