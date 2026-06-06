@@ -63,19 +63,36 @@ class AdminUserController extends Controller
 
         // ── Vue "Anciennes promos" ───────────────────────────────────────
         if ($filtre === 'anciens') {
-            $users = User::role('Etudiant')
+            $promos = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
-                    // Diplômés (promo <= année active) OU démissionnaires
                     $q->where('promo', '<=', $syActif)
                       ->orWhere('statut', 'demissionnaire');
                 })
-                ->orderByDesc('promo')
+                ->whereNotNull('promo')
+                ->pluck('promo')
+                ->unique()
+                ->sortDesc()
+                ->values();
+
+            $promoFiltre = $request->get('promo');
+
+            $query = User::role('Etudiant')
+                ->where(function ($q) use ($syActif) {
+                    $q->where('promo', '<=', $syActif)
+                      ->orWhere('statut', 'demissionnaire');
+                });
+
+            if ($promoFiltre) {
+                $query->where('promo', $promoFiltre);
+            }
+
+            $users = $query->orderByDesc('promo')
                 ->orderBy('nom')
                 ->paginate(30)
                 ->withQueryString();
 
             $sy = $syActif;
-            return view('admin.users.anciens', compact('users', 'sy'));
+            return view('admin.users.anciens', compact('users', 'sy', 'promos', 'promoFiltre'));
         }
 
         // ── Requête standard : actifs de l'année en cours ────────────────

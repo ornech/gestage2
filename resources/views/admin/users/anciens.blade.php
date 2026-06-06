@@ -6,7 +6,7 @@
     <div class="level">
         <div class="level-left">
             <div>
-                <h1 class="title">Anciens étudiants</h1>
+                <h1 class="title">Anciennes promos</h1>
                 <p class="subtitle is-6 has-text-grey">Diplômés et démissionnaires</p>
             </div>
         </div>
@@ -22,7 +22,7 @@
     @endif
 
     <form method="GET">
-        <input type="hidden" name="anciens" value="1">
+        <input type="hidden" name="filtre" value="anciens">
         <div class="columns is-vcentered mb-4">
             <div class="column">
                 <div class="control has-icons-left">
@@ -30,6 +30,18 @@
                            placeholder="Nom, prénom ou email…"
                            value="{{ request('search') }}">
                     <span class="icon is-left"><i class="fas fa-search"></i></span>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="select">
+                    <select name="promo" onchange="this.form.submit()">
+                        <option value="">Toutes les promos</option>
+                        @foreach($promos as $p)
+                            <option value="{{ $p }}" {{ $promoFiltre == $p ? 'selected' : '' }}>
+                                Promo {{ $p }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
             <div class="column is-narrow">
