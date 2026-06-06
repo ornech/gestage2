@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\RappelSaisieStage;
+use App\Models\Parametre;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -16,8 +17,13 @@ class RappelStagePapier extends Command
 
     public function handle(): int
     {
+        $anneeActive = Parametre::get('annee_scolaire', date('Y') . '-' . (date('Y') + 1));
+        $syInt       = (int) explode('-', $anneeActive)[0];
+        $promosActives = [$syInt + 1, $syInt + 2]; // SIO2 et SIO1 de l'année en cours
+
         $etudiants = User::role('Etudiant')
             ->where('statut', 'actif')
+            ->whereIn('promo', $promosActives)
             ->whereDoesntHave('stages')
             ->whereDoesntHave('conventionPapier')
             ->with('tuteur')
