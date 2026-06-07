@@ -43,7 +43,21 @@
             'en_attente'     => ['is-info',    'fa-clock', 'Déposée — en attente du proviseur'],
             'validee'        => ['is-success', 'fa-check-circle', 'Convention validée ✓'],
         ];
+        // Stage de l'année en cours absent — même si un stage d'une année précédente est déjà saisi
+        $stageAnneeCouranteManquant = $user->classe_courante
+            && $stages->isNotEmpty()
+            && !$stages->contains(fn($s) => $s->classe === $user->classe_courante);
     @endphp
+
+    @if($stageAnneeCouranteManquant)
+    <div class="notification is-warning">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <strong>Stage de {{ $user->classe_courante }} non saisi.</strong>
+        Le ou les stages affichés ci-dessous concernent une année précédente.
+        Il te reste à renseigner dans l'application ton stage actuel : <strong>entreprise</strong> et <strong>maître de stage</strong>.
+        <a href="{{ route('etudiant.stage.nouveau') }}" class="ml-2">→ Saisir mon stage de {{ $user->classe_courante }}</a>
+    </div>
+    @endif
 
     @if($stages->isEmpty() && !$convPapier)
     {{-- Aucun stage --}}
