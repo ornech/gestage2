@@ -87,7 +87,7 @@ class EmployeController extends Controller
     public function update(Request $request, Employe $employe)
      {
         // Valider les données du formulaire
-         $request->validate([
+         $validated = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
             'email' => 'required|email|unique:employes,email,' . $employe->id,
@@ -96,7 +96,7 @@ class EmployeController extends Controller
             ]);
             // Mettre à jour l'employé avec les données validées
             $emailChange = $employe->email !== $request->email;
-            $employe->update($request->validated());
+            $employe->update($validated);
 
             // Si l'email change, renvoyer immédiatement le mail sur les stages déjà validés
             if ($emailChange && $request->email) {
