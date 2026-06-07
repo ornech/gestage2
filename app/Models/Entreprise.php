@@ -23,6 +23,7 @@ class Entreprise extends Model
         'ville',
         'departement_code',
         'telephone',
+        'email',
         'type',
         'effectif',
         'est_valide',

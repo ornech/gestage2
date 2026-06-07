@@ -16,6 +16,54 @@
     <p><strong>Effectif :</strong> {{ $entreprise->effectif ?? 'Non défini' }}</p>
     <p><strong>SIRET :</strong> {{ $entreprise->siret ?? 'Non défini' }}</p>
 
+    {{-- Contact générique de l'entreprise (standard) : reste accessible même si
+         le maître de stage demande l'anonymisation de ses coordonnées (RGPD) --}}
+    <div class="box mt-4 mb-4">
+        <p class="menu-label mb-2">Contact générique (standard)</p>
+        @if($entreprise->telephone || $entreprise->email)
+            <p>
+                <i class="fas fa-phone mr-2"></i>
+                {{ $entreprise->telephone ?? '—' }}
+            </p>
+            <p>
+                <i class="fas fa-envelope mr-2"></i>
+                {{ $entreprise->email ?? '—' }}
+            </p>
+        @else
+            <p class="has-text-grey">Aucun contact générique renseigné pour cette entreprise.</p>
+        @endif
+
+        @hasanyrole('Professeur|Administrateur')
+            <details class="mt-3">
+                <summary class="is-size-7 has-text-link" style="cursor:pointer;">Modifier le contact générique</summary>
+                <form action="{{ route('entreprises.update', $entreprise) }}" method="POST" class="mt-3">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="raison_sociale" value="{{ $entreprise->raison_sociale }}">
+                    <input type="hidden" name="adresse" value="{{ $entreprise->adresse }}">
+                    <input type="hidden" name="code_postal" value="{{ $entreprise->code_postal }}">
+                    <input type="hidden" name="ville" value="{{ $entreprise->ville }}">
+                    <input type="hidden" name="siret" value="{{ $entreprise->siret }}">
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label is-small">Téléphone standard</label>
+                                <input class="input is-small" type="text" name="telephone" value="{{ $entreprise->telephone }}">
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="field">
+                                <label class="label is-small">Email standard</label>
+                                <input class="input is-small" type="email" name="email" value="{{ $entreprise->email }}">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="button is-link is-small">Enregistrer</button>
+                </form>
+            </details>
+        @endhasanyrole
+    </div>
+
     <hr>
 
    

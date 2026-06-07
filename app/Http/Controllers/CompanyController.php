@@ -30,12 +30,24 @@ class CompanyController extends Controller
 
     public function update(Request $request, Entreprise $entreprise)
     {
+        $request->validate([
+            'raison_sociale' => 'required|string|max:255',
+            'adresse'        => 'nullable|string|max:255',
+            'code_postal'    => 'nullable|string|max:20',
+            'ville'          => 'required|string|max:100',
+            'siret'          => 'nullable|digits:14',
+            'telephone'      => 'nullable|string|max:20',
+            'email'          => 'nullable|email|max:255',
+        ]);
+
         $entreprise->update([
             'raison_sociale' => $request->raison_sociale,
             'adresse' => $request->adresse,
             'code_postal' => $request->code_postal,
             'ville' => $request->ville,
             'siret' => $request->siret,
+            'telephone' => $request->telephone,
+            'email' => $request->email,
         ]);
 
         return redirect()->route('entreprises.show', $entreprise)
@@ -50,6 +62,7 @@ class CompanyController extends Controller
             'siret'          => 'nullable|digits:14',
             'code_postal'    => 'nullable|string|max:20',
             'telephone'      => 'nullable|string|max:20',
+            'email'          => 'nullable|email|max:255',
             'code_naf'       => 'nullable|string|max:10',
         ]);
 
@@ -60,6 +73,7 @@ class CompanyController extends Controller
             'ville'           => strtoupper($request->ville),
             'siret'           => $request->siret ?: null,
             'telephone'       => $request->telephone,
+            'email'           => $request->email,
             'code_naf'        => $request->code_naf,
             'departement_code'=> $request->code_postal ? substr($request->code_postal, 0, 2) : null,
             'est_valide'      => true,

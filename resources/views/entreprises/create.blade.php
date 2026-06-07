@@ -82,18 +82,30 @@
             <div class="columns">
                 <div class="column">
                     <div class="field">
-                        <label class="label is-small">Téléphone</label>
+                        <label class="label is-small">
+                            Téléphone standard
+                            <span class="has-text-grey is-size-7">(accueil / standard de l'entreprise)</span>
+                        </label>
                         <input class="input is-small" type="text" name="telephone"
                                value="{{ old('telephone') }}">
                     </div>
                 </div>
                 <div class="column">
                     <div class="field">
-                        <label class="label is-small">Code NAF</label>
-                        <input class="input is-small" type="text" name="code_naf"
-                               value="{{ old('code_naf') }}" placeholder="ex : 6201Z">
+                        <label class="label is-small">
+                            Email standard
+                            <span class="has-text-grey is-size-7">(accueil / standard de l'entreprise)</span>
+                        </label>
+                        <input class="input is-small" type="email" name="email"
+                               value="{{ old('email') }}">
                     </div>
                 </div>
+            </div>
+
+            <div class="field">
+                <label class="label is-small">Code NAF</label>
+                <input class="input is-small" type="text" name="code_naf"
+                       value="{{ old('code_naf') }}" placeholder="ex : 6201Z" style="max-width:200px;">
             </div>
 
             <div class="field is-grouped mt-4">
