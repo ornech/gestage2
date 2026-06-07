@@ -40,25 +40,11 @@
                     <td>{{ $employe->telephone }}</td>
                     <td>{{ $employe->entreprise->raison_sociale ?? '—' }}</td>
 
-                    <td class="d-flex gap-2">
-
+                    <td>
                         {{-- Bouton pour accéder au formulaire d'édition --}}
                         <a href="{{ route('employes.edit', $employe) }}" class="btn btn-warning btn-sm">
                             Modifier
                         </a>
-
-                        {{-- Formulaire pour supprimer un employé --}}
-                        <form action="{{ route('employes.destroy', $employe) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-
-                            {{-- Bouton de suppression avec confirmation --}}
-                            <button class="btn btn-danger btn-sm"
-                                onclick="return confirm('Supprimer cet employé ?')">
-                                Supprimer
-                            </button>
-                        </form>
-
                     </td>
                 </tr>
             @endforeach

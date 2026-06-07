@@ -107,7 +107,6 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::post('/entreprises/{entreprise}/employes',                [EmployeController::class, 'store'])  ->name('employes.store');
     Route::get('/employes/{employe}/edit',                           [EmployeController::class, 'edit'])   ->name('employes.edit');
     Route::put('/employes/{employe}',                                [EmployeController::class, 'update']) ->name('employes.update');
-    Route::delete('/employes/{employe}',                             [EmployeController::class, 'destroy'])->name('employes.destroy');
 });
 
 

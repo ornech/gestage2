@@ -116,17 +116,6 @@ class EmployeController extends Controller
         return redirect()->route('employes.index')
                          ->with('success', 'Employé mis à jour avec succès.');
      }
-    
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Employe $employe)
-    {
-        $employe->delete();
-
-        return redirect()->route('employes.index')
-                         ->with('success', 'Employé supprimé avec succès.');
-    }
 
     public function supprimerEmailRgpd(Employe $employe)
     {
