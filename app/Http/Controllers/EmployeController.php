@@ -64,7 +64,12 @@ class EmployeController extends Controller
     public function show(Employe $employe)
     {
         $employe->load('entreprise');
-        return view('employes.show', compact('employe'));
+
+        // Téléphone : visible par le staff, et par l'étudiant si c'est son propre maître de stage
+        $estMonMaitreDeStage = auth()->user()->hasRole('Etudiant')
+            && auth()->user()->stages()->where('maitre_de_stage_id', $employe->id)->exists();
+
+        return view('employes.show', compact('employe', 'estMonMaitreDeStage'));
     }
     /**
      * Show the form for editing the specified resource.

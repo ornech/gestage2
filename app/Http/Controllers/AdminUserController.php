@@ -6,6 +6,7 @@ use App\Models\ConfigurationStage;
 use App\Models\Parametre;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
@@ -151,11 +152,17 @@ class AdminUserController extends Controller
 
     public function store(Request $request)
     {
+        // Un Professeur ne peut créer que des comptes Étudiant ou Professeur :
+        // seul un Administrateur peut accorder le rôle Administrateur (cohérent avec toggle-admin).
+        $rolesAutorises = auth()->user()->hasRole('Administrateur')
+            ? ['Etudiant', 'Professeur', 'Administrateur']
+            : ['Etudiant', 'Professeur'];
+
         $request->validate([
             'nom'       => 'required|string|max:255',
             'prenom'    => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
-            'role'      => 'required|in:Etudiant,Professeur,Administrateur',
+            'role'      => ['required', Rule::in($rolesAutorises)],
             'classe'    => 'nullable|in:SIO1,SIO2',
             'promo'     => 'nullable|integer|min:2020|max:2040',
             'spe'       => 'nullable|in:SLAM,SISR',
@@ -236,11 +243,15 @@ class AdminUserController extends Controller
 
     public function show(User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         return view('admin.users.show', compact('user'));
     }
 
     public function edit(User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
         $annee       = \App\Models\Parametre::get('annee_scolaire', '2025-2026');
         $currentYear = (int) explode('-', $annee)[0];
@@ -255,6 +266,8 @@ class AdminUserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         $request->validate([
             'nom'       => 'required|string|max:255',
             'prenom'    => 'required|string|max:255',
@@ -276,6 +289,8 @@ class AdminUserController extends Controller
 
     public function updateStatut(Request $request, User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         $request->validate([
             'statut' => 'required|in:actif,demissionnaire',
         ]);
@@ -287,6 +302,8 @@ class AdminUserController extends Controller
 
     public function redoubler(User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         if (!$user->promo) {
             return back()->withErrors("Promotion non définie pour cet étudiant.");
         }
@@ -321,6 +338,8 @@ class AdminUserController extends Controller
 
     public function assignTuteur(Request $request, User $user)
     {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
         $request->validate(['tuteur_id' => 'nullable|exists:users,id']);
         $user->update(['tuteur_id' => $request->tuteur_id]);
         return back()->with('success', 'Tuteur assigné.');

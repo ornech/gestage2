@@ -28,7 +28,9 @@
                     <select name="role" id="role-select" required>
                         <option value="Etudiant"       {{ old('role', 'Etudiant') === 'Etudiant'       ? 'selected' : '' }}>Étudiant</option>
                         <option value="Professeur"     {{ old('role') === 'Professeur'                 ? 'selected' : '' }}>Professeur</option>
+                        @role('Administrateur')
                         <option value="Administrateur" {{ old('role') === 'Administrateur'             ? 'selected' : '' }}>Administrateur</option>
+                        @endrole
                     </select>
                 </div>
             </div>

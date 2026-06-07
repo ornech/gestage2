@@ -14,7 +14,8 @@ class StagePolicy
 
     public function view(User $user, Stage $stage): bool
     {
-        return true;
+        return $user->hasAnyRole(['Professeur', 'Administrateur'])
+            || $user->id === $stage->etudiant_id;
     }
 
     public function create(User $user): bool
@@ -46,12 +47,6 @@ class StagePolicy
     public function validate(User $user): bool
     {
         return $user->hasAnyRole(['Professeur', 'Administrateur']);
-    }
-
-    public function delete(User $user, Stage $stage): bool
-    {
-        return $user->hasAnyRole(['Administrateur', 'Professeur'])
-            || $user->id === $stage->etudiant_id;
     }
 
     public function restore(User $user, Stage $stage): bool

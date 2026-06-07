@@ -118,9 +118,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
 */
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/entreprises/{entreprise}/stages/create', [StageController::class, 'create'])
-        ->name('stages.create');
-    Route::resource('stages', StageController::class)->except(['create']);
+    Route::resource('stages', StageController::class)->except(['create', 'destroy']);
 
     // Journal de stage — student_has_stage laisse passer les profs/admins, bloque les étudiants sans stage
     Route::middleware('student_has_stage')->group(function () {

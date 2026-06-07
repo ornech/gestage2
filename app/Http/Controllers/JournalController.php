@@ -71,6 +71,7 @@ class JournalController extends Controller
     public function update(Request $request, Stage $stage, JournalEntry $entry)
     {
         $this->authorize('manageJournal', $stage);
+        abort_unless($entry->stage_id === $stage->id, 404);
 
         $request->validate([
             'titre'          => 'required|string|max:255',
@@ -92,6 +93,7 @@ class JournalController extends Controller
     public function destroy(Stage $stage, JournalEntry $entry)
     {
         $this->authorize('manageJournal', $stage);
+        abort_unless($entry->stage_id === $stage->id, 404);
 
         $entry->delete();
 

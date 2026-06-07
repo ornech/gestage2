@@ -9,7 +9,7 @@ cd gestage2
 
 ## ─── 2. DÉPENDANCES ─────────────────────────────────────────────────────────
 ```bash
-composer install --no-dev --optimize-autoloader
+composer install --optimize-autoloader
 npm ci
 npm run build
 ```

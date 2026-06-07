@@ -11,6 +11,8 @@ class PdfController extends Controller
 {
     public function convention(Stage $stage)
     {
+        $this->authorize('view', $stage);
+
         $stage->load(['etudiant', 'entreprise', 'maitreDeStage']);
 
         // ── Paramètres éditables de l'établissement ──────────────────────
@@ -86,6 +88,8 @@ class PdfController extends Controller
 
     public function attestation(Stage $stage)
     {
+        $this->authorize('view', $stage);
+
         // TODO : générer l'attestation
         return response('%PDF-1.4', 200)->header('Content-Type', 'application/pdf');
     }

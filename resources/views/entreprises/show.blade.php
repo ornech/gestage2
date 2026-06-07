@@ -23,9 +23,11 @@
     {{-- Stages --}}
   <h2 class="title is-4">Contacts</h2>
 
+@hasanyrole('Professeur|Administrateur')
 <a href="{{ route('employes.create', $entreprise->id) }}" class="button is-primary mb-3">
     Ajouter un contact
 </a>
+@endhasanyrole
 
 @if($entreprise->employes->isEmpty())
     <p>Aucun employé pour cette entreprise.</p>
@@ -45,7 +47,13 @@
         <tr>
             <td>{{ $employe->prenom }} {{ $employe->nom }}</td>
             <td>{{ $employe->email }}</td>
-            <td>{{ $employe->telephone ?? '—' }}</td>
+            <td>
+                @if(auth()->user()->hasAnyRole(['Professeur', 'Administrateur']) || in_array($employe->id, $monMaitreDeStageIds))
+                    {{ $employe->telephone ?? '—' }}
+                @else
+                    <span class="has-text-grey-light" title="Visible uniquement par ton propre maître de stage">masqué</span>
+                @endif
+            </td>
             <td>Contact</td>
             <td>
                 @role('Administrateur')
@@ -68,10 +76,6 @@
 <hr>
 
 <h2 class="title is-4">Stages</h2>
-
-<a href="{{ route('stages.create', $entreprise->id) }}" class="button is-link mb-3">
-    Ajouter un stage
-</a>
 
 <p class="has-text-grey">
     Les stages sont visibles par les étudiants et les professeurs.

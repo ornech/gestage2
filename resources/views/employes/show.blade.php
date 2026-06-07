@@ -31,7 +31,13 @@
                 </tr>
                 <tr>
                     <th>Téléphone</th>
-                    <td>{{ $employe->telephone ?? '—' }}</td>
+                    <td>
+                        @if(auth()->user()->hasAnyRole(['Professeur', 'Administrateur']) || $estMonMaitreDeStage)
+                            {{ $employe->telephone ?? '—' }}
+                        @else
+                            <span class="has-text-grey-light" title="Visible uniquement par ton propre maître de stage">masqué</span>
+                        @endif
+                    </td>
                 </tr>
                 @if($employe->service)
                 <tr>

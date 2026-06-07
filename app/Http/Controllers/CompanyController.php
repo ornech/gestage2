@@ -109,7 +109,12 @@ class CompanyController extends Controller
             'stages.maitreDeStage'
         ]);
 
-        return view('entreprises.show', compact('entreprise'));
+        // Téléphones des contacts : visibles par le staff, et par l'étudiant pour son propre maître de stage
+        $monMaitreDeStageIds = auth()->user()->hasRole('Etudiant')
+            ? auth()->user()->stages()->whereNotNull('maitre_de_stage_id')->pluck('maitre_de_stage_id')->all()
+            : [];
+
+        return view('entreprises.show', compact('entreprise', 'monMaitreDeStageIds'));
     }
 
     public function importForm()

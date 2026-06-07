@@ -7,6 +7,7 @@ use App\Models\Employe;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Entreprise;
 
 class StageController extends Controller
@@ -17,32 +18,6 @@ class StageController extends Controller
     public function index()
     {
         return redirect()->route('admin.stages.index');
-    }
-
-    /**
-     * Formulaire de création (étudiant)
-     */
-    public function create(Entreprise $entreprise)
-    {
-        $this->authorize('create', Stage::class);
-
-        $user    = auth()->user();
-        $classe  = $user->classe_courante;     // SIO1 ou SIO2
-
-        // Charger la configuration de stage pour la classe de l'étudiant
-        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
-        $config = $classe
-            ? \App\Models\ConfigurationStage::where('annee_scolaire', $annee)
-                ->where('classe', $classe)
-                ->first()
-            : null;
-
-        return view('stages.create', [
-            'entreprise' => $entreprise,
-            'employes'   => $entreprise->employes,
-            'config'     => $config,
-            'classe'     => $classe,
-        ]);
     }
 
     /**
@@ -58,8 +33,9 @@ class StageController extends Controller
         }
 
         // Vérifier qu'il n'a pas déjà un stage pour sa classe
+        // (classe_courante = champ calculé fiable, cohérent avec etudiantNouveau() — voir le bug de transition SIO1→SIO2)
         $existe = Stage::where('etudiant_id', $user->id)
-                       ->where('classe', $user->classe)
+                       ->where('classe', $user->classe_courante)
                        ->exists();
 
         if ($existe) {
@@ -69,7 +45,10 @@ class StageController extends Controller
         // Validation
         $request->validate([
             'entreprise_id'      => 'required|exists:entreprises,id',
-            'maitre_de_stage_id' => 'required|exists:employes,id',
+            'maitre_de_stage_id' => [
+                'required',
+                Rule::exists('employes', 'id')->where('entreprise_id', $request->entreprise_id),
+            ],
             'date_debut'         => 'required|date',
             'duree'              => 'required|integer|min:1',
         ]);
@@ -119,6 +98,8 @@ public function mesConventions()
 
     public function show(Stage $stage)
     {
+        $this->authorize('view', $stage);
+
         $stage->load(['entreprise', 'maitreDeStage', 'etudiant', 'professeur', 'journalEntries']);
 
         return view('stages.show', compact('stage'));
@@ -151,7 +132,10 @@ public function edit(Stage $stage)
         $request->validate([
             'date_debut'         => 'required|date',
             'duree'              => 'required|integer|min:1',
-            'maitre_de_stage_id' => 'required|exists:employes,id',
+            'maitre_de_stage_id' => [
+                'required',
+                Rule::exists('employes', 'id')->where('entreprise_id', $stage->entreprise_id),
+            ],
         ]);
 
         // Recalcul de la date de fin
@@ -167,19 +151,6 @@ public function edit(Stage $stage)
         ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');
-    }
-
-    /**
-     * Suppression d'un stage
-     */
-    public function destroy(Stage $stage)
-    {
-        // Autoriser un étudiant à supprimer son stage
-        $this->authorize('delete', $stage);
-
-        $stage->delete();
-
-        return redirect()->route('stages.index')->with('success', 'Stage supprimé.');
     }
 
     /**
