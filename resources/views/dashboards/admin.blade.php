@@ -194,7 +194,7 @@
                     @endif
                     @if($c['papier_pending'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'sans_stage']) }}"
-                           class="tag is-warning">{{ $c['papier_pending'] }} papier — à saisir</a>
+                           class="tag is-warning">{{ $c['papier_pending'] }} hors app — à saisir</a>
                     @endif
                     @if($c['a_faire_signer'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'a_faire_signer']) }}"

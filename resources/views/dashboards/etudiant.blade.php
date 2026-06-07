@@ -38,6 +38,7 @@
     @php
         $stageActif = $stages->first();
         $convBadge  = [
+            'hors_app'       => ['is-warning', 'fa-file-alt', 'Convention hors app — remise'],
             'a_faire_signer' => ['is-warning', 'fa-pen', "À faire signer par l'employeur"],
             'en_attente'     => ['is-info',    'fa-clock', 'Déposée — en attente du proviseur'],
             'validee'        => ['is-success', 'fa-check-circle', 'Convention validée ✓'],
@@ -55,7 +56,7 @@
     @endif
 
     @if($convPapier && $stages->isEmpty())
-    {{-- Convention papier uniquement --}}
+    {{-- Convention hors app uniquement --}}
     @php [$badgeColor, $badgeIcon, $badgeLabel] = $convBadge[$convPapier->statut] ?? ['is-light', 'fa-file', '—']; @endphp
     <div class="box mb-4">
         <p class="menu-label mb-2">Convention de stage</p>
@@ -63,8 +64,15 @@
             <span class="tag {{ $badgeColor }} is-medium">
                 <i class="fas {{ $badgeIcon }} mr-1"></i> {{ $badgeLabel }}
             </span>
-            <span class="is-size-7 has-text-grey">Convention remise en version papier</span>
+            <span class="is-size-7 has-text-grey">Convention remise en dehors de l'application</span>
         </div>
+        @if($convPapier->statut === 'hors_app')
+        <div class="notification is-warning is-light py-2 mt-3 mb-0 is-size-7">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Il te reste à renseigner ton <strong>entreprise</strong> et ton <strong>maître de stage</strong> dans l'application.
+            <a href="{{ route('etudiant.stage.nouveau') }}" class="ml-1">→ Compléter mon stage</a>
+        </div>
+        @endif
     </div>
     @endif
 

@@ -18,18 +18,18 @@ class ConventionPapier extends Model
     public function statutSuivant(): ?string
     {
         return match($this->statut) {
-            'a_faire_signer'       => 'en_attente',
+            'hors_app'   => 'en_attente',
             'en_attente' => 'validee',
-            default                => null,
+            default      => null,
         };
     }
 
     public function statutPrecedent(): ?string
     {
         return match($this->statut) {
-            'en_attente' => 'a_faire_signer',
-            'validee'      => 'en_attente',
-            default                => null,
+            'en_attente' => 'hors_app',
+            'validee'    => 'en_attente',
+            default      => null,
         };
     }
 }

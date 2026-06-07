@@ -47,6 +47,7 @@
             @foreach([
                 'tous'           => ['Tous',             'is-dark',    'is-dark'],
                 'sans_stage'     => ['Sans stage',       'is-danger',  'is-danger'],
+                'hors_app'       => ['Hors app',         'is-warning', 'is-warning'],
                 'a_faire_signer' => ['À faire signer',   'is-warning', 'is-warning'],
                 'en_attente'     => ['Déposée direction','is-info',    'is-info'],
                 'validee'        => ['Remise étudiant ✓','is-success', 'is-success'],
@@ -87,7 +88,7 @@
 
     <p class="is-size-7 has-text-grey mb-2">{{ $etudiants->count() }} étudiant(s) — {{ $classeStr }}</p>
 
-    <table class="table is-striped is-fullwidth is-hoverable is-size-7 stages-table">
+    <div class="table-scroll"><table class="table is-striped is-fullwidth is-hoverable is-size-7 stages-table">
         <thead>
             <tr>
                 <th>Étudiant</th>
@@ -253,15 +254,15 @@
             @php
                 $conv = $etudiant->conventionPapier;
                 $rowBgPapier = $conv ? match($conv->statut) {
-                    'a_faire_signer'       => '#fff8e1',
+                    'hors_app'   => '#fdf2e9',
                     'en_attente' => '#e3f2fd',
-                    'validee'      => '#e8f5e9',
-                    default                => '',
+                    'validee'    => '#e8f5e9',
+                    default      => '',
                 } : '';
                 $convPapierSeq = [
-                    'a_faire_signer'       => ['label' => 'Déposée direction',          'class' => 'is-warning'],
+                    'hors_app'   => ['label' => 'Déposée direction',              'class' => 'is-warning'],
                     'en_attente' => ['label' => 'Signée et remise à l\'étudiant', 'class' => 'is-primary'],
-                    'validee'      => ['label' => 'Validée ✓',                       'class' => 'is-success'],
+                    'validee'    => ['label' => 'Validée ✓',                      'class' => 'is-success'],
                 ];
             @endphp
             <tr style="{{ $rowBgPapier ? 'background-color:'.$rowBgPapier.';' : (!$conv ? 'background-color:#fdecea;' : '') }}">
@@ -279,18 +280,18 @@
                 </td>
 
                 @if($conv)
-                {{-- Convention papier en cours --}}
+                {{-- Convention hors app en cours --}}
                 <td colspan="4" class="is-size-7 has-text-grey is-italic">
-                    Convention papier
+                    Convention hors app
                 </td>
                 <td>
-                    {{-- Statut courant convention papier --}}
+                    {{-- Statut courant convention hors app --}}
                     @php
                         $badgePapier = match($conv->statut) {
-                            'a_faire_signer' => ['is-warning is-light', "À faire signer par l'employeur"],
-                            'en_attente'     => ['is-info is-light',    'En attente'],
-                            'validee'        => ['is-success is-light', 'Validée ✓'],
-                            default          => ['is-light',            '—'],
+                            'hors_app'   => ['is-warning is-light', 'Convention hors app — remise'],
+                            'en_attente' => ['is-info is-light',    'En attente'],
+                            'validee'    => ['is-success is-light', 'Validée ✓'],
+                            default      => ['is-light',            '—'],
                         };
                     @endphp
                     <span class="tag {{ $badgePapier[0] }} is-small">{{ $badgePapier[1] }}</span>
@@ -315,11 +316,11 @@
                         {{-- Revenir --}}
                         <form action="{{ route('admin.conventions-papier.revert', $conv) }}"
                               method="POST"
-                              onsubmit="return confirm('{{ $conv->statut === 'a_faire_signer' ? 'Supprimer cette convention papier ?' : '↩ Revenir à l\'étape précédente ?' }}')">
+                              onsubmit="return confirm('{{ $conv->statut === 'hors_app' ? 'Supprimer cette convention hors app ?' : '↩ Revenir à l\'étape précédente ?' }}')">
                             @csrf @method('DELETE')
                             <button type="submit" class="button is-small is-light has-text-grey"
-                                    title="{{ $conv->statut === 'a_faire_signer' ? 'Supprimer' : 'Revenir' }}">
-                                {{ $conv->statut === 'a_faire_signer' ? '✕' : '↩' }}
+                                    title="{{ $conv->statut === 'hors_app' ? 'Supprimer' : 'Revenir' }}">
+                                {{ $conv->statut === 'hors_app' ? '✕' : '↩' }}
                             </button>
                         </form>
                     </div>
@@ -333,10 +334,10 @@
                 <td>
                     <form action="{{ route('admin.stages.hors-appli', $etudiant) }}"
                           method="POST"
-                          onsubmit="return confirm('Confirmer que {{ $etudiant->prenom }} {{ $etudiant->nom }} a remis une convention papier ?')">
+                          onsubmit="return confirm('Confirmer que {{ $etudiant->prenom }} {{ $etudiant->nom }} a remis une convention hors app ?')">
                         @csrf @method('PATCH')
                         <button type="submit" class="button is-small is-warning is-light" style="min-width:155px;">
-                            ⚠ Convention papier remise
+                            ⚠ Convention hors app remise
                         </button>
                     </form>
                 </td>
@@ -346,7 +347,7 @@
             @endif
             @endforeach
         </tbody>
-    </table>
+    </table></div>
     @endif
 
 </div>

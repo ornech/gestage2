@@ -44,7 +44,7 @@ class AdminDashboardController extends Controller
                 'sisr'            => $etudiants->where('spe', 'SISR')->where('statut', 'actif')->count(),
                 'actifs'          => $etudiants->where('statut', 'actif')->count(),
                 'demissionnaires' => $etudiants->where('statut', 'demissionnaire')->count(),
-                'a_faire_signer'  => (clone $baseStages)->where('statut_convention', 'a_faire_signer')->count() + $papierFn('a_faire_signer'),
+                'a_faire_signer'  => (clone $baseStages)->where('statut_convention', 'a_faire_signer')->count() + $papierFn('hors_app'),
                 'en_attente'      => (clone $baseStages)->where('statut_convention', 'en_attente')->count() + $papierFn('en_attente'),
                 'remis'           => (clone $baseStages)->where('statut_convention', 'validee')->count() + $papierFn('validee'),
                 'sans_stage'      => $etudiants->where('statut', 'actif')

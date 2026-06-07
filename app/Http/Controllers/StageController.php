@@ -80,8 +80,16 @@ class StageController extends Controller
 
         $entreprise = \App\Models\Entreprise::find($request->entreprise_id);
 
-        // Transférer le statut de la convention papier si elle existe
+        // Transférer le statut de la convention hors app si elle existe
         $convPapier = \App\Models\ConventionPapier::where('etudiant_id', $user->id)->first();
+
+        // "hors_app" est un statut propre à la convention hors application :
+        // l'employeur a déjà signé → côté stage, l'équivalent est "en_attente" (déposée à la direction)
+        $statutConvention = match ($convPapier?->statut) {
+            'hors_app' => 'en_attente',
+            null       => 'a_faire_signer',
+            default    => $convPapier->statut,
+        };
 
         $stage = Stage::create([
             'titre'              => "Stage chez {$entreprise->raison_sociale}",
@@ -91,7 +99,7 @@ class StageController extends Controller
             'classe'             => $user->classe_courante ?? $request->classe,
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
-            'statut_convention'  => $convPapier?->statut ?? 'a_faire_signer',
+            'statut_convention'  => $statutConvention,
             'statut_validation'  => $convPapier ? 'valide' : 'en_attente',
         ]);
 

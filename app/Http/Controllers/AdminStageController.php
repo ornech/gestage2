@@ -71,6 +71,9 @@ class AdminStageController extends Controller
         // Filtre sur le statut de la convention (indépendant de la classe)
         if ($filtre === 'sans_stage') {
             $query->whereDoesntHave('stages')->whereDoesntHave('conventionPapier');
+        } elseif ($filtre === 'hors_app') {
+            $query->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'hors_app'))
+                  ->whereDoesntHave('stages');
         } elseif (in_array($filtre, ['a_faire_signer', 'en_attente', 'validee'])) {
             $query->where(function ($q) use ($filtre) {
                 $q->whereHas('stages', fn($s) => $s->where('statut_convention', $filtre))
@@ -99,6 +102,10 @@ class AdminStageController extends Controller
         $compteurs = [
             'tous'           => ($baseCount)()->count(),
             'sans_stage'     => ($baseCount)()->whereDoesntHave('stages')->whereDoesntHave('conventionPapier')->count(),
+            'hors_app'       => ($baseCount)()
+                                    ->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'hors_app'))
+                                    ->whereDoesntHave('stages')
+                                    ->count(),
             'a_faire_signer' => ($baseCount)()->where(fn($q) =>
                 $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'a_faire_signer'))
                   ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'a_faire_signer'))->whereDoesntHave('stages'))
@@ -162,16 +169,14 @@ class AdminStageController extends Controller
     }
 
     /**
-     * Crée un stage placeholder quand un étudiant a remis sa convention
-     * directement sans passer par l'application.
+     * Crée un placeholder de convention quand un étudiant a remis sa convention
+     * directement sans passer par l'application (statut initial "hors app").
      */
     public function marquerHorsAppli(User $user)
     {
-        // La convention papier est remise par l'étudiant au prof :
-        // l'employeur a déjà signé → on démarre directement à "en_attente" (prête à déposer à la direction)
         ConventionPapier::updateOrCreate(
             ['etudiant_id' => $user->id],
-            ['statut' => 'en_attente']
+            ['statut' => 'hors_app']
         );
 
         return back();

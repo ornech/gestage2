@@ -191,17 +191,17 @@
 
                 @php
                     $convBadgeMap = [
-                        'a_faire_signer' => ['is-warning is-light', "À faire signer par l'employeur"],
+                        'hors_app'       => ['is-warning is-light', 'Convention hors app — remise'],
                         'en_attente'     => ['is-info is-light',    'En attente du proviseur'],
                         'validee'        => ['is-success is-light', 'Validée ✓'],
                     ];
                 @endphp
 
-                {{-- Convention papier sans stage numérique --}}
+                {{-- Convention hors app sans stage numérique --}}
                 @if($user->conventionPapier && $user->stages->isEmpty())
                 <div class="notification is-warning is-light py-2 mb-3">
                     <i class="fas fa-file-alt mr-2"></i>
-                    <strong>Convention papier</strong> — stage non saisi dans l'appli.
+                    <strong>Convention hors app</strong> — stage non saisi dans l'appli.
                     <span class="tag {{ $convBadgeMap[$user->conventionPapier->statut][0] ?? 'is-light' }} ml-2">
                         {{ $convBadgeMap[$user->conventionPapier->statut][1] ?? $user->conventionPapier->statut }}
                     </span>

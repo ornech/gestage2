@@ -35,7 +35,7 @@
             }
             if ($c['papier_pending'] > 0) {
                 $alertes->push(['warning', 'fa-file-signature',
-                    "{$c['papier_pending']} {$classe} — convention papier reçue, stage à saisir",
+                    "{$c['papier_pending']} {$classe} — convention hors app reçue, stage à saisir",
                     route('admin.stages.index', ['classe' => strtolower($classe)]), 'Voir →']);
             }
         }
@@ -129,7 +129,7 @@
                            class="tag is-danger">{{ $c['sans_stage'] }} sans stage</a>
                     @endif
                     @if($c['papier_pending'] > 0)
-                        <span class="tag is-warning">{{ $c['papier_pending'] }} papier — à saisir</span>
+                        <span class="tag is-warning">{{ $c['papier_pending'] }} hors app — à saisir</span>
                     @endif
                     @if($c['a_faire_signer'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'a_faire_signer']) }}"
