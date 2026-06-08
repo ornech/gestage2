@@ -24,6 +24,9 @@ class SetSecurityHeaders
              . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
              . "img-src 'self' data:; "
              . "font-src 'self' https://cdnjs.cloudflare.com; "
+             . "object-src 'none'; "
+             . "base-uri 'self'; "
+             . "frame-ancestors 'self'; "
              . "form-action 'self';";
 
         $response->headers->set('Content-Security-Policy', $csp);

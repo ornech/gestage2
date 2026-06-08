@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip@1.2.0/dist/bulma-tooltip.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip@1.2.0/dist/bulma-tooltip.min.css"
+      integrity="sha384-thcgPEqE7CCsUh6b/t9LdTE9tFrKMH1h4FSQs5CCxRwt/iF5gAdYVoJLMH1qZU+K" crossorigin="anonymous">
 <style>
     .tab-pane { display: none; }
     .tab-pane.is-visible { display: block; }
