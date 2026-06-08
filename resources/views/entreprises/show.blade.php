@@ -134,9 +134,7 @@
         <tr>
             <td>
                 @if($stage->etudiant)
-                    <a href="{{ route('admin.users.edit', $stage->etudiant) }}" class="has-text-link">
-                        {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
-                    </a>
+                    {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
                 @else
                     <span class="has-text-grey">—</span>
                 @endif

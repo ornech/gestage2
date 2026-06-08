@@ -51,10 +51,5 @@ class Entreprise extends Model
     {
         return $this->hasMany(Stage::class);
     }
-    // Relation : Une entreprise a plusieurs contacts
-    public function contacts()
-{
-    return $this->hasMany(Contact::class);
-}
 
 }
