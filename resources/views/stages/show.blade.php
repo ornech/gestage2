@@ -51,9 +51,13 @@
                 <p class="is-size-7 has-text-grey mb-1">Étudiant</p>
                 <p class="has-text-weight-semibold">
                     @if($stage->etudiant)
-                        <a href="{{ route('admin.users.edit', $stage->etudiant) }}" class="has-text-dark lien-info">
+                        @hasanyrole('Professeur|Administrateur')
+                            <a href="{{ route('admin.users.edit', $stage->etudiant) }}" class="has-text-dark lien-info">
+                                {{ $stage->etudiant->prenom }} {{ $stage->etudiant->nom }}
+                            </a>
+                        @else
                             {{ $stage->etudiant->prenom }} {{ $stage->etudiant->nom }}
-                        </a>
+                        @endhasanyrole
                     @else —
                     @endif
                 </p>
