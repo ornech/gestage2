@@ -53,6 +53,15 @@
 
 
         <div class="column is-3">
+            <a href="{{ route('admin.stages.creer.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
+               onmouseover="this.style.borderColor='#23d160'" onmouseout="this.style.borderColor='#dbdbdb'">
+                <span class="icon is-large has-text-success mb-2"><i class="fas fa-briefcase fa-2x"></i></span>
+                <p class="has-text-weight-semibold">Créer un stage</p>
+                <p class="is-size-7 has-text-grey">Passe-droit pour un étudiant bloqué</p>
+            </a>
+        </div>
+
+        <div class="column is-3">
             <a href="{{ route('admin.reset-password') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
                onmouseover="this.style.borderColor='#f5a623'" onmouseout="this.style.borderColor='#dbdbdb'">
                 <span class="icon is-large has-text-warning mb-2"><i class="fas fa-key fa-2x"></i></span>

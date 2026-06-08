@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\RechercheSiretTrait;
 use App\Mail\BienvenueMaitreDeStage;
 use App\Models\ConfigurationStage;
 use App\Models\ConventionPapier;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Mail;
 
 class AdminStageController extends Controller
 {
+    use RechercheSiretTrait;
+
     public function index(Request $request)
     {
         $anneeActive       = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
@@ -124,6 +127,110 @@ class AdminStageController extends Controller
             'etudiants', 'tuteurs', 'annees', 'anneeSelectionnee', 'anneeActive',
             'syInt', 'filtre', 'classe', 'classeStr', 'compteurs'
         ));
+    }
+
+    /**
+     * Formulaire de saisie d'un stage par le staff, pour le compte d'un étudiant
+     * bloqué (passe-droit) — entreprise introuvable, maître de stage manquant, etc.
+     */
+    public function creerForm()
+    {
+        $etudiants = User::role('Etudiant')
+            ->where('statut', 'actif')
+            ->orderBy('classe')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'prenom', 'classe', 'classe_id']);
+
+        $annee = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+
+        return view('admin.stages.creer', compact('etudiants', 'annee'));
+    }
+
+    /**
+     * Recherche d'entreprise par SIRET (passe-droit staff) — réutilise la même
+     * logique que la recherche étudiant (base locale puis API INSEE Sirene).
+     */
+    public function rechercheSiret(Request $request)
+    {
+        return $this->rechercherEntrepriseParSiret($request);
+    }
+
+    /**
+     * Ajout en AJAX d'un nouveau maître de stage depuis le formulaire de création
+     * de stage par le staff (passe-droit) — miroir de StageController::ajouterMaitreDeStage.
+     */
+    public function ajouterMaitreDeStage(Request $request)
+    {
+        $validated = $request->validate([
+            'entreprise_id' => 'required|exists:entreprises,id',
+            'nom'           => 'required|string|max:255',
+            'prenom'        => 'required|string|max:255',
+            'email'         => 'nullable|email|unique:employes,email',
+            'telephone'     => 'nullable|string|max:30',
+        ]);
+
+        $employe = Employe::create($validated + ['creator_id' => auth()->id()]);
+
+        return response()->json([
+            'id'    => $employe->id,
+            'label' => "{$employe->prenom} {$employe->nom}",
+        ]);
+    }
+
+    /**
+     * Enregistre le stage saisi par le staff pour le compte de l'étudiant choisi.
+     * Reprend la logique de StageController::store, en ciblant l'étudiant sélectionné
+     * plutôt que l'utilisateur connecté.
+     */
+    public function creer(Request $request)
+    {
+        $validated = $request->validate([
+            'etudiant_id'        => 'required|exists:users,id',
+            'entreprise_id'      => 'required|exists:entreprises,id',
+            'maitre_de_stage_id' => [
+                'required',
+                \Illuminate\Validation\Rule::exists('employes', 'id')->where('entreprise_id', $request->entreprise_id),
+            ],
+            'date_debut'         => 'required|date',
+            'duree'              => 'required|integer|min:1',
+        ]);
+
+        $etudiant = User::findOrFail($validated['etudiant_id']);
+        abort_unless($etudiant->hasRole('Etudiant'), 422, "L'utilisateur sélectionné n'est pas un étudiant.");
+
+        if (Stage::where('etudiant_id', $etudiant->id)->where('classe', $etudiant->classe_courante)->exists()) {
+            return back()->withInput()->withErrors(
+                "Cet étudiant a déjà un stage enregistré pour cette année. Modifie-le directement depuis « Tous les stages »."
+            );
+        }
+
+        $entreprise = \App\Models\Entreprise::findOrFail($validated['entreprise_id']);
+        $dateDebut  = \Carbon\Carbon::parse($validated['date_debut']);
+        $dateFin    = $dateDebut->copy()->addWeeks((int) $validated['duree']);
+
+        $convPapier = ConventionPapier::where('etudiant_id', $etudiant->id)->first();
+        $statutConvention = match ($convPapier?->statut) {
+            'hors_app' => 'en_attente',
+            null       => 'a_faire_signer',
+            default    => $convPapier->statut,
+        };
+
+        Stage::create([
+            'titre'              => "Stage chez {$entreprise->raison_sociale}",
+            'entreprise_id'      => $entreprise->id,
+            'maitre_de_stage_id' => $validated['maitre_de_stage_id'],
+            'etudiant_id'        => $etudiant->id,
+            'classe'             => $etudiant->classe_courante,
+            'date_debut'         => $dateDebut,
+            'date_fin'           => $dateFin,
+            'statut_convention'  => $statutConvention,
+            'statut_validation'  => $convPapier ? 'valide' : 'en_attente',
+        ]);
+
+        $convPapier?->delete();
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', "Stage créé pour {$etudiant->prenom} {$etudiant->nom}.");
     }
 
     public function assign(Request $request, Stage $stage)
