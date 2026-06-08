@@ -1,73 +1,71 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container mt-5" style="max-width:640px;">
 
-    {{-- Titre de la page --}}
-    <h1 class="mb-4">Modifier un employé</h1>
+    <div class="level mb-4">
+        <div class="level-left">
+            <h1 class="title is-4 mb-0">Modifier le maître de stage</h1>
+        </div>
+        <div class="level-right">
+            <a href="{{ route('employes.show', $employe) }}" class="button is-light is-small">← Retour</a>
+        </div>
+    </div>
 
-    {{-- Affichage des erreurs de validation si le formulaire contient des erreurs --}}
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                {{-- Boucle sur chaque erreur et affichage --}}
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="notification is-danger is-light mb-4">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
     @endif
 
-    {{-- Formulaire de modification d'un employé existant --}}
-    {{-- La méthode PUT est utilisée pour mettre à jour une ressource --}}
-    <form action="{{ route('employes.update', $employe) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <div class="box">
+        <form action="{{ route('employes.update', $employe) }}" method="POST">
+            @csrf
+            @method('PUT')
 
-        {{-- Champ Nom, pré-rempli avec la valeur actuelle --}}
-        <div class="mb-3">
-            <label for="nom" class="form-label">Nom</label>
-            <input type="text" name="nom" id="nom" class="form-control" value="{{ old('nom', $employe->nom) }}">
-        </div>
+            <div class="columns">
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small">Nom</label>
+                        <input class="input is-small" type="text" name="nom" value="{{ old('nom', $employe->nom) }}" required>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small">Prénom</label>
+                        <input class="input is-small" type="text" name="prenom" value="{{ old('prenom', $employe->prenom) }}" required>
+                    </div>
+                </div>
+            </div>
 
-        {{-- Champ Prénom --}}
-        <div class="mb-3">
-            <label for="prenom" class="form-label">Prénom</label>
-            <input type="text" name="prenom" id="prenom" class="form-control" value="{{ old('prenom', $employe->prenom) }}">
-        </div>
+            <div class="field">
+                <label class="label is-small">Email</label>
+                <input class="input is-small" type="email" name="email" value="{{ old('email', $employe->email) }}">
+            </div>
 
-        {{-- Champ Email --}}
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $employe->email) }}">
-        </div>
+            <div class="field">
+                <label class="label is-small">Téléphone</label>
+                <input class="input is-small" type="text" name="telephone" value="{{ old('telephone', $employe->telephone) }}">
+            </div>
 
-        {{-- Champ Téléphone --}}
-        <div class="mb-3">
-            <label for="telephone" class="form-label">Téléphone</label>
-            <input type="text" name="telephone" id="telephone" class="form-control" value="{{ old('telephone', $employe->telephone) }}">
-        </div>
+            {{-- Entreprise : information non modifiable depuis ce formulaire --}}
+            <div class="field">
+                <label class="label is-small">Entreprise</label>
+                <input class="input is-small" type="text" value="{{ $employe->entreprise?->raison_sociale ?? '—' }}" readonly disabled>
+            </div>
 
-        {{-- Champ Entreprise --}}
-        <div class="mb-3">
-            <label for="entreprise_id" class="form-label">Entreprise</label>
-            <select name="entreprise_id" id="entreprise_id" class="form-control">
-                @foreach($entreprises as $entreprise)
-                    <option value="{{ $entreprise->id }}"
-                        {{ old('entreprise_id', $employe->entreprise_id) == $entreprise->id ? 'selected' : '' }}>
-                        {{ $entreprise->raison_sociale }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        {{-- Bouton pour enregistrer les modifications --}}
-        <button type="submit" class="btn btn-success">Mettre à jour</button>
-
-        {{-- Bouton pour revenir à la liste des employés --}}
-        <a href="{{ route('employes.index') }}" class="btn btn-secondary ms-2">Annuler</a>
-
-    </form>
+            <div class="field is-grouped mt-4">
+                <div class="control">
+                    <button type="submit" class="button is-primary is-small">Mettre à jour</button>
+                </div>
+                <div class="control">
+                    <a href="{{ route('employes.show', $employe) }}" class="button is-light is-small">Annuler</a>
+                </div>
+            </div>
+        </form>
+    </div>
 
 </div>
 @endsection

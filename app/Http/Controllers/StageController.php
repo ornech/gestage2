@@ -187,6 +187,29 @@ public function edit(Stage $stage)
     }
 
     /**
+     * Ajout en AJAX d'un nouveau maître de stage depuis le formulaire unifié
+     * de saisie de stage (étape 2). Reste dans le point d'entrée unique
+     * étudiant — évite de renvoyer vers la fiche entreprise (réservée au staff).
+     */
+    public function ajouterMaitreDeStage(Request $request)
+    {
+        $validated = $request->validate([
+            'entreprise_id' => 'required|exists:entreprises,id',
+            'nom'           => 'required|string|max:255',
+            'prenom'        => 'required|string|max:255',
+            'email'         => 'nullable|email|unique:employes,email',
+            'telephone'     => 'nullable|string|max:30',
+        ]);
+
+        $employe = Employe::create($validated + ['creator_id' => auth()->id()]);
+
+        return response()->json([
+            'id'    => $employe->id,
+            'label' => "{$employe->prenom} {$employe->nom}",
+        ]);
+    }
+
+    /**
      * Recherche une entreprise par SIRET :
      * 1) dans la base locale
      * 2) sinon via l'API INSEE Sirene — crée la fiche automatiquement si trouvée

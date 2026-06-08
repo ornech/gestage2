@@ -93,11 +93,52 @@
                 </div>
             </div>
 
-            <p class="is-size-7 has-text-grey mt-2">
+            <p class="is-size-7 has-text-grey mt-2 mb-0">
                 <i class="fas fa-plus-circle mr-1"></i>
-                Si ton maître de stage n'apparaît pas,
-                <a id="lien-ajout-contact" href="#">ajoute-le depuis la fiche entreprise</a>.
+                Ton maître de stage n'apparaît pas ?
+                <a id="btn-nouveau-contact" href="#">Ajoute-le ici</a>.
             </p>
+
+            {{-- Mini-formulaire d'ajout d'un nouveau maître de stage (AJAX) --}}
+            <div id="bloc-nouveau-contact" class="box mt-3" style="display:none;">
+                <div class="columns mb-0">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label is-small">Nom</label>
+                            <input class="input is-small" type="text" id="nc-nom">
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label is-small">Prénom</label>
+                            <input class="input is-small" type="text" id="nc-prenom">
+                        </div>
+                    </div>
+                </div>
+                <div class="columns mb-0">
+                    <div class="column">
+                        <div class="field">
+                            <label class="label is-small">Email</label>
+                            <input class="input is-small" type="email" id="nc-email">
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="field">
+                            <label class="label is-small">Téléphone</label>
+                            <input class="input is-small" type="text" id="nc-telephone">
+                        </div>
+                    </div>
+                </div>
+                <p id="nc-erreur" class="help is-danger" style="display:none;"></p>
+                <div class="field is-grouped mt-2">
+                    <div class="control">
+                        <button type="button" id="nc-enregistrer" class="button is-link is-small">Enregistrer</button>
+                    </div>
+                    <div class="control">
+                        <button type="button" id="nc-annuler" class="button is-light is-small">Annuler</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- ── Étape 3 : Dates ─────────────────────────────────────── --}}
@@ -168,7 +209,15 @@ const entrepriseInfo = document.getElementById('entreprise-info');
 const blocIntrouvable = document.getElementById('bloc-entreprise-introuvable');
 const blocContact  = document.getElementById('bloc-contact');
 const selectContact = document.getElementById('select-contact');
-const lienAjoutContact = document.getElementById('lien-ajout-contact');
+const btnNouveauContact = document.getElementById('btn-nouveau-contact');
+const blocNouveauContact = document.getElementById('bloc-nouveau-contact');
+const ncNom = document.getElementById('nc-nom');
+const ncPrenom = document.getElementById('nc-prenom');
+const ncEmail = document.getElementById('nc-email');
+const ncTelephone = document.getElementById('nc-telephone');
+const ncErreur = document.getElementById('nc-erreur');
+const ncEnregistrer = document.getElementById('nc-enregistrer');
+const ncAnnuler = document.getElementById('nc-annuler');
 const blocDates    = document.getElementById('bloc-dates');
 const blocSubmit   = document.getElementById('bloc-submit');
 
@@ -219,7 +268,6 @@ btnSiret.addEventListener('click', async function () {
             opt.textContent = c.label;
             selectContact.appendChild(opt);
         });
-        lienAjoutContact.href = '/entreprises/' + data.id;
         blocContact.style.display = 'block';
         blocDates.style.display   = 'block';
         blocSubmit.style.display  = 'block';
@@ -227,6 +275,73 @@ btnSiret.addEventListener('click', async function () {
         entrepriseId.value = '';
         blocIntrouvable.style.display = 'block';
     }
+});
+
+// Ajout d'un nouveau maître de stage (AJAX, sans quitter le formulaire)
+btnNouveauContact.addEventListener('click', function (e) {
+    e.preventDefault();
+    ncErreur.style.display = 'none';
+    blocNouveauContact.style.display = blocNouveauContact.style.display === 'none' ? 'block' : 'none';
+});
+
+ncAnnuler.addEventListener('click', function () {
+    blocNouveauContact.style.display = 'none';
+    ncErreur.style.display = 'none';
+    [ncNom, ncPrenom, ncEmail, ncTelephone].forEach(i => i.value = '');
+});
+
+ncEnregistrer.addEventListener('click', async function () {
+    ncErreur.style.display = 'none';
+
+    if (!entrepriseId.value) {
+        ncErreur.textContent = 'Sélectionne d\'abord une entreprise.';
+        ncErreur.style.display = 'block';
+        return;
+    }
+    if (!ncNom.value.trim() || !ncPrenom.value.trim()) {
+        ncErreur.textContent = 'Le nom et le prénom sont obligatoires.';
+        ncErreur.style.display = 'block';
+        return;
+    }
+
+    ncEnregistrer.classList.add('is-loading');
+
+    const resp = await fetch('{{ route("etudiant.stage.maitre-de-stage.store") }}', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            entreprise_id: entrepriseId.value,
+            nom: ncNom.value.trim(),
+            prenom: ncPrenom.value.trim(),
+            email: ncEmail.value.trim() || null,
+            telephone: ncTelephone.value.trim() || null
+        })
+    });
+
+    ncEnregistrer.classList.remove('is-loading');
+
+    if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        const premiereErreur = data.errors ? Object.values(data.errors)[0][0] : null;
+        ncErreur.textContent = premiereErreur || 'Impossible d\'ajouter ce maître de stage.';
+        ncErreur.style.display = 'block';
+        return;
+    }
+
+    const data = await resp.json();
+    const opt = document.createElement('option');
+    opt.value = data.id;
+    opt.textContent = data.label;
+    opt.selected = true;
+    selectContact.appendChild(opt);
+
+    blocNouveauContact.style.display = 'none';
+    [ncNom, ncPrenom, ncEmail, ncTelephone].forEach(i => i.value = '');
 });
 
 // Si retour avec erreurs (old values), réafficher les blocs

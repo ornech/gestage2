@@ -8,6 +8,11 @@
             <h1 class="title is-4 mb-0">{{ $employe->prenom }} {{ $employe->nom }}</h1>
         </div>
         <div class="level-right">
+            @can('update', $employe)
+                <a href="{{ route('employes.edit', $employe) }}" class="button is-warning is-small mr-2">
+                    <i class="fas fa-pen mr-1"></i> Modifier
+                </a>
+            @endcan
             <a href="{{ route('entreprises.show', $employe->entreprise_id) }}"
                class="button is-light is-small">← Retour à l'entreprise</a>
         </div>

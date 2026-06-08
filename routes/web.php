@@ -95,9 +95,12 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// Vue fiche contact : tous les auth (nécessaire pour les étudiants via le détail stage)
+// Vue fiche contact + édition : tous les auth, accès fin géré par EmployePolicy
+// (Professeur, Administrateur, ou l'étudiant qui a créé ce maître de stage)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/employes/{employe}', [EmployeController::class, 'show'])->name('employes.show');
+    Route::get('/employes/{employe}',      [EmployeController::class, 'show']) ->name('employes.show');
+    Route::get('/employes/{employe}/edit', [EmployeController::class, 'edit']) ->name('employes.edit');
+    Route::put('/employes/{employe}',      [EmployeController::class, 'update'])->name('employes.update');
 });
 
 // CRUD complet : Professeur et Administrateur uniquement
@@ -105,8 +108,6 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::get('/employes',                                          [EmployeController::class, 'index'])  ->name('employes.index');
     Route::get('/entreprises/{entreprise}/employes/create',          [EmployeController::class, 'create']) ->name('employes.create');
     Route::post('/entreprises/{entreprise}/employes',                [EmployeController::class, 'store'])  ->name('employes.store');
-    Route::get('/employes/{employe}/edit',                           [EmployeController::class, 'edit'])   ->name('employes.edit');
-    Route::put('/employes/{employe}',                                [EmployeController::class, 'update']) ->name('employes.update');
 });
 
 
@@ -154,6 +155,9 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
 
     Route::get('/etudiant/stage/recherche-siret', [StageController::class, 'rechercheSiret'])
         ->name('etudiant.stage.recherche-siret');
+
+    Route::post('/etudiant/stage/maitre-de-stage', [StageController::class, 'ajouterMaitreDeStage'])
+        ->name('etudiant.stage.maitre-de-stage.store');
 
     Route::get('/etudiant/conventions', [StageController::class, 'mesConventions'])
         ->name('etudiant.conventions.index');

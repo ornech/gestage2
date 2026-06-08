@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employe;
-use App\Models\Entreprise;
 use App\Mail\BienvenueMaitreDeStage;
 use Illuminate\Support\Facades\Mail;
 
@@ -50,6 +49,7 @@ class EmployeController extends Controller
         'email'         => $request->email,
         'telephone'     => $request->telephone,
         'entreprise_id' => $request->entreprise_id,
+        'creator_id'    => auth()->id(),
     ]);
 
     return redirect()
@@ -76,23 +76,28 @@ class EmployeController extends Controller
      */
     public function edit(Employe $employe)
     {
-        $entreprises = Entreprise::orderBy('raison_sociale')->get();
-        return view('employes.edit', compact('employe', 'entreprises'));
+        $this->authorize('update', $employe);
+
+        $employe->load('entreprise');
+
+        return view('employes.edit', compact('employe'));
     }
-   
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Employe $employe)
      {
-        // Valider les données du formulaire
+        $this->authorize('update', $employe);
+
+        // Valider les données du formulaire — l'entreprise n'est pas modifiable ici
+        // (elle est affichée en lecture seule, voir employes/edit.blade.php)
          $validated = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
-            'email' => 'required|email|unique:employes,email,' . $employe->id,
+            'email' => 'nullable|email|unique:employes,email,' . $employe->id,
             'telephone' => 'nullable',
-            'entreprise_id' => 'required|exists:entreprises,id',
             ]);
             // Mettre à jour l'employé avec les données validées
             $emailChange = $employe->email !== $request->email;
@@ -113,8 +118,8 @@ class EmployeController extends Controller
                 }
             }
 
-        return redirect()->route('employes.index')
-                         ->with('success', 'Employé mis à jour avec succès.');
+        return redirect()->route('employes.show', $employe)
+                         ->with('success', 'Maître de stage mis à jour avec succès.');
      }
 
     public function supprimerEmailRgpd(Employe $employe)

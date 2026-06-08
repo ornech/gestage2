@@ -49,6 +49,22 @@
             && !$stages->contains(fn($s) => $s->classe === $user->classe_courante);
     @endphp
 
+    @if($errors->any())
+    <div class="notification is-danger is-light" id="alerte-stage-existant">
+        <button class="delete"></button>
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        @foreach($errors->all() as $erreur)
+            {{ $erreur }}
+        @endforeach
+    </div>
+    <script nonce="{{ $cspNonce ?? '' }}">
+        document.querySelector('#alerte-stage-existant .delete')
+            .addEventListener('click', function () {
+                document.getElementById('alerte-stage-existant').remove();
+            });
+    </script>
+    @endif
+
     @if($stageAnneeCouranteManquant)
     <div class="notification is-warning">
         <i class="fas fa-exclamation-triangle mr-2"></i>
