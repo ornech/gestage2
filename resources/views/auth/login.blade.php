@@ -6,9 +6,18 @@
         <div class="container">
             <div class="columns is-centered">
                 <div class="column is-8-mobile is-6-tablet is-5-desktop is-4-widescreen">
-                    
+
                     <div class="box shadow-lg">
-                        <h1 class="title has-text-centered has-text-grey-dark">Connexion</h1>
+                        <div class="has-text-centered mb-4">
+                            <p class="is-size-2 has-text-weight-bold mb-0"
+                               style="background:linear-gradient(90deg, #485fc7, #00d1b2); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:.15rem;">
+                                BTS SIO
+                            </p>
+                            <span style="display:inline-block; width:56px; height:3px; border-radius:2px; background:linear-gradient(90deg, #485fc7, #00d1b2); margin:.4rem 0 .6rem;"></span>
+                            <p class="is-size-6 has-text-grey" style="letter-spacing:.25rem; text-transform:uppercase;">
+                                Gestion stage
+                            </p>
+                        </div>
                         <hr>
 
                         <form method="POST" action="/login">
