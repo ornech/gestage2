@@ -134,7 +134,11 @@
         <tr>
             <td>
                 @if($stage->etudiant)
-                    {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
+                    @role('Etudiant')
+                        <span class="has-text-grey" title="Données personnelles masquées">—</span>
+                    @else
+                        {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
+                    @endrole
                 @else
                     <span class="has-text-grey">—</span>
                 @endif
