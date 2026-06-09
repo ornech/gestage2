@@ -57,30 +57,74 @@
         </div>
     @endif
 
-    {{-- ── Export CSV maîtres de stage ──────────────────────────────── --}}
-    @php $anneesDisponibles = \App\Models\Stage::whereNotNull('annee_scolaire')->distinct()->orderByDesc('annee_scolaire')->pluck('annee_scolaire'); @endphp
-    <div class="box py-3 mb-4">
-        <form method="GET" action="{{ route('admin.stages.export-maitres') }}" style="display:flex; align-items:center; flex-wrap:wrap; gap:.6rem;">
-            <span class="is-size-7 has-text-grey"><i class="fas fa-file-csv mr-1"></i> <strong>Export maîtres de stage</strong></span>
-            <div class="select is-small">
-                <select name="annee">
-                    @foreach($anneesDisponibles as $a)
-                        <option value="{{ $a }}" {{ $a === $annee ? 'selected' : '' }}>{{ $a }}</option>
-                    @endforeach
-                </select>
+    {{-- ── Actions ────────────────────────────────────────────────────── --}}
+    <div class="columns is-multiline mb-4">
+        <div class="column is-3">
+            <div id="btn-export-csv" class="box has-text-centered p-4" style="cursor:pointer; border:2px dashed #dbdbdb; transition:.15s;"
+                 onmouseover="this.style.borderColor='#23d160'" onmouseout="this.style.borderColor='#dbdbdb'">
+                <span class="icon is-large mb-2" style="color:#23d160;"><i class="fas fa-file-csv fa-2x"></i></span>
+                <p class="has-text-weight-semibold">Export maîtres de stage</p>
+                <p class="is-size-7 has-text-grey">Télécharger la liste CSV</p>
             </div>
-            <div class="select is-small">
-                <select name="classe">
-                    <option value="">Toutes les sections</option>
-                    <option value="SIO1">SIO1</option>
-                    <option value="SIO2">SIO2</option>
-                </select>
-            </div>
-            <button type="submit" class="button is-success is-small">
-                <i class="fas fa-download mr-1"></i> Télécharger CSV
-            </button>
-        </form>
+        </div>
     </div>
+
+    {{-- ── Modale export CSV ──────────────────────────────────────────── --}}
+    @php $anneesDisponibles = \App\Models\Stage::whereNotNull('annee_scolaire')->distinct()->orderByDesc('annee_scolaire')->pluck('annee_scolaire'); @endphp
+    <div id="modal-export-csv" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card" style="max-width:380px;">
+            <header class="modal-card-head">
+                <p class="modal-card-title"><i class="fas fa-file-csv mr-2"></i>Export maîtres de stage</p>
+                <button class="delete js-modal-close" aria-label="close"></button>
+            </header>
+            <form method="GET" action="{{ route('admin.stages.export-maitres') }}">
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Année scolaire</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="annee">
+                                @foreach($anneesDisponibles as $a)
+                                    <option value="{{ $a }}" {{ $a === $annee ? 'selected' : '' }}>{{ $a }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Section</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="classe">
+                                <option value="">Toutes les sections</option>
+                                <option value="SIO1">SIO1</option>
+                                <option value="SIO2">SIO2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot" style="justify-content:space-between;">
+                <button type="submit" class="button is-success">
+                    <i class="fas fa-download mr-1"></i> Télécharger CSV
+                </button>
+                <button type="button" class="button js-modal-close">Annuler</button>
+            </footer>
+            </form>
+        </div>
+    </div>
+    <script nonce="{{ $cspNonce ?? '' }}">
+    (function () {
+        var modal  = document.getElementById('modal-export-csv');
+        var opener = document.getElementById('btn-export-csv');
+        opener.addEventListener('click', function () { modal.classList.add('is-active'); });
+        modal.querySelector('.modal-background').addEventListener('click', function () { modal.classList.remove('is-active'); });
+        modal.querySelectorAll('.js-modal-close').forEach(function (el) {
+            el.addEventListener('click', function () { modal.classList.remove('is-active'); });
+        });
+    })();
+    </script>
 
     {{-- ── 2 cards SIO1 / SIO2 ─────────────────────────────────────── --}}
     <div class="columns">
