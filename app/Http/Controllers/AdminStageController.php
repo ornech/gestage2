@@ -130,6 +130,62 @@ class AdminStageController extends Controller
     }
 
     /**
+     * Export CSV des maîtres de stage (nom, email, adresse entreprise)
+     * filtré par année scolaire et optionnellement par section (SIO1/SIO2).
+     */
+    public function exportMaitresCsv(Request $request)
+    {
+        $annee  = $request->get('annee', Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1)));
+        $classe = $request->get('classe');
+
+        $query = Stage::with(['maitreDeStage', 'entreprise', 'etudiant'])
+            ->where('annee_scolaire', $annee)
+            ->whereNotNull('maitre_de_stage_id');
+
+        if ($classe) {
+            $query->where('classe', strtoupper($classe));
+        }
+
+        $stages = $query->orderBy('classe')->get();
+
+        $slug    = 'maitres-de-stage_' . $annee . ($classe ? '_' . strtolower($classe) : '') . '.csv';
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$slug}\"",
+        ];
+
+        $callback = function () use ($stages) {
+            $out = fopen('php://output', 'w');
+            // BOM UTF-8 pour Excel
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Section', 'Étudiant nom', 'Étudiant prénom', 'Maître nom', 'Maître prénom', 'Email', 'Téléphone', 'Entreprise', 'Adresse', 'Code postal', 'Ville'], ';');
+
+            foreach ($stages as $stage) {
+                $emp  = $stage->maitreDeStage;
+                $ent  = $stage->entreprise;
+                $etu  = $stage->etudiant;
+                fputcsv($out, [
+                    $stage->classe ?? '',
+                    $etu?->nom     ?? '',
+                    $etu?->prenom  ?? '',
+                    $emp?->nom     ?? '',
+                    $emp?->prenom  ?? '',
+                    $emp?->email   ?? '',
+                    $emp?->telephone ?? '',
+                    $ent?->raison_sociale ?? '',
+                    $ent?->adresse        ?? '',
+                    $ent?->code_postal    ?? '',
+                    $ent?->ville          ?? '',
+                ], ';');
+            }
+
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
      * Formulaire de saisie d'un stage par le staff, pour le compte d'un étudiant
      * bloqué (passe-droit) — entreprise introuvable, maître de stage manquant, etc.
      */

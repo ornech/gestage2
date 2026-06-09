@@ -57,6 +57,31 @@
         </div>
     @endif
 
+    {{-- ── Export CSV maîtres de stage ──────────────────────────────── --}}
+    @php $anneesDisponibles = \App\Models\Stage::whereNotNull('annee_scolaire')->distinct()->orderByDesc('annee_scolaire')->pluck('annee_scolaire'); @endphp
+    <div class="box py-3 mb-4">
+        <form method="GET" action="{{ route('admin.stages.export-maitres') }}" style="display:flex; align-items:center; flex-wrap:wrap; gap:.6rem;">
+            <span class="is-size-7 has-text-grey"><i class="fas fa-file-csv mr-1"></i> <strong>Export maîtres de stage</strong></span>
+            <div class="select is-small">
+                <select name="annee">
+                    @foreach($anneesDisponibles as $a)
+                        <option value="{{ $a }}" {{ $a === $annee ? 'selected' : '' }}>{{ $a }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="select is-small">
+                <select name="classe">
+                    <option value="">Toutes les sections</option>
+                    <option value="SIO1">SIO1</option>
+                    <option value="SIO2">SIO2</option>
+                </select>
+            </div>
+            <button type="submit" class="button is-success is-small">
+                <i class="fas fa-download mr-1"></i> Télécharger CSV
+            </button>
+        </form>
+    </div>
+
     {{-- ── 2 cards SIO1 / SIO2 ─────────────────────────────────────── --}}
     <div class="columns">
         @foreach($cartesSio as $classe => $c)

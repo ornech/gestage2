@@ -192,7 +192,8 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
 
 // Stages + Paramètres année scolaire — Prof ET Admin
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
-    Route::get('/admin/stages',                       [AdminStageController::class, 'index'])  ->name('admin.stages.index');
+    Route::get('/admin/stages',                       [AdminStageController::class, 'index'])           ->name('admin.stages.index');
+    Route::get('/admin/stages/export-maitres',        [AdminStageController::class, 'exportMaitresCsv'])->name('admin.stages.export-maitres');
     Route::get('/admin/stages/nouveau',                [AdminStageController::class, 'creerForm'])->name('admin.stages.creer.form');
     Route::post('/admin/stages/nouveau',               [AdminStageController::class, 'creer'])    ->name('admin.stages.creer');
     Route::get('/admin/stages/recherche-siret',        [AdminStageController::class, 'rechercheSiret'])      ->name('admin.stages.recherche-siret');
