@@ -21,6 +21,7 @@ class Stage extends Model
         'etudiant_id',
         'professeur_id',
         'classe',
+        'annee_scolaire',
         'statut_validation',
         'note_rejet',
         'statut_convention',

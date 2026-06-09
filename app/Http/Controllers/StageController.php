@@ -37,10 +37,10 @@ class StageController extends Controller
             abort(403, "Vous n'êtes plus autorisé à ajouter un stage.");
         }
 
-        // Vérifier qu'il n'a pas déjà un stage pour sa classe
-        // (classe_courante = champ calculé fiable, cohérent avec etudiantNouveau() — voir le bug de transition SIO1→SIO2)
+        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+
         $existe = Stage::where('etudiant_id', $user->id)
-                       ->where('classe', $user->classe_courante)
+                       ->where('annee_scolaire', $annee)
                        ->exists();
 
         if ($existe) {
@@ -81,6 +81,7 @@ class StageController extends Controller
             'maitre_de_stage_id' => $request->maitre_de_stage_id,
             'etudiant_id'        => $user->id,
             'classe'             => $user->classe_courante ?? $request->classe,
+            'annee_scolaire'     => $annee,
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
             'statut_convention'  => $statutConvention,
@@ -177,13 +178,15 @@ public function edit(Stage $stage)
     {
         $user = auth()->user();
 
-        if ($user->classe_courante && Stage::where('etudiant_id', $user->id)
-                ->where('classe', $user->classe_courante)->exists()) {
+        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+
+        if (Stage::where('etudiant_id', $user->id)
+                ->where('annee_scolaire', $annee)
+                ->exists()) {
             return redirect()->route('etudiant.dashboard')
                 ->withErrors("Tu as déjà un stage enregistré pour cette année.");
         }
 
-        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
         $config = \App\Models\ConfigurationStage::where('annee_scolaire', $annee)
             ->where('classe', $user->classe_courante)
             ->first();

@@ -198,7 +198,7 @@ class AdminStageController extends Controller
         $etudiant = User::findOrFail($validated['etudiant_id']);
         abort_unless($etudiant->hasRole('Etudiant'), 422, "L'utilisateur sélectionné n'est pas un étudiant.");
 
-        if (Stage::where('etudiant_id', $etudiant->id)->where('classe', $etudiant->classe_courante)->exists()) {
+        if (Stage::where('etudiant_id', $etudiant->id)->where('annee_scolaire', $annee)->exists()) {
             return back()->withInput()->withErrors(
                 "Cet étudiant a déjà un stage enregistré pour cette année. Modifie-le directement depuis « Tous les stages »."
             );
@@ -221,6 +221,7 @@ class AdminStageController extends Controller
             'maitre_de_stage_id' => $validated['maitre_de_stage_id'],
             'etudiant_id'        => $etudiant->id,
             'classe'             => $etudiant->classe_courante,
+            'annee_scolaire'     => $annee,
             'date_debut'         => $dateDebut,
             'date_fin'           => $dateFin,
             'statut_convention'  => $statutConvention,
