@@ -11,6 +11,8 @@ class ForcePasswordChange
     private const EXCLUDED_ROUTES = [
         'password.first-change',
         'password.first-change.update',
+        'cgu.show',
+        'cgu.accept',
         'logout',
     ];
 

@@ -13,7 +13,8 @@ class EnsureCguAccepted
         if (
             auth()->check()
             && !auth()->user()->cgu_accepted_at
-            && !$request->routeIs('cgu.*')      // évite la boucle infinie
+            && !$request->routeIs('cgu.*')
+            && !$request->routeIs('password.first-change', 'password.first-change.update')
             && !$request->routeIs('logout')
         ) {
             return redirect()->route('cgu.show');
