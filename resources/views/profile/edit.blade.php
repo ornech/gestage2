@@ -33,8 +33,32 @@
                 </div>
             </div>
 
+            {{-- Bloc email — adapté selon présence d'un email Pronote --}}
             <div class="field">
-                <label class="label">Email</label>
+                <label class="label">Adresse e-mail</label>
+
+                @if($user->email_pronote)
+                    @if($user->email === $user->email_pronote)
+                        {{-- L'utilisateur utilise encore l'adresse Pronote --}}
+                        <div class="notification is-info is-light py-2 px-4 mb-2" style="font-size:.88rem;">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Votre adresse a été importée depuis <strong>Pronote</strong> :
+                            <strong>{{ $user->email_pronote }}</strong>.<br>
+                            En application de l'<strong>art. 21 RGPD</strong>, vous pouvez vous opposer
+                            à son utilisation en saisissant une adresse alternative ci-dessous.
+                        </div>
+                    @else
+                        {{-- L'utilisateur a déjà renseigné une adresse alternative --}}
+                        <div class="notification is-success is-light py-2 px-4 mb-2" style="font-size:.88rem;">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Vous utilisez une adresse alternative à votre adresse Pronote
+                            (<em>{{ $user->email_pronote }}</em>).
+                            Vous pouvez revenir à l'adresse Pronote en resaisissant
+                            <strong>{{ $user->email_pronote }}</strong> dans le champ ci-dessous.
+                        </div>
+                    @endif
+                @endif
+
                 <div class="control">
                     <input class="input" type="email" name="email"
                            value="{{ old('email', $user->email) }}" required>

@@ -95,7 +95,10 @@
 
             @foreach([
                 ['Identité', 'is-info', 'Étudiants &amp; professeurs',
-                    'Nom, prénom, adresse e-mail, numéro de téléphone.'],
+                    'Nom, prénom, adresse e-mail, numéro de téléphone.
+                    Pour les étudiants, l\'adresse e-mail est importée depuis <strong>Pronote</strong>.
+                    Conformément à l\'art. 21 RGPD, vous pouvez vous opposer à son utilisation et
+                    renseigner une adresse alternative depuis votre <a href="' . route('profile.edit') . '">page de profil</a>.'],
                 ['Scolarité', 'is-info', 'Étudiants',
                     'Classe, spécialité (SLAM/SISR), promotion, statut (actif/démissionnaire), dates d\'entrée et de sortie, acceptation des CGU.'],
                 ['Stages', 'is-info', 'Étudiants',

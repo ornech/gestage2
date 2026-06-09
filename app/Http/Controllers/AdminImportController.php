@@ -50,6 +50,7 @@ class AdminImportController extends Controller
                     'nom'                   => $row['nom'],
                     'prenom'                => $row['prenom'],
                     'email'                 => $row['email'],
+                    'email_pronote'         => $row['email'],
                     'password'              => Hash::make('achanger'),
                     'force_password_change' => true,
                     'classe'                => $row['classe'],
@@ -82,7 +83,8 @@ class AdminImportController extends Controller
                 // Remplacer un email placeholder par le vrai email Pronote
                 $existing = User::find($row['existing_id']);
                 if ($existing && str_ends_with($existing->email, '@import.local')) {
-                    $updateData['email'] = $row['email'];
+                    $updateData['email']         = $row['email'];
+                    $updateData['email_pronote'] = $row['email'];
                 }
 
                 User::where('id', $row['existing_id'])->update($updateData);
