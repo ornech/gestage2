@@ -10,9 +10,41 @@ cd gestage2
 ## ─── 2. DÉPENDANCES ─────────────────────────────────────────────────────────
 ```bash
 composer install --optimize-autoloader
-npm ci
+```
+
+### Node.js (hébergement mutualisé O2Switch)
+
+`npm` n'est pas dans le PATH par défaut. Créer une app Node.js via cPanel
+(une seule fois) :
+
+- cPanel → *Software* → **Setup Node.js App** → *Create Application*
+- Version : une version récente (ex. 20.x)
+- Application mode : `Production`
+- Application root : le dossier du projet (ex. `gestage2.btssio17.com`)
+- Application URL : peu importe, ce Node.js ne sert pas le site (le site
+  reste servi en PHP), il sert uniquement à disposer de `npm` pour le build
+
+cPanel affiche ensuite une commande d'activation du virtualenv, à relancer
+à chaque déploiement (le `npm`/`node` activé ne persiste pas entre les
+sessions shell) :
+
+```bash
+source /home3/<user>/nodevenv/<app-root>/20/bin/activate && cd /home3/<user>/<app-root>
+```
+
+Puis, dans ce shell activé :
+
+```bash
+npm ci --include=dev
 npm run build
 ```
+
+> `--include=dev` est nécessaire car `NODE_ENV=production` est souvent
+> positionné par défaut sur ce type d'hébergement, ce qui fait sauter
+> silencieusement les `devDependencies` (`vite`, `tailwindcss`, etc.) lors
+> d'un simple `npm ci` — le build échoue alors avec `vite: commande introuvable`.
+> Une fois `public/build/` généré, `node_modules` n'est plus nécessaire en
+> runtime (le site est servi en PHP, pas en Node).
 
 ## ─── 3. BASE DE DONNÉES ─────────────────────────────────────────────────────
 
@@ -85,8 +117,18 @@ php artisan storage:link
 ```
 
 ## ─── 7. PERMISSIONS ─────────────────────────────────────────────────────────
+
+Sur un serveur dédié avec Apache/Nginx tournant sous `www-data` :
+
 ```bash
 chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+```
+
+Sur hébergement mutualisé O2Switch, l'utilisateur `www-data` n'existe pas :
+les fichiers appartiennent déjà au compte cPanel, seul le `chmod` est utile.
+
+```bash
 chmod -R 775 storage bootstrap/cache
 ```
 
@@ -120,7 +162,19 @@ Tâches planifiées actives :
 cd /var/www/gestage2
 git pull origin dev
 composer install --no-dev --optimize-autoloader
-npm ci && npm run build
+```
+
+Sur O2Switch, activer le virtualenv Node.js avant le build (voir section 2) :
+
+```bash
+source /home3/<user>/nodevenv/<app-root>/20/bin/activate && cd /home3/<user>/<app-root>
+npm ci --include=dev
+npm run build
+```
+
+Puis :
+
+```bash
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
