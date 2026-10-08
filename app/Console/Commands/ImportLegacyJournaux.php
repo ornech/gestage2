@@ -34,10 +34,12 @@ class ImportLegacyJournaux extends Command
             $this->warn('MODE DRY-RUN — aucune écriture en base.');
         }
 
-        // Récupère toutes les entrées legacy avec leur stage gestage2 pour calculer la date
+        // Récupère toutes les entrées legacy avec leur stage local pour calculer la date
+        $localDatabase = config('database.connections.mysql.database');
+
         $rows = DB::connection('legacy')
             ->table('journaux as j')
-            ->join('gestage2.stages as gs', 'gs.id', '=', 'j.idStageEtu')
+            ->join("{$localDatabase}.stages as gs", 'gs.id', '=', 'j.idStageEtu')
             ->select(
                 'j.id        as legacy_id',
                 'j.idEtu     as user_id',
