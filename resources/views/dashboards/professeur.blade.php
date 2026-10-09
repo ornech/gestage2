@@ -11,11 +11,6 @@
                 <p class="is-size-7 has-text-grey">Année scolaire {{ $annee }}</p>
             </div>
         </div>
-        <div class="level-right">
-            <a href="{{ route('admin.stages.index') }}" class="button is-link is-small">
-                <i class="fas fa-list mr-1"></i> Tous les stages
-            </a>
-        </div>
     </div>
 
     {{-- Alertes --}}

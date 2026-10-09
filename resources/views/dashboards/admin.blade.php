@@ -14,20 +14,6 @@
                 <p class="is-size-7 has-text-grey">Année scolaire {{ $annee }}</p>
             </div>
         </div>
-        <div class="level-right" style="gap:8px; display:flex;">
-            <a href="{{ route('admin.stages.index') }}" class="button is-link is-small">
-                <i class="fas fa-briefcase mr-1"></i> Tous les stages
-            </a>
-            <a href="{{ route('admin.users.index') }}" class="button is-info is-small">
-                <i class="fas fa-users mr-1"></i> Étudiants
-            </a>
-            <a href="{{ route('admin.parametres.index') }}" class="button is-light is-small">
-                <i class="fas fa-calendar-alt mr-1"></i> Paramètres
-            </a>
-            <a href="{{ route('imports.pronote.form') }}" class="button is-light is-small">
-                <i class="fas fa-file-import mr-1"></i> Import Pronote
-            </a>
-        </div>
     </div>
 
     {{-- ── Actions admin ───────────────────────────────────────────── --}}
