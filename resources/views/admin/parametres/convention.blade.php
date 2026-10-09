@@ -86,6 +86,13 @@
                 </div>
                 <div class="column is-one-quarter">
                     <div class="field">
+                        <label class="label is-small">Fax</label>
+                        <input class="input is-small" type="text" name="etablissement[fax]"
+                               value="{{ $etablissement['fax'] }}">
+                    </div>
+                </div>
+                <div class="column is-one-quarter">
+                    <div class="field">
                         <label class="label is-small">Email</label>
                         <input class="input is-small" type="email" name="etablissement[mel]"
                                value="{{ $etablissement['mel'] }}">
@@ -107,8 +114,9 @@
             <p class="is-size-7 has-text-grey mb-3">
                 Dans l'article 3, utilisez <code>{DATE_DEBUT}</code> et <code>{DATE_FIN}</code>
                 pour insérer les dates du stage automatiquement.
+                Entourez un passage de <code>**</code> pour le mettre en gras.
             </p>
-            @foreach(['conv_art1','conv_art2','conv_art3','conv_art4','conv_art5','conv_art6','conv_art7','conv_art8','conv_art9','conv_art10','conv_art11'] as $cle)
+            @foreach(['conv_art1','conv_art2','conv_art3','conv_art4','conv_art5','conv_art6','conv_art7','conv_art8','conv_art9','conv_art10','conv_art11','conv_art12'] as $cle)
             <div class="field mb-4">
                 <label class="label is-small">
                     Titre — <code>{{ $cle }}</code>

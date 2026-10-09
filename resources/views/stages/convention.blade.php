@@ -4,304 +4,265 @@
     <meta charset="UTF-8">
     <title>Convention de stage</title>
     <style>
-        /* Marges gérées par mPDF dans le controller */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page {
+            margin-left: 18mm;
+            margin-right: 18mm;
+            margin-top: 24mm;
+            margin-bottom: 18mm;
+            margin-header: 12mm;
+            margin-footer: 12mm;
+            header: html_entete;
+            footer: html_pied;
+        }
+        @page :first {
+            margin-top: 14mm;
+            header: _blank;
+            footer: _blank;
+        }
+
         body {
-            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            line-height: 1.35;
+            font-family: 'FreeSerif', 'Times New Roman', serif;
+            font-size: 11.6pt;
+            line-height: 1.06;
             color: #000;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
-        /* ── Tables ── */
+        p { margin: 0; }
         table { width: 100%; border-collapse: collapse; }
-        td, th { vertical-align: top; font-size: 10pt; line-height: 1.35; }
+        td { vertical-align: top; }
 
-        .table-parties td, .table-parties th {
-            border: 0.75pt solid #000;
-            padding: 5pt 7pt;
-        }
-        .table-parties th {
-            background: #d8d8d8;
+        /* ── Page 1 ── */
+        .titre-convention {
+            background: #b3b3b3;
+            font-size: 20pt;
             font-weight: bold;
             text-align: center;
-            font-size: 10.5pt;
+            padding: 2pt 0;
         }
-        .table-etudiant td {
-            border: 0.75pt solid #000;
-            padding: 5pt 8pt;
-        }
-        .table-sigs td {
-            border: 0.75pt solid #000;
-            padding: 5pt 8pt;
-            text-align: center;
-        }
-        .noborder td { border: none; padding: 2pt 0; }
-
-        /* ── Titres ── */
-        .doc-title-box {
-            border: 2pt solid #000;
-            text-align: center;
-            font-size: 15pt;
-            font-weight: bold;
-            padding: 7pt 10pt;
-            letter-spacing: 0.5pt;
-        }
-        .titre-section {
-            border: 1.5pt solid #000;
-            text-align: center;
-            font-size: 12.5pt;
-            font-weight: bold;
-            padding: 5pt;
-            margin: 12pt 0 8pt;
-            text-transform: uppercase;
-        }
-
-        /* ── Articles ── */
-        .article-titre { font-weight: bold; text-decoration: underline; margin: 7pt 0 2pt; font-size: 10pt; }
-        .article-corps { text-align: left; text-indent: 15pt; margin-bottom: 4pt; word-wrap: break-word; overflow-wrap: break-word; font-size: 10pt; line-height: 1.35; }
-        .article-corps-noindent { text-align: left; margin-bottom: 3pt; word-wrap: break-word; font-size: 10pt; }
-
-        /* ── Lignes pointillées ── */
-        .dotline {
-            display: block;
-            border-bottom: 0.5pt dotted #444;
-            min-height: 13pt;
-            margin: 1pt 0;
-            width: 100%;
-        }
-
-        /* ── Encadré mission ── */
-        .encadre-mission {
-            border: 0.75pt solid #000;
-            padding: 6pt 8pt;
-            margin: 5pt 0;
-        }
-        .ligne-mission {
-            height: 16pt;
-            border-bottom: 0.5pt dotted #555;
-            margin: 0;
-            display: block;
-            width: 100%;
-        }
-
-        /* ── Article sans coupure ── */
-        .article-bloc {
-            page-break-inside: avoid;
-        }
-
-        /* ── Saut de page ── */
-        .page-break { page-break-before: always; }
-
+        .entre-et { font-weight: bold; text-align: center; font-size: 11pt; }
+        .table-parties td { border: 0.75pt solid #000; padding: 3pt 5pt; }
+        .table-parties td.gris { background: #b3b3b3; text-align: center; font-weight: bold; }
         .bold { font-weight: bold; }
-        .center { text-align: center; }
+        .pt { margin: 0; }
+        .pt td { border: none; border-bottom: 0.5pt dotted #000; height: 12.4pt; padding: 0; line-height: 1.15; }
+        .table-etudiant { border: 0.75pt solid #000; }
+        .table-etudiant td { padding: 5pt 5pt; }
+
+        /* ── Titres et articles ── */
+        .titre-section {
+            border: 0.75pt solid #000;
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            padding: 2pt;
+            margin: 0 0 14pt;
+        }
+        .article-titre {
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 22pt 0 6pt;
+        }
+        .corps { text-align: justify; }
+        .retrait { text-indent: 1cm; }
+        .puce { text-align: left; }
+
+        .encadre-mission {
+            border: 2pt solid #ff0000;
+            height: 125pt;
+            margin: 4pt 0 6pt;
+        }
     </style>
 </head>
 <body>
 
-{{-- En-tête et pied de page gérés par mPDF via SetHTMLHeader/SetHTMLFooter dans le controller --}}
+{{-- En-tête (pages 2+) et pied de page, repris du modèle --}}
+<htmlpageheader name="entete">
+    <table style="font-size:10pt; padding:0 7mm;">
+        <tr>
+            <td style="width:25%; text-align:left;">{{ $p['etablissement_nom'] }}</td>
+            <td style="width:50%; text-align:center;">STS Services Informatiques aux Organisations</td>
+            <td style="width:25%; text-align:right;">{{ $p['lieu'] }}</td>
+        </tr>
+    </table>
+</htmlpageheader>
+<htmlpagefooter name="pied">
+    <table style="font-size:9pt; font-style:italic; padding:0 7mm;">
+        <tr>
+            <td style="width:45%; text-align:left;">{{ str_replace('-', '/ ', $stage->annee_scolaire ?? '') }}</td>
+            <td style="width:55%; text-align:left;">Page {PAGENO} sur {nbpg}</td>
+        </tr>
+    </table>
+</htmlpagefooter>
+
+@php
+    // Rendu du corps d'un article : paragraphes séparés par une ligne vide, puces "• "
+    $rendreCorps = function (array $article) use ($stage) {
+        $cle = $article['cle'] ?? '';
+        $retrait = ! in_array($cle, ['conv_art11', 'conv_art12']);
+        $espace = in_array($cle, ['conv_art10', 'conv_art11']);
+        // Retrait des puces, repris du modèle (art. 10 : tirets, art. 11 : puces)
+        [$gauche, $creux] = $cle === 'conv_art10' ? ['13mm', '5.9mm'] : ['5.8mm', '6.9mm'];
+        $retraitPuce = "margin-left:{$gauche}; padding-left:{$creux}; text-indent:-{$creux};";
+        $html = '';
+        foreach (explode("\n\n", $article['corps']) as $n => $para) {
+            $intro = [];
+            $puces = [];
+            foreach (explode("\n", $para) as $ligne) {
+                if (str_starts_with($ligne, '• ') || str_starts_with($ligne, '- ')) {
+                    $puces[] = $ligne;
+                } else {
+                    $intro[] = $ligne;
+                }
+            }
+            $marge = ($n > 0 && $espace) ? 'margin-top:14pt;' : '';
+            if ($intro) {
+                $html .= '<p class="corps'.($retrait ? ' retrait' : '').'" style="'.$marge.'">'.preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', e(implode(' ', $intro))).'</p>';
+                $marge = '';
+            }
+            foreach ($puces as $i => $puce) {
+                $html .= '<div class="puce" style="'.($i === 0 ? $marge : '').$retraitPuce.'">'.e($puce).'</div>';
+            }
+        }
+        if ($stage->date_debut && str_contains($html, '{DATE_DEBUT}')) {
+            $dDebut = \Carbon\Carbon::parse($stage->date_debut)->locale('fr')->isoFormat('dddd D MMMM YYYY');
+            $dFin = $stage->date_fin
+                ? \Carbon\Carbon::parse($stage->date_fin)->locale('fr')->isoFormat('dddd D MMMM YYYY')
+                : '?';
+            $html = str_replace(
+                ['{DATE_DEBUT}', '{DATE_FIN}'],
+                ['<strong>'.e($dDebut).'</strong>', '<strong>'.e($dFin).'</strong>'],
+                $html
+            );
+        }
+        return $html;
+    };
+    $tuteur = $stage->maitreDeStage;
+@endphp
 
 {{-- ════════════════════════════ PAGE 1 ════════════════════════════ --}}
 
-{{-- ── Logo + Titre ── --}}
-<table class="noborder" style="margin-bottom:10pt;">
+<table style="margin-bottom:6pt;">
     <tr>
-        <td style="width:145pt; vertical-align:middle; text-align:center; padding:0; border:none;">
-            @if(file_exists(public_path('img/logo-lmp.png')))
-                <img src="{{ asset('img/logo-lmp.png') }}" width="130" alt="">
-            @else
-                <div style="font-weight:bold; font-size:12pt; line-height:1.3; text-align:center;">
-                    Lycée<br>MERLEAU-PONTY
-                </div>
-            @endif
+        <td style="width:45%; text-align:center; vertical-align:middle;">
+            <img src="{{ public_path('img/logo-sio.png') }}" style="width:150pt;" alt="">
         </td>
-        <td style="vertical-align:middle; padding-left:14pt; border:none;">
-            <div class="doc-title-box">CONVENTION DE STAGE</div>
+        <td style="width:55%; text-align:center; vertical-align:bottom;">
+            <img src="{{ public_path('img/logo-lycee.png') }}" style="width:230pt;" alt=""><br>
+            <div class="titre-convention">CONVENTION DE STAGE</div>
         </td>
     </tr>
 </table>
 
-{{-- ── Tableau des parties ── --}}
-<table class="table-parties" style="margin-bottom:8pt;">
-    <thead>
-        <tr>
-            <th style="width:50%;">ENTRE</th>
-            <th style="width:50%;">ET</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align:center; padding:6pt 7pt;">
-                <span class="bold" style="font-size:12pt;">LE LYCÉE<br>{{ mb_strtoupper($p['etablissement_nom'], 'UTF-8') }}</span>
-            </td>
-            <td style="padding:6pt 7pt;">
-                <span class="dotline">{{ $stage->entreprise?->raison_sociale }}</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding:6pt 7pt;">
-                <span class="bold">Représenté par :</span><br>
-                {{ $p['proviseur_civilite'] }} {{ $p['proviseur_nom'] }}<br>
-                <span class="bold">{{ $p['proviseur_titre'] }}</span><br><br>
-                <span class="bold">Adresse de l'établissement :</span><br>
-                {{ $p['adresse'] }}<br>
-                @if($p['bp']){{ $p['bp'] }}<br>@endif
-                {{ $p['cp_ville'] }}<br>
-                Tél : {{ $p['tel'] }}<br>
-                Mél : {{ $p['mel'] }}<br><br>
-                <span class="bold">Professeur responsable :</span><br>
-                Nom : {{ $profPrincipal?->prenom }} {{ $profPrincipal?->nom }}<br>
-                Tél : {{ $p['tel'] }}<br>
-                Courriel : {{ $profPrincipal?->email }}
-            </td>
-            <td style="padding:6pt 7pt;">
-                <span class="bold">Représenté par :</span><br>
-                <span class="dotline">{{ $stage->maitreDeStage?->prenom }} {{ $stage->maitreDeStage?->nom }}</span>
-                <br>
-                <span class="bold">Fonction ;</span><br>
-                <span class="dotline">{{ $stage->maitreDeStage?->fonction }}</span>
-                <br>
-                <span class="bold">Nom et adresse de l'entreprise :</span><br>
-                <span class="dotline">{{ $stage->entreprise?->adresse }}</span>
-                <span class="dotline">{{ $stage->entreprise?->complement_adresse }}</span>
-                <span class="dotline">{{ $stage->entreprise?->code_postal }} {{ $stage->entreprise?->ville }}</span>
-                <span class="dotline">&nbsp;</span>
-                <span class="dotline">&nbsp;</span>
-                <br>
-                <span class="bold">Tuteur du stagiaire :</span><br>
-                Nom : <span class="dotline">{{ $stage->maitreDeStage?->prenom }} {{ $stage->maitreDeStage?->nom }}</span>
-                Fonction : <span class="dotline">{{ $stage->maitreDeStage?->fonction }}</span>
-                Service : <span class="dotline">{{ $stage->maitreDeStage?->service }}</span>
-                Tél : <span class="dotline">{{ $stage->maitreDeStage?->telephone }}</span>
-                Courriel : <span class="dotline">{{ $stage->maitreDeStage?->email }}</span>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-{{-- ── Étudiant ── --}}
-<p style="font-weight:bold; font-size:11pt; text-transform:uppercase; margin:8pt 0 5pt;">
-    Concernant le stage de formation professionnelle de :
-</p>
-<table class="table-etudiant" style="margin-bottom:6pt; page-break-inside:avoid;">
+<table style="margin-bottom:2pt;">
     <tr>
-        <td style="width:22%;">Nom :</td>
-        <td colspan="3" style="font-size:13pt; font-weight:bold; letter-spacing:1pt;">
-            {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}
-        </td>
-    </tr>
-    <tr>
-        <td>Section :</td>
-        <td colspan="3">{{ $stage->classe }}</td>
-    </tr>
-    <tr>
-        <td>Adresse :</td>
-        <td colspan="3" style="height:44pt;">&nbsp;</td>
-    </tr>
-    <tr>
-        <td>Tél :</td>
-        <td style="width:28%;">
-            {{ $stage->etudiant->telephone ? preg_replace('/(\d{2})(?=\d)/', '$1 ', $stage->etudiant->telephone) : '' }}
-        </td>
-        <td style="width:18%;">Courriel :</td>
-        <td>{{ $stage->etudiant->email }}</td>
+        <td class="entre-et" style="width:50%;">ENTRE</td>
+        <td class="entre-et" style="width:50%;">ET</td>
     </tr>
 </table>
 
-{{-- ════════════════════════════ PAGE 2+ ═══════════════════════════ --}}
-<div class="page-break"></div>
+<table class="table-parties" style="margin-bottom:18pt;">
+    <tr>
+        <td class="gris" style="width:50%; height:36pt;">LE LYCÉE<br>{{ mb_strtoupper($p['etablissement_nom'], 'UTF-8') }}</td>
+        <td class="gris" style="width:50%; vertical-align:bottom;">{{ $stage->entreprise?->raison_sociale }}</td>
+    </tr>
+    <tr>
+        <td style="border-top:none;">
+            <span class="bold">Représenté par :</span><br>
+            <span class="bold">{{ $p['proviseur_civilite'] }} {{ $p['proviseur_nom'] }}</span><br>
+            <span class="bold">{{ $p['proviseur_titre'] }}</span><br><br>
+            <span class="bold">Adresse de l’établissement</span> :<br>
+            {{ $p['adresse'] }}<br>
+            @if($p['bp']){{ $p['bp'] }}<br>@endif
+            {{ $p['cp_ville'] }}<br>
+            Tél : {{ $p['tel'] }}<br>
+            Fax : {{ $p['fax'] }}<br>
+            Courriel : {{ $p['mel'] }}<br><br>
+            <span class="bold">Professeur responsable</span> :<br>
+            Nom : {{ $profPrincipal?->prenom }} {{ $profPrincipal?->nom }}<br>
+            Tél : {{ $p['tel'] }}<br>
+            Courriel : {{ $profPrincipal?->email }}
+        </td>
+        <td style="border-top:none;">
+            <span class="bold">Représenté par :</span>
+            <table class="pt"><tr><td>{{ $tuteur?->prenom }} {{ $tuteur?->nom }}</td></tr></table>
+            <span class="bold">Fonction :</span>
+            <table class="pt"><tr><td>{{ $tuteur?->fonction }}</td></tr></table>
+            <span class="bold">Nom et adresse de l’organisation :</span>
+            <table class="pt"><tr><td>{{ $stage->entreprise?->adresse }}</td></tr></table>
+            <table class="pt"><tr><td>{{ $stage->entreprise?->complement_adresse }}</td></tr></table>
+            <table class="pt"><tr><td>{{ $stage->entreprise?->code_postal }} {{ $stage->entreprise?->ville }}</td></tr></table>
+            <table class="pt"><tr><td>&nbsp;</td></tr></table>
+            <table class="pt"><tr><td>&nbsp;</td></tr></table>
+            <table class="pt"><tr><td>&nbsp;</td></tr></table>
+            <br>
+            <span class="bold">Tuteur du/de la stagiaire :</span>
+            <table class="pt"><tr><td>Nom : {{ $tuteur?->prenom }} {{ $tuteur?->nom }}</td></tr></table>
+            <table class="pt"><tr><td>Fonction : {{ $tuteur?->fonction }}</td></tr></table>
+            <table class="pt"><tr><td>Service : {{ $tuteur?->service }}</td></tr></table>
+            <table class="pt"><tr><td>Tél : {{ $tuteur?->telephone }}</td></tr></table>
+            <table class="pt"><tr><td>Courriel : {{ $tuteur?->email }}</td></tr></table>
+        </td>
+    </tr>
+</table>
 
-<div class="titre-section">Titre I : Dispositions générales</div>
+<p class="bold" style="margin:0 0 6pt 8pt;">CONCERNANT LE STAGE DE FORMATION PROFESSIONNELLE DE :</p>
+<table class="table-etudiant">
+    <tr><td>Nom : {{ $stage->etudiant->nom }} {{ $stage->etudiant->prenom }}</td></tr>
+    <tr><td>Section : {{ $stage->classe }}</td></tr>
+    <tr><td style="height:82pt;">Adresse :</td></tr>
+    <tr><td>Téléphone : {{ $stage->etudiant->telephone ? preg_replace('/(\d{2})(?=\d)/', '$1 ', $stage->etudiant->telephone) : '' }}<br>
+        Courriel : {{ $stage->etudiant->email }}</td></tr>
+</table>
+
+{{-- ════════════════════════════ PAGES 2+ ═══════════════════════════ --}}
+<pagebreak />
+<div style="margin: 0 7mm;">
+
+<div class="titre-section">TITRE I : DISPOSITIONS GÉNÉRALES</div>
 
 @foreach($articles as $i => $article)
-@php
-    // Échapper d'abord, puis injecter les balises bold sur les dates
-    $corpsHtml = nl2br(e($article['corps']));
-    if ($stage->date_debut && str_contains($article['corps'], '{DATE_DEBUT}')) {
-        $dDebut = \Carbon\Carbon::parse($stage->date_debut)->locale('fr')->isoFormat('dddd D MMMM YYYY');
-        $dFin   = $stage->date_fin
-            ? \Carbon\Carbon::parse($stage->date_fin)->locale('fr')->isoFormat('dddd D MMMM YYYY')
-            : '?';
-        $corpsHtml = str_replace(
-            ['{DATE_DEBUT}', '{DATE_FIN}'],
-            ['<strong>' . e($dDebut) . '</strong>', '<strong>' . e($dFin) . '</strong>'],
-            $corpsHtml
-        );
-    }
-@endphp
-
-<div class="article-bloc">
-    <p class="article-titre">{{ $article['titre'] }} :</p>
-    <p class="article-corps">{!! $corpsHtml !!}</p>
-</div>
+{{-- Le modèle commence la page 3 à l'article 6 et la page 4 à l'article 11 --}}
+@if($i === 5 || $i === 10)<pagebreak />@endif
+<div style="page-break-inside:avoid;">
+    <p class="article-titre">{{ $article['titre'] }}</p>
+    {!! $rendreCorps($article) !!}
 
 @if($i === 1)
-{{-- Encadré mission — après article 2 --}}
-<div class="article-bloc">
-    <p class="article-corps-noindent bold" style="margin-top:3pt;">
-        Le sujet proposé est obligatoirement décrit sommairement ci-après :
-    </p>
-    <div class="encadre-mission">
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission">&nbsp;</div>
-        <div class="ligne-mission" style="border-bottom:none;">&nbsp;</div>
-    </div>
-    <p class="article-corps-noindent" style="margin-bottom:6pt;">
-        En cas de besoin, il fait l'objet d'une annexe qui le décrit de façon détaillée.
-    </p>
-</div>
+    <p class="bold" style="margin:12pt 0 0 1cm;">Le sujet proposé est obligatoirement décrit sommairement ci-après :</p>
+    <div class="encadre-mission"></div>
+    <p class="retrait">En cas de besoin, il fait l’objet d’une annexe qui le décrit de façon détaillée.</p>
 @endif
-
+</div>
 @endforeach
 
-<div class="titre-section">Titre II : Dispositions particulières</div>
+<div class="titre-section" style="margin-top:14pt;">TITRE II : DISPOSITIONS PARTICULIÈRES</div>
 
 @foreach($articlesParticuliers as $article)
-<div class="article-bloc">
-    <p class="article-titre">{{ $article['titre'] }} :</p>
-    <p class="article-corps">{!! nl2br(e($article['corps'])) !!}</p>
+<div style="page-break-inside:avoid;">
+    <p class="article-titre">{{ $article['titre'] }}</p>
+    {!! $rendreCorps($article) !!}
 </div>
 @endforeach
 
 {{-- ── Signatures ── --}}
-<table class="noborder" style="margin-top:14pt; margin-bottom:8pt;">
-    <tr>
-        <td style="width:50%; padding:0; border:none;">Fait en trois exemplaires,</td>
-        <td style="padding:0; border:none;">
-            À {{ $p['lieu'] }}, le ___________________________
-        </td>
-    </tr>
-</table>
-
-<table class="table-sigs">
-    <tr>
-        <td style="width:33%;">
-            <span class="bold">Le chef d'entreprise</span><br>
-            <span style="font-size:8.5pt;">(Cachet et signature)</span>
-        </td>
-        <td style="width:33%;">
-            <span class="bold">Le {{ $p['proviseur_titre'] }}</span>
-        </td>
-        <td style="width:34%;">
-            <span class="bold">Le(la) stagiaire</span><br>
-            <span style="font-size:8.5pt;">ou son représentant légal</span>
-    </tr>
-    <tr>
-        <td style="height:60pt; vertical-align:bottom; text-align:left; font-size:9pt; color:#666; padding:4pt 8pt;">
-            (Lu et approuvé)
-        </td>
-        <td style="height:60pt;">&nbsp;</td>
-        <td style="height:60pt;">&nbsp;</td>
-
-    </tr>
-    
-</table>
+<div style="page-break-inside:avoid; margin-top:10pt;">
+    <table>
+        <tr>
+            <td style="width:50%;">Fait en deux exemplaires,</td>
+            <td>À {{ $p['lieu'] }}, le</td>
+        </tr>
+    </table>
+    <table style="margin-top:14pt; text-align:center; font-size:11pt;">
+        <tr>
+            <td style="width:25%;">Responsable<br>dans l’organisation</td>
+            <td style="width:25%; vertical-align:middle;">Proviseur.e</td>
+            <td style="width:25%;">Responsable<br>pédagogique</td>
+            <td style="width:25%;">Stagiaire<br>ou son représentant légal</td>
+        </tr>
+        <tr><td style="height:40pt;">&nbsp;</td><td></td><td></td><td></td></tr>
+    </table>
+</div>
+</div>
 
 </body>
 </html>

@@ -117,23 +117,21 @@ class AdminParametreController extends Controller
             'bp'       => Parametre::get('convention_etablissement_bp',       ''),
             'cp_ville' => Parametre::get('convention_etablissement_cp_ville', ''),
             'tel'      => Parametre::get('convention_etablissement_tel',      ''),
+            'fax'      => Parametre::get('convention_etablissement_fax',      '05 46 87 05 72'),
             'mel'      => Parametre::get('convention_etablissement_mel',      ''),
             'lieu'     => Parametre::get('convention_lieu',                   ''),
         ];
 
-        // Charger tous les articles depuis Parametre (avec valeurs par défaut vides)
-        $cles = [
-            'conv_art1','conv_art2','conv_art3','conv_art4','conv_art5','conv_art6',
-            'conv_art7','conv_art8','conv_art9','conv_art10','conv_art11',
-            'conv_part1','conv_part2',
-        ];
+        // Articles : valeurs enregistrées, sinon texte par défaut de la convention
         $articles = [];
-        foreach ($cles as $cle) {
-            $articles[$cle] = [
-                'titre' => Parametre::get($cle . '_titre', ''),
-                'corps' => Parametre::get($cle . '_corps', ''),
-            ];
+        $liste = array_merge(
+            PdfController::articlesConvention(),
+            PdfController::articlesParticuliers()
+        );
+        foreach ($liste as $article) {
+            $articles[$article['cle']] = ['titre' => $article['titre'], 'corps' => $article['corps']];
         }
+        $cles = array_keys($articles);
 
         return view('admin.parametres.convention', compact('etablissement', 'articles', 'cles'));
     }
@@ -148,6 +146,7 @@ class AdminParametreController extends Controller
             'etablissement.bp'             => 'nullable|string|max:50',
             'etablissement.cp_ville'       => 'nullable|string|max:100',
             'etablissement.tel'            => 'nullable|string|max:20',
+            'etablissement.fax'            => 'nullable|string|max:20',
             'etablissement.mel'            => 'nullable|email|max:100',
             'etablissement.lieu'           => 'nullable|string|max:100',
         ]);
@@ -160,6 +159,7 @@ class AdminParametreController extends Controller
             'bp'             => 'convention_etablissement_bp',
             'cp_ville'       => 'convention_etablissement_cp_ville',
             'tel'            => 'convention_etablissement_tel',
+            'fax'            => 'convention_etablissement_fax',
             'mel'            => 'convention_etablissement_mel',
             'lieu'           => 'convention_lieu',
         ];
