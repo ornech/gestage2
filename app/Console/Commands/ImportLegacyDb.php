@@ -262,8 +262,11 @@ class ImportLegacyDb extends Command
                 );
 
                 // Spatie necessite un modele Eloquent pour syncRoles()
+                // On ne touche jamais aux rôles d'un compte Administrateur existant :
+                // le legacy ne connaît que Professeur/Etudiant (déduit de `classe`),
+                // un syncRoles() inconditionnel écraserait le rôle Administrateur.
                 $user = User::find($old->id);
-                if ($user) {
+                if ($user && ! $user->hasRole('Administrateur')) {
                     $user->syncRoles([$role]);
                 }
 
