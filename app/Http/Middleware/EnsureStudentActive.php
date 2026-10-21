@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Parametre;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,9 +16,8 @@ class EnsureStudentActive
 
         $user = auth()->user();
 
-        $annee      = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
-        $sy         = (int) explode('-', $annee)[0];
-        $isDiplome  = $user->promo && $user->promo <= $sy;
+        // Le diplôme est validé par un professeur : il n'est jamais déduit de la promo.
+        $isDiplome  = $user->estDiplome();
         $isBloque   = $user->statut === 'demissionnaire';
 
         if ($isDiplome || $isBloque) {

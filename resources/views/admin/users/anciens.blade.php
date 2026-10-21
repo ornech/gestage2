@@ -64,7 +64,7 @@
         <tbody>
             @forelse($users as $user)
             @php
-                $isDiplome = $user->promo && $user->promo <= $sy;
+                $formationTerminee = $user->promo && $user->promo <= $sy;
             @endphp
             <tr>
                 <td>{{ $user->nom }}</td>
@@ -74,8 +74,18 @@
                 <td>
                     @if($user->statut === 'demissionnaire')
                         <span class="tag is-danger is-light">Démissionnaire</span>
-                    @elseif($isDiplome)
+                    @elseif($user->estDiplome())
                         <span class="tag is-success is-light">Diplômé {{ $user->promo }}</span>
+                    @elseif($formationTerminee)
+                        <span class="tag is-warning is-light">Diplôme à valider</span>
+                        <form action="{{ route('admin.users.statut', $user) }}" method="POST" style="display:inline">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="statut" value="diplome">
+                            <button type="submit" class="button is-small is-success is-light"
+                                    onclick="return confirm({{ Illuminate\Support\Js::from('Confirmer que '.$user->prenom.' '.$user->nom." a obtenu son diplôme ?\nSon accès à l'application sera désactivé.") }})">
+                                <i class="fas fa-graduation-cap mr-1"></i> Valider le diplôme
+                            </button>
+                        </form>
                     @endif
                 </td>
                 <td>

@@ -6,11 +6,36 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Enums\StatutEtudiant;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, Notifiable;
+    use HasRoles {
+        scopeRole as private scopeRoleSpatie;
+    }
+
+    /**
+     * Idem Spatie, mais un rôle inexistant donne un résultat vide au lieu d'une
+     * exception (base fraîche sans RoleSeeder) : personne ne possède un rôle qui n'existe pas.
+     */
+    public function scopeRole(Builder $query, $roles, $guard = null, bool $without = false): Builder
+    {
+        try {
+            return $this->scopeRoleSpatie($query, $roles, $guard, $without);
+        } catch (RoleDoesNotExist) {
+            return $without ? $query : $query->whereRaw('1 = 0');
+        }
+    }
+
+    /** Diplôme validé par un professeur (jamais déduit de la promo). */
+    public function estDiplome(): bool
+    {
+        return $this->statut === StatutEtudiant::Diplome->value;
+    }
 
     protected $fillable = [
         'nom',
@@ -27,6 +52,8 @@ class User extends Authenticatable
         'classe_id',
         'statut',
         'date_sortie',
+        'diplome_at',
+        'diplome_par',
         'force_password_change',
         'cgu_accepted_at',
     ];
@@ -37,6 +64,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'cgu_accepted_at'   => 'datetime',
         'date_entree'       => 'date',
+        'date_sortie'       => 'date',
+        'diplome_at'        => 'datetime',
     ];
     public function stages(): HasMany
     {

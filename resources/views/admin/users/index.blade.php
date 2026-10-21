@@ -87,11 +87,13 @@
                 $statutColor = match($user->statut) {
                     'actif'          => 'is-success is-light',
                     'demissionnaire' => 'is-danger is-light',
+                    'diplome'        => 'is-link is-light',
                     default          => 'is-light',
                 };
                 $statutLabel = match($user->statut) {
                     'actif'          => 'Actif',
                     'demissionnaire' => 'Démiss.',
+                    'diplome'        => 'Diplômé',
                     default          => '—',
                 };
             @endphp
@@ -102,8 +104,10 @@
                 <td>
                     @if($classeAnnee)
                         <span class="tag {{ $classeAnnee === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeAnnee }}</span>
-                    @elseif($user->promo && $user->promo <= $syInt)
+                    @elseif($user->estDiplome())
                         <span class="tag is-success is-light">Diplômé {{ $user->promo }}</span>
+                    @elseif($user->promo && $user->promo <= $syInt)
+                        <span class="tag is-warning is-light">Formation terminée</span>
                     @else
                         <span class="has-text-grey">—</span>
                     @endif

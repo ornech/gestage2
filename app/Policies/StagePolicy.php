@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatutValidation;
 use App\Models\Stage;
 use App\Models\User;
 
@@ -32,7 +33,7 @@ class StagePolicy
 
         // Étudiant : uniquement son propre stage, et seulement si rejeté ou en attente
         return $user->id === $stage->etudiant_id
-            && in_array($stage->statut_validation, ['en_attente', 'rejete']);
+            && in_array($stage->statut_validation, [StatutValidation::EnAttente->value, StatutValidation::Rejete->value]);
     }
 
     public function manageJournal(User $user, Stage $stage): bool

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatutConvention;
+use App\Enums\StatutValidation;
 use Carbon\Carbon;
 use App\Http\Controllers\Concerns\RechercheSiretTrait;
 use App\Models\Employe;
@@ -67,13 +69,7 @@ class StageController extends Controller
         // Transférer le statut de la convention hors app si elle existe
         $convPapier = \App\Models\ConventionPapier::where('etudiant_id', $user->id)->first();
 
-        // "hors_app" est un statut propre à la convention hors application :
-        // l'employeur a déjà signé → côté stage, l'équivalent est "en_attente" (déposée à la direction)
-        $statutConvention = match ($convPapier?->statut) {
-            'hors_app' => 'en_attente',
-            null       => 'a_faire_signer',
-            default    => $convPapier->statut,
-        };
+        $statutConvention = StatutConvention::depuisConventionPapier($convPapier)->value;
 
         $stage = Stage::create([
             'titre'              => "Stage chez {$entreprise->raison_sociale}",
@@ -85,7 +81,7 @@ class StageController extends Controller
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
             'statut_convention'  => $statutConvention,
-            'statut_validation'  => $convPapier ? 'valide' : 'en_attente',
+            'statut_validation'  => ($convPapier ? StatutValidation::Valide : StatutValidation::EnAttente)->value,
         ]);
 
         // Supprimer la convention papier maintenant que le stage est saisi
@@ -152,8 +148,8 @@ public function edit(Stage $stage)
             'date_debut'         => $date_debut,
             'date_fin'           => $date_fin,
             'maitre_de_stage_id' => $request->maitre_de_stage_id,
-            'statut_convention'  => 'aucune',   // Toute modification remet en cycle de signature
-            'statut_validation'  => 'en_attente',
+            'statut_convention'  => StatutConvention::AFaireSigner->value,   // Toute modification remet en cycle de signature
+            'statut_validation'  => StatutValidation::EnAttente->value,
         ]);
 
         return redirect()->route('stages.index')->with('success', 'Stage mis à jour.');

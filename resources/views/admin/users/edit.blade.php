@@ -138,9 +138,9 @@
             <div class="box mt-3">
                 <p class="menu-label">Statut administratif</p>
 
-                {{-- Statuts : Actif | Démissionnaire --}}
+                {{-- Statuts : Actif | Démissionnaire | Diplômé (validé par un professeur) --}}
                 <div class="buttons are-small mb-2">
-                    @foreach(['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire']] as $val => [$color, $label])
+                    @foreach(['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire'], 'diplome' => ['is-link', 'Diplômé']] as $val => [$color, $label])
                         @if($user->statut === $val)
                             <span class="button is-small {{ $color }}">
                                 <i class="fas fa-check mr-1"></i> {{ $label }}
@@ -160,6 +160,12 @@
 
                 @if($user->statut === 'demissionnaire')
                     <p class="help is-danger mb-3"><i class="fas fa-ban mr-1"></i> Accès désactivé.</p>
+                @endif
+                @if($user->estDiplome())
+                    <p class="help is-link mb-3">
+                        <i class="fas fa-graduation-cap mr-1"></i>
+                        Diplôme validé{{ $user->diplome_at ? ' le '.$user->diplome_at->format('d/m/Y') : '' }}. Accès désactivé.
+                    </p>
                 @endif
 
                 {{-- Redoublement : action sur la promo, pas un statut --}}

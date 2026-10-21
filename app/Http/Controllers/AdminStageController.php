@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatutConvention;
+use App\Enums\StatutConventionPapier;
+use App\Enums\StatutValidation;
 use App\Http\Controllers\Concerns\RechercheSiretTrait;
 use App\Mail\BienvenueMaitreDeStage;
 use App\Models\ConfigurationStage;
@@ -265,11 +268,7 @@ class AdminStageController extends Controller
         $dateFin    = $dateDebut->copy()->addWeeks((int) $validated['duree']);
 
         $convPapier = ConventionPapier::where('etudiant_id', $etudiant->id)->first();
-        $statutConvention = match ($convPapier?->statut) {
-            'hors_app' => 'en_attente',
-            null       => 'a_faire_signer',
-            default    => $convPapier->statut,
-        };
+        $statutConvention = StatutConvention::depuisConventionPapier($convPapier)->value;
 
         Stage::create([
             'titre'              => "Stage chez {$entreprise->raison_sociale}",
@@ -281,7 +280,7 @@ class AdminStageController extends Controller
             'date_debut'         => $dateDebut,
             'date_fin'           => $dateFin,
             'statut_convention'  => $statutConvention,
-            'statut_validation'  => $convPapier ? 'valide' : 'en_attente',
+            'statut_validation'  => ($convPapier ? StatutValidation::Valide : StatutValidation::EnAttente)->value,
         ]);
 
         $convPapier?->delete();
@@ -303,22 +302,22 @@ class AdminStageController extends Controller
 
     public function updateConvention(Stage $stage, string $statut)
     {
-        $valides = ['a_faire_signer', 'en_attente', 'validee'];
+        $nouveau = StatutConvention::tryFrom($statut);
 
-        abort_unless(in_array($statut, $valides), 422);
+        abort_unless($nouveau !== null, 422);
 
-        $data = ['statut_convention' => $statut];
+        $data = ['statut_convention' => $nouveau->value];
 
         // Déposer la convention pour signature = valider implicitement le stage
-        if ($statut === 'en_attente' && $stage->statut_validation === 'en_attente') {
-            $data['statut_validation'] = 'valide';
+        if ($nouveau === StatutConvention::EnAttente && $stage->statut_validation === StatutValidation::EnAttente->value) {
+            $data['statut_validation'] = StatutValidation::Valide->value;
             $data['note_rejet']        = null;
         }
 
         $stage->update($data);
 
         // Mail de bienvenue au maître de stage — une seule fois, à la validation de la convention
-        if ($statut === 'validee' && $stage->mail_bienvenue_envoye_at === null) {
+        if ($nouveau === StatutConvention::Validee && $stage->mail_bienvenue_envoye_at === null) {
             $stage->load(['maitreDeStage', 'etudiant.tuteur']);
             $employe = $stage->maitreDeStage;
             if ($employe?->email) {
@@ -340,7 +339,7 @@ class AdminStageController extends Controller
     {
         ConventionPapier::updateOrCreate(
             ['etudiant_id' => $user->id],
-            ['statut' => 'hors_app']
+            ['statut' => StatutConventionPapier::HorsApp->value]
         );
 
         return back();
@@ -373,17 +372,12 @@ class AdminStageController extends Controller
 
     public function revertConvention(Stage $stage)
     {
-        $precedent = [
-            'en_attente' => 'a_faire_signer',
-            'validee'      => 'en_attente',
-        ];
-
-        $prev = $precedent[$stage->statut_convention] ?? null;
+        $prev = StatutConvention::tryFrom($stage->statut_convention)?->precedent();
 
         if ($prev) {
-            $data = ['statut_convention' => $prev];
-            if ($prev === 'a_faire_signer') {
-                $data['statut_validation'] = 'en_attente';
+            $data = ['statut_convention' => $prev->value];
+            if ($prev === StatutConvention::AFaireSigner) {
+                $data['statut_validation'] = StatutValidation::EnAttente->value;
             }
             $stage->update($data);
         }
@@ -394,7 +388,7 @@ class AdminStageController extends Controller
     public function valider(Stage $stage)
     {
         $stage->update([
-            'statut_validation' => 'valide',
+            'statut_validation' => StatutValidation::Valide->value,
             'note_rejet'        => null,
         ]);
 
@@ -408,7 +402,7 @@ class AdminStageController extends Controller
         ]);
 
         $stage->update([
-            'statut_validation' => 'rejete',
+            'statut_validation' => StatutValidation::Rejete->value,
             'note_rejet'        => $request->note_rejet,
         ]);
 

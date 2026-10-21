@@ -34,7 +34,7 @@
                     </a>
 
                     {{-- Journal de stage --}}
-                    <a href="#" class="button is-warning">
+                    <a href="{{ route('stages.journal.index', $stage) }}" class="button is-warning">
                         <i class="fas fa-book mr-2"></i> Journal de stage
                     </a>
 

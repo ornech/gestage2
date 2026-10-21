@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\StatutEtudiant;
 use App\Models\ConfigurationStage;
 use App\Models\Parametre;
 use App\Models\User;
@@ -67,7 +68,7 @@ class AdminUserController extends Controller
             $promos = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhere('statut', 'demissionnaire');
+                      ->orWhereIn('statut', ['demissionnaire', 'diplome']);
                 })
                 ->whereNotNull('promo')
                 ->pluck('promo')
@@ -80,7 +81,7 @@ class AdminUserController extends Controller
             $query = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhere('statut', 'demissionnaire');
+                      ->orWhereIn('statut', ['demissionnaire', 'diplome']);
                 });
 
             if ($promoFiltre) {
@@ -97,8 +98,9 @@ class AdminUserController extends Controller
         }
 
         // ── Requête standard : actifs de l'année en cours ────────────────
+        // Les diplômés validés restent consultables dans l'historique des années passées
         $query = User::role('Etudiant')
-                     ->whereIn('statut', ['actif']);
+                     ->whereIn('statut', ['actif', 'diplome']);
 
         // Filtre par classe (depuis le menu navbar ?classe=SIO1/SIO2)
         if ($classeParam === 'SIO1') {
@@ -292,10 +294,17 @@ class AdminUserController extends Controller
         abort_unless($user->hasRole('Etudiant'), 404);
 
         $request->validate([
-            'statut' => 'required|in:actif,demissionnaire',
+            'statut' => ['required', Rule::enum(StatutEtudiant::class)],
         ]);
 
-        $user->update(['statut' => $request->statut]);
+        // Validation du diplôme : on trace qui et quand ; tout autre statut efface la trace.
+        $diplome = $request->statut === StatutEtudiant::Diplome->value;
+
+        $user->update([
+            'statut'      => $request->statut,
+            'diplome_at'  => $diplome ? now() : null,
+            'diplome_par' => $diplome ? $request->user()->id : null,
+        ]);
 
         return back()->with('success', "Statut de {$user->prenom} {$user->nom} mis à jour.");
     }

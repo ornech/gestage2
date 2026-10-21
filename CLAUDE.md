@@ -15,7 +15,7 @@ composer run setup
 # Développement (PHP + queue + logs + Vite en parallèle)
 composer run dev
 
-# Tests (SQLite en mémoire)
+# Tests (MySQL/MariaDB, base gestage2_test)
 composer run test
 
 # Test unique
@@ -79,6 +79,10 @@ La **`StagePolicy`** affine l'accès : un étudiant ne peut modifier que ses pro
 
 **Génération PDF** (`PdfController` + mPDF) : la convention est un template Blade (`resources/views/stages/convention.blade.php`) rendu via mPDF. Les textes des articles particuliers sont stockés dans la table `Parametre` avec des placeholders `{DATE_DEBUT}`, `{DATE_FIN}`, etc. remplacés à la génération.
 
+### Statuts
+
+Enums PHP dans `app/Enums/` (`StatutValidation`, `StatutConvention`, `StatutConventionPapier`, `StatutEtudiant`), identiques aux ENUM MySQL (verrouillé par `EnumsMatchSchemaTest`). Écrire un statut en base = utiliser l'enum, jamais une chaîne libre. Le statut étudiant `diplome` est posé **par un professeur** (`admin.users.statut`, avec `diplome_at`/`diplome_par`) et désactive l'accès ; il n'est jamais déduit de la promo.
+
 ### Configuration dynamique via `Parametre`
 
 La table `Parametre` (clé-valeur) remplace les fichiers de config pour tout ce qui est configurable par l'admin : infos de l'établissement, textes juridiques de la convention, année scolaire active, activation de la SPE. À lire avant de modifier tout texte affiché "en dur" dans les vues — il peut venir de cette table.
@@ -89,9 +93,11 @@ Flux d'état distinct du statut de validation du stage : `a_faire_signer` → `e
 
 ## Tests
 
-- SQLite `:memory:` en test (voir `phpunit.xml`)
+- MySQL/MariaDB en test, comme en production : base dédiée `gestage2_test` (à créer une fois : `CREATE DATABASE gestage2_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`). Hôte et identifiants sont lus dans `.env`, mais `phpunit.xml` force `DB_DATABASE=gestage2_test` pour ne jamais toucher la base de dev
 - Suites : `tests/Unit/` et `tests/Feature/`
 - Bcrypt rounds réduits à 4 en test pour la vitesse
+- Factories : `User::factory()->etudiant()|professeur()|administrateur()` (rôle Spatie + CGU acceptées)
+- CI : `.github/workflows/tests.yml` (build Vite puis `php artisan test`)
 
 ## Frontend
 

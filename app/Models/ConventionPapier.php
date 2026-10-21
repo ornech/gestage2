@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StatutConventionPapier;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,19 +18,11 @@ class ConventionPapier extends Model
 
     public function statutSuivant(): ?string
     {
-        return match($this->statut) {
-            'hors_app'   => 'en_attente',
-            'en_attente' => 'validee',
-            default      => null,
-        };
+        return StatutConventionPapier::tryFrom($this->statut)?->suivant()?->value;
     }
 
     public function statutPrecedent(): ?string
     {
-        return match($this->statut) {
-            'en_attente' => 'hors_app',
-            'validee'    => 'en_attente',
-            default      => null,
-        };
+        return StatutConventionPapier::tryFrom($this->statut)?->precedent()?->value;
     }
 }
