@@ -180,6 +180,11 @@
                 <td>{{ $stage->date_fin?->format('d/m/Y') }}</td>
                 <td>
                     <span class="tag {{ $statutConvBadge[0] }}">{{ $statutConvBadge[1] }}</span>
+                    <br>
+                    <span class="tag {{ $valBadge[0] }} mt-1" title="Validation administrative du stage">{{ $valBadge[1] }}</span>
+                    @if($stage->statut_validation === 'rejete' && $stage->note_rejet)
+                        <p class="help has-text-danger" title="{{ $stage->note_rejet }}">{{ Str::limit($stage->note_rejet, 40) }}</p>
+                    @endif
                 </td>
                 <td>
                     <div style="display:flex; gap:4px; align-items:center;">
@@ -241,6 +246,26 @@
                     <a href="{{ route('stages.show', $stage) }}" class="button is-small is-light" title="Voir le détail">
                         <i class="fas fa-eye"></i>
                     </a>
+                    {{-- Validation administrative du stage --}}
+                    @if($stage->statut_validation !== 'valide')
+                        <form action="{{ route('admin.stages.valider', $stage) }}" method="POST" style="display:inline"
+                              onsubmit="return confirm('Valider le stage de {{ addslashes($etudiant->prenom.' '.$etudiant->nom) }} ?')">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="button is-small is-success is-light" title="Valider le stage">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                    @endif
+                    @if($stage->statut_validation !== 'rejete' && $stage->statut_convention !== 'validee')
+                        <form action="{{ route('admin.stages.rejeter', $stage) }}" method="POST" style="display:inline"
+                              onsubmit="const m = prompt('Motif du rejet (visible par l\'étudiant) :'); if (!m || !m.trim()) { return false; } this.note_rejet.value = m.trim(); return true;">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="note_rejet" value="">
+                            <button type="submit" class="button is-small is-danger is-light" title="Rejeter le stage (motif obligatoire)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    @endif
                     @role('Administrateur')
                     <a href="{{ route('stages.edit', $stage) }}" class="button is-small is-light" title="Modifier">
                         <i class="fas fa-pen"></i>

@@ -406,6 +406,6 @@ class AdminStageController extends Controller
             'note_rejet'        => $request->note_rejet,
         ]);
 
-        return back()->with('success', "Stage rejeté — l'étudiant a été notifié.");
+        return back()->with('success', "Stage rejeté — le motif est visible par l'étudiant sur son tableau de bord.");
     }
 }
