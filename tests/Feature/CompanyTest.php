@@ -2,99 +2,96 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Models\Entreprise;
-use App\Services\SireneClient;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 class CompanyTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
-  public function test_manual_creation_sets_status_pending()
-{
-    
-    // 1) On simule une requête POST pour créer une entreprise
-    $response = $this->post('/companies', [
-        'raison_sociale' => 'Entreprise Test',
-        'siret' => '12345678901234',
-    ]);
 
-    // 2) On vérifie que la base contient bien status = pending
-    $this->assertDatabaseHas('entreprises', [
-        'raison_sociale' => 'Entreprise Test',
-        'est_valide' => 0,
-    ]);
-}
-public function test_import_siret_creates_company_if_not_exists()
-{
-    // Fake du client Sirene
-    $this->mock(\App\Services\SireneClient::class, function ($mock) {
-        $mock->shouldReceive('getBySiret')->andReturn([
-            'etablissement' => [
-                'uniteLegale' => [
-                    'denominationUniteLegale' => 'ENTREPRISE IMPORTÉE'
-                ],
-                'adresseEtablissement' => [
-                    'libelleVoieEtablissement' => '10 RUE TEST',
-                    'codePostalEtablissement' => '33000',
-                    'libelleCommuneEtablissement' => 'BORDEAUX'
-                ]
-            ]
+    public function test_un_professeur_cree_une_entreprise_validee(): void
+    {
+        $prof = User::factory()->professeur()->create();
+
+        $response = $this->actingAs($prof)->post(route('entreprises.store'), [
+            'raison_sociale' => 'Entreprise Test',
+            'ville'          => 'La Rochelle',
+            'siret'          => '12345678901234',
+            'code_postal'    => '17000',
         ]);
-    });
 
-    $response = $this->post('/companies/import-siret', [
-        'siret' => '12345678901234'
-    ]);
+        $entreprise = Entreprise::where('siret', '12345678901234')->firstOrFail();
+        $response->assertRedirect(route('entreprises.show', $entreprise));
+        $this->assertSame('ENTREPRISE TEST', $entreprise->raison_sociale);
+        $this->assertSame('LA ROCHELLE', $entreprise->ville);
+        $this->assertSame('17', $entreprise->departement_code);
+        $this->assertTrue((bool) $entreprise->est_valide);
+        $this->assertSame($prof->id, $entreprise->user_id);
+    }
 
-    $response->assertStatus(200);
+    public function test_creation_refuse_un_siret_invalide(): void
+    {
+        $prof = User::factory()->professeur()->create();
 
-    $this->assertDatabaseHas('entreprises', [
-        'siret' => '12345678901234',
-        'raison_sociale' => 'ENTREPRISE IMPORTÉE',
-        'est_valide' => 1,
-    ]);
-}
-public function test_import_siret_updates_company_if_exists()
-{
-    // Entreprise existante
-    Entreprise::create([
-        'raison_sociale' => 'ANCIEN NOM',
-        'siret' => '12345678901234',
-        'est_valide' => 0,
-    ]);
+        $this->actingAs($prof)->post(route('entreprises.store'), [
+            'raison_sociale' => 'Entreprise Test',
+            'ville'          => 'Paris',
+            'siret'          => '123',
+        ])->assertSessionHasErrors('siret');
 
-    // Fake API
-    $this->mock(\App\Services\SireneClient::class, function ($mock) {
-        $mock->shouldReceive('getBySiret')->andReturn([
-            'etablissement' => [
-                'uniteLegale' => [
-                    'denominationUniteLegale' => 'NOUVEAU NOM'
-                ],
-                'adresseEtablissement' => [
-                    'libelleVoieEtablissement' => '20 AVENUE TEST',
-                    'codePostalEtablissement' => '75000',
-                    'libelleCommuneEtablissement' => 'PARIS'
-                ]
-            ]
+        $this->assertDatabaseCount('entreprises', 0);
+    }
+
+    public function test_un_etudiant_ne_peut_pas_creer_d_entreprise_via_le_crud(): void
+    {
+        $etudiant = User::factory()->etudiant()->create();
+
+        $this->actingAs($etudiant)->post(route('entreprises.store'), [
+            'raison_sociale' => 'Entreprise Test',
+            'ville'          => 'Paris',
         ]);
-    });
 
-    $response = $this->post('/companies/import-siret', [
-        'siret' => '12345678901234'
-    ]);
+        $this->assertDatabaseCount('entreprises', 0);
+    }
 
-    $response->assertStatus(200);
+    public function test_import_siret_affiche_les_donnees_sirene(): void
+    {
+        Http::fake([
+            'https://api.insee.fr/*' => Http::response([
+                'etablissement' => [
+                    'uniteLegale'          => ['denominationUniteLegale' => 'ENTREPRISE IMPORTÉE'],
+                    'adresseEtablissement' => [
+                        'libelleVoieEtablissement'    => 'RUE TEST',
+                        'codePostalEtablissement'     => '33000',
+                        'libelleCommuneEtablissement' => 'BORDEAUX',
+                    ],
+                ],
+            ], 200),
+        ]);
 
-    $this->assertDatabaseHas('entreprises', [
-        'siret' => '12345678901234',
-        'raison_sociale' => 'NOUVEAU NOM',
-        'est_valide' => 1,
-    ]);
-}
+        $this->actingAs(User::factory()->professeur()->create())
+            ->post(route('entreprises.import'), ['siret' => '12345678901234'])
+            ->assertOk()
+            ->assertSee('ENTREPRISE IMPORTÉE');
+    }
 
+    public function test_import_siret_inconnu_affiche_la_page_introuvable(): void
+    {
+        Http::fake(['https://api.insee.fr/*' => Http::response([], 404)]);
+
+        $this->actingAs(User::factory()->professeur()->create())
+            ->post(route('entreprises.import'), ['siret' => '12345678901234'])
+            ->assertOk()
+            ->assertViewIs('entreprises.import-not-found');
+    }
+
+    public function test_import_siret_exige_14_chiffres(): void
+    {
+        $this->actingAs(User::factory()->professeur()->create())
+            ->post(route('entreprises.import'), ['siret' => 'abc'])
+            ->assertSessionHasErrors('siret');
+    }
 }

@@ -2,52 +2,58 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Stage;
 use App\Models\Entreprise;
+use App\Models\Stage;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ConventionTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    private function stageDe(User $etudiant): Stage
     {
-        parent::setUp();
-
-        // Désactive les policies pour ce test PDF
-        $this->withoutMiddleware(\Illuminate\Auth\Middleware\Authorize::class);
+        return Stage::factory()->create([
+            'etudiant_id'   => $etudiant->id,
+            'classe'        => 'SIO1',
+            'entreprise_id' => Entreprise::factory()->create(['siret' => '12345678900011'])->id,
+        ]);
     }
 
-    public function test_convention_fails_without_siret()
+    public function test_l_etudiant_telecharge_la_convention_de_son_stage(): void
     {
-        $this->actingAs(User::factory()->create());
+        $etudiant = User::factory()->etudiant()->create();
+        $stage    = $this->stageDe($etudiant);
 
-        $stage = Stage::factory()->create([
-            'entreprise_id' => Entreprise::factory()->create([
-                'siret' => null
-            ])->id,
-        ]);
+        $response = $this->actingAs($etudiant)->get("/stages/{$stage->id}/pdf/convention");
 
-        $response = $this->get("/stages/{$stage->id}/pdf/convention");
-
-        $response->assertStatus(422);
+        $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
-    public function test_convention_pdf_generates_successfully()
+    public function test_un_etudiant_ne_peut_pas_telecharger_la_convention_d_un_autre(): void
     {
-        $this->actingAs(User::factory()->create());
+        $stage = $this->stageDe(User::factory()->etudiant()->create());
 
-        $stage = Stage::factory()->create([
-            'entreprise_id' => Entreprise::factory()->create([
-                'siret' => '12345678900011'
-            ])->id,
-        ]);
+        $this->actingAs(User::factory()->etudiant()->create())
+            ->get("/stages/{$stage->id}/pdf/convention")
+            ->assertForbidden();
+    }
 
-        $response = $this->get("/stages/{$stage->id}/pdf/convention");
+    public function test_un_professeur_peut_telecharger_n_importe_quelle_convention(): void
+    {
+        $stage = $this->stageDe(User::factory()->etudiant()->create());
 
-        $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->actingAs(User::factory()->professeur()->create())
+            ->get("/stages/{$stage->id}/pdf/convention")
+            ->assertOk();
+    }
+
+    public function test_un_visiteur_est_redirige_vers_la_connexion(): void
+    {
+        $stage = $this->stageDe(User::factory()->etudiant()->create());
+
+        $this->get("/stages/{$stage->id}/pdf/convention")->assertRedirect('/login');
     }
 }

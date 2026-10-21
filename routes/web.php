@@ -42,7 +42,7 @@ Route::get('/cgu', [CguController::class, 'show'])->name('cgu.show');
 */
 Route::get('/rgpd/employe/{employe}/supprimer-email', [EmployeController::class, 'supprimerEmailRgpd'])
     ->name('rgpd.employe.supprimer-email')
-    ->middleware('signed');
+    ->middleware(['signed', 'throttle:20,1']);
 Route::post('/cgu/accept', [CguController::class, 'accept'])
     ->name('cgu.accept')
     ->middleware('auth');
@@ -61,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Changement de mot de passe forcé — première connexion
     Route::get('/password/first-change',  [PasswordChangeController::class, 'show'])  ->name('password.first-change');
-    Route::put('/password/first-change',  [PasswordChangeController::class, 'update'])->name('password.first-change.update');
+    Route::put('/password/first-change',  [PasswordChangeController::class, 'update'])->name('password.first-change.update')->middleware('throttle:6,1');
 });
 
 
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
     Route::get('/entreprises/create',            [CompanyController::class, 'create'])    ->name('entreprises.create');
     Route::get('/entreprises/import',            [CompanyController::class, 'importForm'])->name('entreprises.import.form');
-    Route::post('/entreprises/import',           [CompanyController::class, 'import'])    ->name('entreprises.import');
+    Route::post('/entreprises/import',           [CompanyController::class, 'import'])    ->name('entreprises.import')->middleware('throttle:siret');
     Route::post('/entreprises',                  [CompanyController::class, 'store'])     ->name('entreprises.store');
     Route::put('/entreprises/{entreprise}',      [CompanyController::class, 'update'])    ->name('entreprises.update');
 });
@@ -154,7 +154,8 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
         ->name('etudiant.stage.nouveau');
 
     Route::get('/etudiant/stage/recherche-siret', [StageController::class, 'rechercheSiret'])
-        ->name('etudiant.stage.recherche-siret');
+        ->name('etudiant.stage.recherche-siret')
+        ->middleware('throttle:siret');
 
     Route::post('/etudiant/stage/maitre-de-stage', [StageController::class, 'ajouterMaitreDeStage'])
         ->name('etudiant.stage.maitre-de-stage.store');
@@ -196,7 +197,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::get('/admin/stages/export-maitres',        [AdminStageController::class, 'exportMaitresCsv'])->name('admin.stages.export-maitres');
     Route::get('/admin/stages/nouveau',                [AdminStageController::class, 'creerForm'])->name('admin.stages.creer.form');
     Route::post('/admin/stages/nouveau',               [AdminStageController::class, 'creer'])    ->name('admin.stages.creer');
-    Route::get('/admin/stages/recherche-siret',        [AdminStageController::class, 'rechercheSiret'])      ->name('admin.stages.recherche-siret');
+    Route::get('/admin/stages/recherche-siret',        [AdminStageController::class, 'rechercheSiret'])      ->name('admin.stages.recherche-siret')->middleware('throttle:siret');
     Route::post('/admin/stages/maitre-de-stage',       [AdminStageController::class, 'ajouterMaitreDeStage'])->name('admin.stages.maitre-de-stage.store');
     Route::put('/admin/stages/{stage}/assign',        [AdminStageController::class, 'assign']) ->name('admin.stages.assign');
     Route::patch('/admin/stages/{stage}/valider',             [AdminStageController::class, 'valider'])          ->name('admin.stages.valider');
@@ -224,8 +225,8 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function () {
 
     Route::get('/imports/pronote',          [AdminImportController::class, 'pronoteForm'])   ->name('imports.pronote.form');
-    Route::post('/imports/pronote/preview', [AdminImportController::class, 'pronotePreview'])->name('imports.pronote.preview');
-    Route::post('/imports/pronote/confirm', [AdminImportController::class, 'pronoteConfirm'])->name('imports.pronote.confirm');
+    Route::post('/imports/pronote/preview', [AdminImportController::class, 'pronotePreview'])->name('imports.pronote.preview')->middleware('throttle:10,1');
+    Route::post('/imports/pronote/confirm', [AdminImportController::class, 'pronoteConfirm'])->name('imports.pronote.confirm')->middleware('throttle:10,1');
 
     Route::get('/spe',                       [AdminSpeController::class, 'index'])       ->name('spe.index');
     Route::get('/spe/{classe}',              [AdminSpeController::class, 'editClasse'])  ->name('spe.edit-classe');
@@ -280,7 +281,7 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
 
     // Communication — envoi, templates, suivi RGPD
     Route::get('/admin/communication',                    [AdminCommunicationController::class, 'index'])          ->name('admin.communication.index');
-    Route::post('/admin/communication/envoyer',           [AdminCommunicationController::class, 'envoyer'])        ->name('admin.communication.envoyer');
+    Route::post('/admin/communication/envoyer',           [AdminCommunicationController::class, 'envoyer'])        ->name('admin.communication.envoyer')->middleware('throttle:mass-mail');
     Route::put('/admin/communication/template',           [AdminCommunicationController::class, 'updateTemplate']) ->name('admin.communication.template');
     Route::get('/admin/communication/preview/bienvenue',  [AdminCommunicationController::class, 'previewBienvenue'])->name('admin.communication.preview.bienvenue');
 });

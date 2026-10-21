@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -32,7 +33,24 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'tuteur_id' => null,
             'classe_id' => null,
+            'cgu_accepted_at' => now(),
+            'force_password_change' => false,
         ];
+    }
+
+    public function etudiant(): static
+    {
+        return $this->afterCreating(fn ($user) => $user->assignRole(Role::findOrCreate('Etudiant')));
+    }
+
+    public function professeur(): static
+    {
+        return $this->afterCreating(fn ($user) => $user->assignRole(Role::findOrCreate('Professeur')));
+    }
+
+    public function administrateur(): static
+    {
+        return $this->afterCreating(fn ($user) => $user->assignRole(Role::findOrCreate('Administrateur')));
     }
 
     /**
