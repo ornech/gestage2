@@ -68,7 +68,7 @@
             <div class="field is-grouped mt-4">
                 <div class="control">
                     <button type="submit" class="button is-warning" id="submit-btn" disabled
-                            onclick="return confirm('Réinitialiser le mot de passe de cet utilisateur ?')">
+                            data-confirm="Réinitialiser le mot de passe de cet utilisateur ?">
                         <i class="fas fa-key mr-1"></i> Réinitialiser
                     </button>
                 </div>

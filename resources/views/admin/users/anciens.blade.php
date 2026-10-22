@@ -82,7 +82,7 @@
                             @csrf @method('PATCH')
                             <input type="hidden" name="statut" value="diplome">
                             <button type="submit" class="button is-small is-success is-light"
-                                    onclick="return confirm({{ Illuminate\Support\Js::from('Confirmer que '.$user->prenom.' '.$user->nom." a obtenu son diplôme ?\nSon accès à l'application sera désactivé.") }})">
+                                    data-confirm="{{ 'Confirmer que '.$user->prenom.' '.$user->nom." a obtenu son diplôme ? Son accès à l'application sera désactivé." }}">
                                 <i class="fas fa-graduation-cap mr-1"></i> Valider le diplôme
                             </button>
                         </form>

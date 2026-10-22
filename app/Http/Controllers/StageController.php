@@ -112,6 +112,8 @@ public function mesConventions()
      */
 public function edit(Stage $stage)
 {
+    $this->authorize('update', $stage);
+
     $stage->load(['entreprise.employes', 'etudiant', 'maitreDeStage']);
 
     // Employés de l'entreprise du stage uniquement

@@ -51,14 +51,14 @@
                                 @if($prof->hasRole('Administrateur'))
                                     <button type="submit"
                                             class="button is-small is-danger is-light"
-                                            onclick="return confirm('Retirer les droits admin à {{ $prof->prenom }} {{ $prof->nom }} ?')">
+                                            data-confirm="Retirer les droits admin à {{ $prof->prenom }} {{ $prof->nom }} ?">
                                         <span class="icon"><i class="fas fa-shield-alt"></i></span>
                                         <span>Retirer admin</span>
                                     </button>
                                 @else
                                     <button type="submit"
                                             class="button is-small is-warning is-light"
-                                            onclick="return confirm('Donner les droits admin à {{ $prof->prenom }} {{ $prof->nom }} ?')">
+                                            data-confirm="Donner les droits admin à {{ $prof->prenom }} {{ $prof->nom }} ?">
                                         <span class="icon"><i class="fas fa-shield-alt"></i></span>
                                         <span>Donner admin</span>
                                     </button>

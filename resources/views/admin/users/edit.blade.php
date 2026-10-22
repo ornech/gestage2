@@ -71,7 +71,7 @@
                             <div class="field">
                                 <label class="label is-small">Classe</label>
                                 <div class="select is-fullwidth is-small">
-                                    <select name="classe" id="classe-select" onchange="updatePromo()" {{ $readOnly ? 'disabled' : '' }}>
+                                    <select name="classe" id="classe-select" data-onchange="updatePromo" {{ $readOnly ? 'disabled' : '' }}>
                                         <option value="">—</option>
                                         @foreach(['SIO1', 'SIO2'] as $c)
                                         @php $current = $user->classe_courante ?? $user->classe; @endphp
@@ -150,7 +150,7 @@
                                 @csrf @method('PATCH')
                                 <input type="hidden" name="statut" value="{{ $val }}">
                                 <button type="submit" class="button is-small is-light"
-                                        onclick="return confirm('Changer en {{ $label }} ?')">
+                                        data-confirm="Changer en {{ $label }} ?">
                                     {{ $label }}
                                 </button>
                             </form>
@@ -179,7 +179,7 @@
                     et conserve le statut <strong>actif</strong>.
                 </p>
                 <form action="{{ route('admin.users.redoubler', $user) }}" method="POST"
-                      onsubmit="return confirm('Faire redoubler {{ $user->prenom }} {{ $user->nom }} ?\nPromotion : {{ $user->promo }} → {{ $user->promo ? $user->promo + 1 : '?' }}')">
+                      data-confirm="Faire redoubler {{ $user->prenom }} {{ $user->nom }} ? Promotion : {{ $user->promo }} → {{ $user->promo ? $user->promo + 1 : '?' }}">
                     @csrf @method('PATCH')
                     <button type="submit" class="button is-small is-warning is-light">
                         <i class="fas fa-redo mr-1"></i> Redoubler

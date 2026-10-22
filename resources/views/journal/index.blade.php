@@ -128,7 +128,7 @@
                                 <form action="{{ route('stages.journal.destroy', [$stage, $entry]) }}" method="POST" style="display:inline;">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="button is-small is-light"
-                                        onclick="return confirm('Supprimer cette réalisation ?')">
+                                        data-confirm="Supprimer cette réalisation ?">
                                         <span class="icon is-small"><i class="fas fa-trash has-text-danger"></i></span>
                                         <span>Supprimer</span>
                                     </button>

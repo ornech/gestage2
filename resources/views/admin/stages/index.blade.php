@@ -70,7 +70,7 @@
             <input type="hidden" name="classe" value="{{ $classe }}">
             <input type="hidden" name="filtre" value="{{ $filtre }}">
             <div class="select is-small">
-                <select name="annee" onchange="this.form.submit()">
+                <select name="annee" data-autosubmit">
                     @foreach($annees as $annee)
                         <option value="{{ $annee }}" {{ $annee === $anneeSelectionnee ? 'selected' : '' }}>
                             {{ $annee }}{{ $annee === $anneeActive ? ' ●' : '' }}
@@ -192,7 +192,7 @@
                         @if($conv['next'])
                             <form action="{{ route('admin.stages.convention', [$stage, $conv['next']]) }}"
                                   method="POST"
-                                  onsubmit="return confirm('Confirmer : {{ addslashes($conv['label']) }} ?')">
+                                  data-confirm="Confirmer : {{ $conv['label'] }} ?">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="button is-small {{ $conv['class'] }}" style="min-width:145px;">
                                     {{ $conv['label'] }}
@@ -208,7 +208,7 @@
                         @if($revertLabel)
                             <form action="{{ route('admin.stages.revert', $stage) }}"
                                   method="POST"
-                                  onsubmit="return confirm('{{ addslashes($revertLabel) }} — Confirmer ?')">
+                                  data-confirm="{{ $revertLabel }} — Confirmer ?">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="button is-small is-light has-text-grey"
                                         title="{{ $revertLabel }}">
@@ -249,7 +249,7 @@
                     {{-- Validation administrative du stage --}}
                     @if($stage->statut_validation !== 'valide')
                         <form action="{{ route('admin.stages.valider', $stage) }}" method="POST" style="display:inline"
-                              onsubmit="return confirm('Valider le stage de {{ addslashes($etudiant->prenom.' '.$etudiant->nom) }} ?')">
+                              data-confirm="Valider le stage de {{ $etudiant->prenom.' '.$etudiant->nom }} ?">
                             @csrf @method('PATCH')
                             <button type="submit" class="button is-small is-success is-light" title="Valider le stage">
                                 <i class="fas fa-check"></i>
@@ -258,7 +258,7 @@
                     @endif
                     @if($stage->statut_validation !== 'rejete' && $stage->statut_convention !== 'validee')
                         <form action="{{ route('admin.stages.rejeter', $stage) }}" method="POST" style="display:inline"
-                              onsubmit="const m = prompt('Motif du rejet (visible par l\'étudiant) :'); if (!m || !m.trim()) { return false; } this.note_rejet.value = m.trim(); return true;">
+                              data-prompt="Motif du rejet (visible par l'étudiant) :" data-prompt-field="note_rejet">
                             @csrf @method('PATCH')
                             <input type="hidden" name="note_rejet" value="">
                             <button type="submit" class="button is-small is-danger is-light" title="Rejeter le stage (motif obligatoire)">
@@ -327,7 +327,7 @@
                         @if($seq && $conv->statutSuivant())
                             <form action="{{ route('admin.conventions-papier.avancer', $conv) }}"
                                   method="POST"
-                                  onsubmit="return confirm('Confirmer : {{ addslashes($seq['label']) }} ?')">
+                                  data-confirm="Confirmer : {{ $seq['label'] }} ?">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="button is-small {{ $seq['class'] }}" style="min-width:155px;">
                                     {{ $seq['label'] }}
@@ -341,7 +341,7 @@
                         {{-- Revenir --}}
                         <form action="{{ route('admin.conventions-papier.revert', $conv) }}"
                               method="POST"
-                              onsubmit="return confirm('{{ $conv->statut === 'hors_app' ? 'Supprimer cette convention hors app ?' : '↩ Revenir à l\'étape précédente ?' }}')">
+                              data-confirm="{{ $conv->statut === 'hors_app' ? 'Supprimer cette convention hors app ?' : '↩ Revenir à l\'étape précédente ?' }}">
                             @csrf @method('DELETE')
                             <button type="submit" class="button is-small is-light has-text-grey"
                                     title="{{ $conv->statut === 'hors_app' ? 'Supprimer' : 'Revenir' }}">
@@ -359,7 +359,7 @@
                 <td>
                     <form action="{{ route('admin.stages.hors-appli', $etudiant) }}"
                           method="POST"
-                          onsubmit="return confirm('Confirmer que {{ $etudiant->prenom }} {{ $etudiant->nom }} a remis une convention hors app ?')">
+                          data-confirm="Confirmer que {{ $etudiant->prenom }} {{ $etudiant->nom }} a remis une convention hors app ?">
                         @csrf @method('PATCH')
                         <button type="submit" class="button is-small is-warning is-light" style="min-width:155px;">
                             ⚠ Convention hors app remise

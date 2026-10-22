@@ -15,7 +15,7 @@
                         <p class="mb-4">
                             Votre session a expiré, merci de recharger votre page.
                         </p>
-                        <button onclick="window.location.reload()" class="button is-primary is-medium">
+                        <button data-reload" class="button is-primary is-medium">
                             <span class="icon"><i class="fas fa-sync-alt"></i></span>
                             <span>Recharger la page</span>
                         </button>

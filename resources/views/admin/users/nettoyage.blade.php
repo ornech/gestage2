@@ -69,7 +69,7 @@
             @endphp
 
             <form action="{{ route('admin.comptes.fusionner') }}" method="POST"
-                  onsubmit="return confirm('Fusionner ces deux comptes ? L\'action est irréversible.')">
+                  data-confirm="Fusionner ces deux comptes ? L'action est irréversible.">
                 @csrf
                 <div class="field has-addons">
                     <div class="control">

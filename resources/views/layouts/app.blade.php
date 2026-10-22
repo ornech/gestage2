@@ -130,6 +130,62 @@
     @stack('scripts')
     <script nonce="{{ $cspNonce ?? '' }}">
 
+        // La CSP interdit les gestionnaires inline (onclick, onsubmit…) : on les remplace
+        // par des attributs data-* traités ici (délégation d'événements).
+        //   data-confirm="msg"                     demande confirmation (sur <form> ou <button>/<a>)
+        //   data-prompt="msg" data-prompt-field=x  demande un texte, copié dans le champ x du formulaire
+        //   data-autosubmit                        soumet le formulaire au changement (<select>)
+        //   data-onchange / data-oninput="fn"      appelle la fonction globale fn
+        //   data-reload                            recharge la page
+        //   data-hover="#couleur"                  bordure colorée au survol
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) {
+                e.preventDefault();
+                return;
+            }
+            if (form.dataset.promptField) {
+                const texte = window.prompt(form.dataset.prompt || '');
+                if (!texte || !texte.trim()) {
+                    e.preventDefault();
+                    return;
+                }
+                form.elements[form.dataset.promptField].value = texte.trim();
+            }
+        });
+        document.addEventListener('click', (e) => {
+            const cible = e.target.closest('[data-confirm]:not(form)');
+            if (cible && !window.confirm(cible.dataset.confirm)) {
+                e.preventDefault();
+            }
+            if (e.target.closest('[data-reload]')) {
+                window.location.reload();
+            }
+        });
+        document.addEventListener('change', (e) => {
+            const el = e.target;
+            if (el.dataset.autosubmit !== undefined && el.form) {
+                el.form.submit();
+            }
+            if (el.dataset.onchange && typeof window[el.dataset.onchange] === 'function') {
+                window[el.dataset.onchange]();
+            }
+        });
+        document.addEventListener('mouseover', (e) => {
+            const carte = e.target.closest('[data-hover]');
+            if (carte) carte.style.borderColor = carte.dataset.hover;
+        });
+        document.addEventListener('mouseout', (e) => {
+            const carte = e.target.closest('[data-hover]');
+            if (carte && !carte.contains(e.relatedTarget)) carte.style.borderColor = '#dbdbdb';
+        });
+        document.addEventListener('input', (e) => {
+            const fn = e.target.dataset ? e.target.dataset.oninput : null;
+            if (fn && typeof window[fn] === 'function') {
+                window[fn]();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
             $navbarBurgers.forEach( el => {

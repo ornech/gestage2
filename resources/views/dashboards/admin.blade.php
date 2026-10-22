@@ -21,7 +21,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.parametres.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#f97316'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#f97316">
                 <span class="icon is-large mb-2" style="color:#f97316;"><i class="fas fa-calendar-alt fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Dates de stage</p>
                 <p class="is-size-7 has-text-grey">Configurer l'année scolaire</p>
@@ -30,7 +30,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.users.create') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#3273dc'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#3273dc">
                 <span class="icon is-large has-text-info mb-2"><i class="fas fa-user-plus fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Créer un compte</p>
                 <p class="is-size-7 has-text-grey">Étudiant, prof ou admin</p>
@@ -40,7 +40,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.stages.creer.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#23d160'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#23d160">
                 <span class="icon is-large has-text-success mb-2"><i class="fas fa-briefcase fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Créer un stage</p>
                 <p class="is-size-7 has-text-grey">Passe-droit pour un étudiant bloqué</p>
@@ -49,7 +49,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.reset-password') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#f5a623'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#f5a623">
                 <span class="icon is-large has-text-warning mb-2"><i class="fas fa-key fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Réinitialiser un mot de passe</p>
                 <p class="is-size-7 has-text-grey">Générer un mot de passe temporaire</p>
@@ -58,7 +58,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.professeurs.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#485fc7'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#485fc7">
                 <span class="icon is-large has-text-dark mb-2"><i class="fas fa-chalkboard-teacher fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Gérer les professeurs</p>
                 <p class="is-size-7 has-text-grey">Droits d'accès et admin</p>
@@ -67,7 +67,7 @@
 
         <div class="column is-3">
             <a href="{{ route('entreprises.create') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#00d1b2'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#00d1b2">
                 <span class="icon is-large has-text-primary mb-2"><i class="fas fa-building fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Ajouter une entreprise</p>
                 <p class="is-size-7 has-text-grey">Saisie manuelle</p>
@@ -76,7 +76,7 @@
 
         <div class="column is-3">
             <a href="{{ route('entreprises.import.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#209cee'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#209cee">
                 <span class="icon is-large has-text-link mb-2"><i class="fas fa-search fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Importer une entreprise</p>
                 <p class="is-size-7 has-text-grey">via son n° de siret</p>
@@ -85,7 +85,7 @@
 
         <div class="column is-3">
             <a href="{{ route('imports.pronote.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#7209b7'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#7209b7">
                 <span class="icon is-large mb-2" style="color:#7209b7;"><i class="fas fa-file-import fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Import Pronote</p>
                 <p class="is-size-7 has-text-grey">Import et mise à jour des effectifs</p>
@@ -98,7 +98,7 @@
 
         <div class="column is-3">
             <a href="{{ route('admin.communication.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               onmouseover="this.style.borderColor='#3273dc'" onmouseout="this.style.borderColor='#dbdbdb'">
+               data-hover="#3273dc">
                 <span class="icon is-large has-text-info mb-2"><i class="fas fa-bullhorn fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Communication</p>
                 <p class="is-size-7 has-text-grey">Envoi, templates, RGPD</p>
@@ -107,7 +107,7 @@
 
         <div class="column is-3">
             <div id="btn-export-csv" class="box has-text-centered p-4" style="cursor:pointer; border:2px dashed #dbdbdb; transition:.15s;"
-                 onmouseover="this.style.borderColor='#23d160'" onmouseout="this.style.borderColor='#dbdbdb'">
+                 data-hover="#23d160">
                 <span class="icon is-large mb-2" style="color:#23d160;"><i class="fas fa-file-csv fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Export maîtres de stage</p>
                 <p class="is-size-7 has-text-grey">Télécharger la liste CSV</p>

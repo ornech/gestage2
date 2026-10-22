@@ -56,7 +56,7 @@
     <div class="columns is-multiline mb-4">
         <div class="column is-3">
             <div id="btn-export-csv" class="box has-text-centered p-4" style="cursor:pointer; border:2px dashed #dbdbdb; transition:.15s;"
-                 onmouseover="this.style.borderColor='#23d160'" onmouseout="this.style.borderColor='#dbdbdb'">
+                 data-hover="#23d160">
                 <span class="icon is-large mb-2" style="color:#23d160;"><i class="fas fa-file-csv fa-2x"></i></span>
                 <p class="has-text-weight-semibold">Export maîtres de stage</p>
                 <p class="is-size-7 has-text-grey">Télécharger la liste CSV</p>

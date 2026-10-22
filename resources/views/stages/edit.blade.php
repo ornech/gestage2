@@ -56,14 +56,14 @@
                 <label class="label">Date de début</label>
                 <input class="input" type="date" name="date_debut"
                        value="{{ old('date_debut', $stage->date_debut?->format('Y-m-d')) }}"
-                       id="date-debut-edit" oninput="majDateFinEdit()" required>
+                       id="date-debut-edit" data-oninput="majDateFinEdit" required>
             </div>
 
             {{-- Durée --}}
             <div class="field">
                 <label class="label">Durée du stage</label>
                 <div class="select is-fullwidth">
-                    <select name="duree" id="duree-edit" onchange="majDateFinEdit()" required>
+                    <select name="duree" id="duree-edit" data-onchange="majDateFinEdit" required>
                         @for($i = 1; $i <= 16; $i++)
                             <option value="{{ $i }}" {{ $duree == $i ? 'selected' : '' }}>
                                 {{ $i }} semaine{{ $i > 1 ? 's' : '' }}

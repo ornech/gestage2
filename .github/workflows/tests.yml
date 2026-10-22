@@ -58,6 +58,11 @@ jobs:
 
       - run: composer install --no-interaction --prefer-dist --no-progress
 
+      # Avis de sécurité sur les dépendances PHP (informatif : ne bloque pas le build)
+      - name: Audit des dépendances PHP
+        run: composer audit
+        continue-on-error: true
+
       - name: Node
         uses: actions/setup-node@v4
         with:
