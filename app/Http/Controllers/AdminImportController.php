@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Parametre;
 use App\Models\User;
+use App\Services\InvitationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminImportController extends Controller
 {
@@ -33,7 +35,7 @@ class AdminImportController extends Controller
         return view('admin.imports.pronote-preview', compact('preview'));
     }
 
-    public function pronoteConfirm(Request $request)
+    public function pronoteConfirm(Request $request, InvitationService $invitations)
     {
         $preview = session('pronote_preview');
 
@@ -42,7 +44,9 @@ class AdminImportController extends Controller
                 ->withErrors('Session expirée, veuillez relancer l\'import.');
         }
 
-        $counts = ['cree' => 0, 'redoublant' => 0, 'mis_a_jour' => 0, 'demissionnaire' => 0];
+        $counts = ['cree' => 0, 'redoublant' => 0, 'mis_a_jour' => 0, 'demissionnaire' => 0, 'invites' => 0];
+        $liens  = []; // comptes sans adresse distribuable : lien à transmettre à la main
+        $rang   = 0;
 
         foreach ($preview as $row) {
             if ($row['action'] === 'create') {
@@ -51,7 +55,7 @@ class AdminImportController extends Controller
                     'prenom'                => $row['prenom'],
                     'email'                 => $row['email'],
                     'email_pronote'         => $row['email'],
-                    'password'              => Hash::make('achanger'),
+                    'password'              => Hash::make(Str::random(64)), // remplacé par l'invitation ci-dessous
                     'force_password_change' => true,
                     'classe'                => $row['classe'],
                     'promo'                 => $row['promo'],
@@ -61,6 +65,13 @@ class AdminImportController extends Controller
                 ]);
                 $user->assignRole('Etudiant');
                 $counts['cree']++;
+
+                $invitation = $invitations->inviter($user, $rang++);
+                if ($invitation['mail_envoye']) {
+                    $counts['invites']++;
+                } else {
+                    $liens[] = ['nom' => "{$user->prenom} {$user->nom}", 'email' => $user->email, 'lien' => $invitation['lien']];
+                }
 
             } elseif ($row['action'] === 'redoublant') {
                 $existing = User::find($row['existing_id']);
@@ -101,7 +112,7 @@ class AdminImportController extends Controller
 
         session()->forget('pronote_preview');
 
-        return view('admin.imports.pronote-result', compact('counts'));
+        return view('admin.imports.pronote-result', compact('counts', 'liens'));
     }
 
     // -----------------------------------------------------------------------

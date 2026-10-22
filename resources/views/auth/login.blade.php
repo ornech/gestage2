@@ -20,6 +20,10 @@
                         </div>
                         <hr>
 
+                        @if(session('status'))
+                            <div class="notification is-success is-light">{{ session('status') }}</div>
+                        @endif
+
                         <form method="POST" action="/login">
                             @csrf
 
@@ -70,6 +74,10 @@
                                 </button>
                             </div>
                         </form>
+
+                        <p class="mt-4 has-text-centered is-size-7">
+                            <a href="{{ route('password.request') }}">Mot de passe oublié ou première connexion ?</a>
+                        </p>
                     </div>
 
 

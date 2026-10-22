@@ -28,8 +28,8 @@
 
             <div class="notification is-info is-light py-2 mb-4">
                 <i class="fas fa-info-circle mr-1"></i>
-                Le mot de passe sera remplacé par <strong>achanger</strong>.
-                L'utilisateur devra le modifier à sa prochaine connexion.
+                L'ancien mot de passe sera invalidé et un email sera envoyé à l'utilisateur
+                pour qu'il en choisisse un nouveau (lien valable 7 jours, usage unique).
             </div>
 
             <div class="field">

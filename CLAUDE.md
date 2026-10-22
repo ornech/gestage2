@@ -42,7 +42,7 @@ Trois rôles Spatie (`Etudiant`, `Professeur`, `Administrateur`) déterminent to
 
 Quatre middlewares custom (dans `app/Http/Middleware/`) s'enchaînent sur les routes étudiants :
 
-- `ForcePasswordChange` — redirige vers changement de mot de passe si `force_password_change = true` (positionné à `true` pour tout compte créé via import Pronote)
+- `ForcePasswordChange` — redirige vers changement de mot de passe si `force_password_change = true`. Tout compte créé (import Pronote, création admin, réinitialisation) reçoit un mot de passe aléatoire inconnu et un **email d'invitation** (`InvitationService`, lien Fortify `password.reset`, usage unique, 7 jours) ; il n'existe plus de mot de passe provisoire commun. `php artisan comptes:invitations-mdp-provisoire [--dry-run]` traite d'éventuels comptes anciens encore en « achanger »
 - `EnsureCguAccepted` — force l'acceptation des CGU avant tout accès
 - `EnsureStudentActive` — bloque les comptes désactivés
 - `EnsureStudentHasStage` — requis avant d'accéder au journal (un étudiant doit avoir un stage actif)

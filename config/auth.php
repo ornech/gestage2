@@ -94,7 +94,8 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
+            // 7 jours : sert aussi aux liens d'invitation envoyés à la création d'un compte (usage unique)
+            'expire' => 10080,
             'throttle' => 60,
         ],
     ],

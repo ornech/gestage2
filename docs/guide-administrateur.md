@@ -34,7 +34,7 @@ Choisir d'abord le rôle :
 - **Professeur** — accès au suivi des stages et à l'import Pronote
 - **Administrateur** — accès complet
 
-Le mot de passe initial est automatiquement défini à `achanger`. L'utilisateur devra le modifier à sa première connexion.
+Aucun mot de passe n'est défini à la création : l'utilisateur reçoit un email d'invitation avec un lien personnel (usage unique, valable 7 jours) pour choisir son mot de passe. Si l'adresse n'est pas distribuable (`@import.local`), l'application affiche le lien à transmettre à la main.
 
 ### Consulter et modifier un compte étudiant
 
@@ -45,7 +45,7 @@ Sur la fiche d'un étudiant, on peut :
 - Modifier ses informations (classe, spécialité, tuteur)
 - Changer son **statut** : Actif ou Démissionnaire
 - Marquer un **redoublement** (la promotion est recalculée automatiquement)
-- **Réinitialiser le mot de passe** (repassé à `achanger`)
+- **Réinitialiser le mot de passe** (l'ancien est invalidé, un email d'invitation est envoyé)
 - **Anonymiser le compte** (RGPD) : le nom devient "Anonyme" et l'email est remplacé par un identifiant neutre — action irréversible
 - **Supprimer le compte** — action irréversible
 
@@ -57,7 +57,7 @@ La section `/admin/professeurs` liste tous les comptes professeurs. On peut y **
 
 ### Réinitialiser un mot de passe
 
-La page `/admin/reset-password` permet de rechercher n'importe quel utilisateur (par nom, prénom ou email) et de remettre son mot de passe à `achanger` en un clic.
+La page `/admin/reset-password` permet de rechercher n'importe quel utilisateur (par nom, prénom ou email) et de lui envoyer en un clic un email pour choisir un nouveau mot de passe (l'ancien est aussitôt invalidé).
 
 ---
 
@@ -93,7 +93,7 @@ Vérifier le tableau avant de confirmer.
 
 Cliquer sur **Confirmer** pour appliquer les modifications. Un résumé indique le nombre de comptes créés, mis à jour, redoublants traités et démissionnaires marqués.
 
-Tous les nouveaux comptes reçoivent le mot de passe `achanger` et seront invités à le modifier à la première connexion.
+Chaque nouveau compte reçoit un email d'invitation pour choisir son mot de passe (envois étalés, partis par la file d'attente). Les comptes sans adresse distribuable sont listés avec leur lien à la fin de l'import.
 
 ---
 

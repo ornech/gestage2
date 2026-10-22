@@ -6,6 +6,8 @@ use App\Enums\StatutEtudiant;
 use App\Models\ConfigurationStage;
 use App\Models\Parametre;
 use App\Models\User;
+use App\Services\InvitationService;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -152,7 +154,7 @@ class AdminUserController extends Controller
         return view('admin.users.create', compact('tuteurs', 'currentYear'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, InvitationService $invitations)
     {
         // Un Professeur ne peut créer que des comptes Étudiant ou Professeur :
         // seul un Administrateur peut accorder le rôle Administrateur (cohérent avec toggle-admin).
@@ -184,7 +186,7 @@ class AdminUserController extends Controller
             'nom'       => strtoupper($request->nom),
             'prenom'    => $request->prenom,
             'email'     => $request->email,
-            'password'  => bcrypt('achanger'),
+            'password'  => bcrypt(Str::random(64)), // remplacé par l'invitation ci-dessous
             'classe'    => $request->classe,
             'promo'     => $promo,
             'spe'       => $request->spe,
@@ -195,9 +197,13 @@ class AdminUserController extends Controller
 
         $user->assignRole($request->role);
 
+        $invitation = $invitations->inviter($user);
+
         return redirect()
             ->route('admin.users.edit', $user)
-            ->with('success', "{$user->prenom} {$user->nom} créé(e). Un mot de passe devra être défini à la première connexion.");
+            ->with('success', $invitation['mail_envoye']
+                ? "{$user->prenom} {$user->nom} créé(e). Un email d'invitation lui a été envoyé pour choisir son mot de passe."
+                : "{$user->prenom} {$user->nom} créé(e). Adresse non distribuable : transmettez-lui ce lien (valable 7 jours, usage unique) : {$invitation['lien']}");
     }
 
     public function professeurs()
@@ -216,18 +222,18 @@ class AdminUserController extends Controller
         return view('admin.users.reset-password', compact('users'));
     }
 
-    public function resetPassword(\Illuminate\Http\Request $request)
+    public function resetPassword(\Illuminate\Http\Request $request, InvitationService $invitations)
     {
         $request->validate(['user_id' => 'required|exists:users,id']);
 
         $user = User::findOrFail($request->user_id);
 
-        $user->update([
-            'password'              => bcrypt('achanger'),
-            'force_password_change' => true,
-        ]);
+        // L'ancien mot de passe est invalidé ; l'utilisateur en choisit un nouveau via un lien par mail.
+        $invitation = $invitations->inviter($user);
 
-        return back()->with('success', "Mot de passe de {$user->prenom} {$user->nom} réinitialisé. Il devra se connecter avec « achanger » et en choisir un nouveau.");
+        return back()->with('success', $invitation['mail_envoye']
+            ? "Mot de passe de {$user->prenom} {$user->nom} invalidé. Un email lui a été envoyé pour en choisir un nouveau."
+            : "Mot de passe de {$user->prenom} {$user->nom} invalidé. Adresse non distribuable : transmettez-lui ce lien (valable 7 jours, usage unique) : {$invitation['lien']}");
     }
 
     public function toggleAdmin(User $user)

@@ -29,10 +29,23 @@
 
         <p class="has-text-grey is-size-7 mt-3">
             <i class="fas fa-info-circle mr-1"></i>
-            Les nouveaux comptes ont le mot de passe provisoire <code>achanger</code>.
+            Chaque nouveau compte reçoit un email d'invitation pour choisir son mot de passe
+            ({{ $counts['invites'] }} envoi(s) en file, partis progressivement).
             L'affectation des spécialités SLAM/SISR se fera au second semestre.
         </p>
     </div>
+
+    @if(!empty($liens))
+    <div class="notification is-warning is-light">
+        <p class="mb-2"><strong>{{ count($liens) }} compte(s) sans adresse email distribuable</strong> —
+        transmettez-leur ce lien personnel (valable 7 jours, usage unique) :</p>
+        <ul>
+            @foreach($liens as $l)
+                <li class="mb-1"><strong>{{ $l['nom'] }}</strong> : <code style="word-break:break-all;">{{ $l['lien'] }}</code></li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     <div class="buttons">
         <a href="{{ route('admin.users.index') }}" class="button is-primary">

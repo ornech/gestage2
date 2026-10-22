@@ -56,7 +56,7 @@
                 <label class="label is-small">Email (login)</label>
                 <input class="input" type="email" name="email"
                        value="{{ old('email') }}" placeholder="marie.dupont@lycee.fr" required>
-                <p class="help">Le mot de passe initial sera <strong>achanger</strong>. L'utilisateur devra le modifier à sa première connexion.</p>
+                <p class="help">Un email d'invitation lui sera envoyé pour qu'il choisisse lui-même son mot de passe.</p>
             </div>
 
             {{-- Champs spécifiques Étudiant --}}
