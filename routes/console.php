@@ -14,6 +14,9 @@ Schedule::command('backup:run --only-db')->dailyAt('02:00');
 // Nettoyage des vieux backups selon la stratégie de rotation (backup.php)
 Schedule::command('backup:clean')->dailyAt('02:30');
 
+// Contrôle l'état des sauvegardes (âge, taille) : sans cette tâche, l'alerte « sauvegarde malsaine » ne part jamais
+Schedule::command('backup:monitor')->dailyAt('03:00');
+
 // Rappel hebdomadaire aux étudiants sans stage saisi — tous les lundis à 8h
 Schedule::command('stages:rappel')->weeklyOn(1, '08:00');
 
