@@ -83,17 +83,21 @@ DB_DATABASE=gestage2
 DB_USERNAME=gestage_user
 DB_PASSWORD=mot_de_passe_fort
 
-# Mail SMTP
+# Mail SMTP authentifié via une boîte créée dans cPanel (ex. O2Switch).
+# Le serveur et le port sont indiqués dans le message « Client configuration » reçu dans cette boîte.
+# Mettre le mot de passe entre guillemets (il contient souvent des caractères spéciaux).
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.ac-poitiers.fr
-MAIL_PORT=587
-MAIL_USERNAME=votre_login
-MAIL_PASSWORD=votre_mot_de_passe
+MAIL_HOST=<serveur sortant de l'hébergeur>
+MAIL_PORT=465
+MAIL_SCHEME=smtps
+MAIL_USERNAME="gestage@votre-domaine.fr"
+MAIL_PASSWORD="mot_de_passe_de_la_boite"
 MAIL_FROM_ADDRESS="gestage@votre-domaine.fr"
 MAIL_FROM_NAME="Gestage BTS SIO"
 
-# Backup — destinataire des notifications
-BACKUP_MAIL_TO="jean-francois.ornech@ac-poitiers.fr"
+# Backup — destinataire des notifications (succès + échec).
+# Utiliser la boîte de l'application, avec une redirection cPanel vers votre adresse personnelle.
+BACKUP_MAIL_TO="gestage@votre-domaine.fr"
 
 # API INSEE Sirene (obtenir une clé sur api.insee.fr)
 INSEE_API_KEY=votre_cle_api
@@ -139,6 +143,14 @@ php artisan route:cache
 php artisan view:cache
 php artisan event:cache
 ```
+
+## Courrier sortant : limites connues
+
+- **Les adresses `@ac-poitiers.fr` (et plus largement `education.gouv.fr`) refusent les mails d'un hébergeur externe** (`550 #5.7.1 Your access to submit messages to this e-mail system has been rejected`). Constaté depuis O2Switch avec un domaine correct (SPF, DKIM, expéditeur valide) : c'est une règle de l'académie.
+- Conséquence : n'utiliser aucune adresse académique comme destinataire de l'application (alertes de sauvegarde, invitations).
+- Créer dans cPanel la boîte qui sert d'expéditeur (`MAIL_FROM_ADDRESS`) : sans elle, certains serveurs vérifient l'adresse d'expédition, la trouvent inexistante et écartent le message.
+- Les messages d'échec (« Impossible d'envoyer l'email ») arrivent dans cette boîte : y ajouter une redirection vers une adresse lue régulièrement.
+- Vérifier l'envoi : `php artisan tinker --execute="Mail::raw('Test', fn(\$m) => \$m->to('adresse')->subject('Test')); echo 'envoyé';"` puis cPanel › Email › Track Delivery. « envoyé » signifie seulement que le message est parti du serveur, pas qu'il est livré.
 
 ## ─── 9. CRON (scheduler Laravel) ────────────────────────────────────────────
 
