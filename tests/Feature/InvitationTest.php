@@ -25,7 +25,7 @@ class InvitationTest extends TestCase
         foreach (['Etudiant', 'Professeur', 'Administrateur'] as $role) {
             Role::findOrCreate($role);
         }
-        Parametre::set('annee_scolaire', '2025-2026');
+        $this->travelTo('2025-10-01');
         Mail::fake();
     }
 

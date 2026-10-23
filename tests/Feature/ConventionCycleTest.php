@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\StatutConvention;
 use App\Models\ConventionPapier;
+use App\Models\Parametre;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,7 +31,7 @@ class ConventionCycleTest extends TestCase
     public function test_convention_papier_avance_puis_recule(): void
     {
         $etudiant = User::factory()->etudiant()->create();
-        $papier   = ConventionPapier::create(['etudiant_id' => $etudiant->id, 'statut' => 'hors_app']);
+        $papier   = ConventionPapier::create(['etudiant_id' => $etudiant->id, 'annee_scolaire' => Parametre::anneeActive(), 'statut' => 'hors_app']);
         $admin    = $this->admin();
 
         $this->actingAs($admin)->patch(route('admin.conventions-papier.avancer', $papier));

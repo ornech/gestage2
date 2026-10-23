@@ -65,7 +65,7 @@ class DiplomeTest extends TestCase
 
     public function test_la_liste_des_anciens_propose_de_valider_les_diplomes_en_attente(): void
     {
-        Parametre::set('annee_scolaire', '2026-2027');
+        $this->travelTo('2026-10-01');
         $this->etudiant(['nom' => 'ATTENTE', 'promo' => 2026]);
         $this->etudiant(['nom' => 'VALIDE', 'promo' => 2026, 'statut' => 'diplome']);
 
@@ -79,7 +79,7 @@ class DiplomeTest extends TestCase
 
     public function test_un_diplome_valide_apparait_dans_l_historique_de_son_annee(): void
     {
-        Parametre::set('annee_scolaire', '2026-2027');
+        $this->travelTo('2026-10-01');
         $this->etudiant(['nom' => 'DIPLOMEE', 'promo' => 2026, 'statut' => 'diplome']);
 
         // Année 2025-2026 : promo 2026 = SIO2

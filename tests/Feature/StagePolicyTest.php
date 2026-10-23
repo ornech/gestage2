@@ -21,9 +21,9 @@ class StagePolicyTest extends TestCase
 
     public function test_etudiant_peut_modifier_son_stage_en_attente_ou_rejete(): void
     {
-        $etudiant = User::factory()->etudiant()->create();
-
         foreach (['en_attente', 'rejete'] as $statut) {
+            // un seul stage par étudiant et par année scolaire
+            $etudiant = User::factory()->etudiant()->create();
             $this->assertTrue($etudiant->can('update', $this->stageDe($etudiant, $statut)), $statut);
         }
     }

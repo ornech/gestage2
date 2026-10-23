@@ -15,7 +15,7 @@ class StageValidationUiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Parametre::set('annee_scolaire', '2026-2027');
+        $this->travelTo('2026-10-01');
     }
 
     private function stage(array $attrs = []): Stage

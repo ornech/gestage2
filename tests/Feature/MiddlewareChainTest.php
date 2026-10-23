@@ -71,7 +71,7 @@ class MiddlewareChainTest extends TestCase
     public function test_la_fin_de_promo_ne_bloque_pas_sans_validation_du_diplome(): void
     {
         // Promo 2026 en 2026-2027 : formation terminée, mais le diplôme n'est pas encore validé
-        Parametre::set('annee_scolaire', '2026-2027');
+        $this->travelTo('2026-10-01');
         $user = $this->etudiant(['promo' => 2026]);
 
         $this->actingAs($user)->get('/etudiant')->assertOk();
@@ -79,7 +79,7 @@ class MiddlewareChainTest extends TestCase
 
     public function test_etudiant_en_cours_de_formation_n_est_pas_bloque(): void
     {
-        Parametre::set('annee_scolaire', '2026-2027');
+        $this->travelTo('2026-10-01');
         $user = $this->etudiant(['promo' => 2027]);
 
         $this->actingAs($user)->get('/etudiant')->assertOk();

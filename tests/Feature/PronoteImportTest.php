@@ -24,7 +24,7 @@ class PronoteImportTest extends TestCase
             Role::findOrCreate($role);
         }
 
-        Parametre::set('annee_scolaire', '2025-2026');
+        $this->travelTo('2025-10-01');
         $this->actingAs(User::factory()->administrateur()->create());
     }
 
