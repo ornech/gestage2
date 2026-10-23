@@ -5,31 +5,55 @@
         {{ $orphelins->count() }} étudiant(s) actif(s) sans classe en {{ $annee }} — à traiter (diplômé, redoublant ou promo à corriger).
         Tant qu'ils n'ont pas de classe, ils ne peuvent pas saisir de stage.
     </p>
-    <table class="table is-narrow is-fullwidth" style="background:transparent;">
-        <tbody>
-        @foreach($orphelins as $e)
-            <tr>
-                <td>{{ $e->nom }} {{ $e->prenom }}</td>
-                <td class="has-text-grey">{{ $e->promo ? 'promo '.$e->promo : 'promo non définie' }}</td>
-                <td class="has-text-right" style="white-space:nowrap;">
-                    @if($e->promo)
-                    <form action="{{ route('admin.users.redoubler', $e) }}" method="POST" style="display:inline"
-                          data-confirm="Confirmer que {{ $e->prenom }} {{ $e->nom }} redouble (promo {{ $e->promo }} → {{ $e->promo + 1 }}) ?">
-                        @csrf @method('PATCH')
-                        <button class="button is-small is-light">Redouble</button>
-                    </form>
-                    @endif
-                    <form action="{{ route('admin.users.statut', $e) }}" method="POST" style="display:inline"
-                          data-confirm="Confirmer que {{ $e->prenom }} {{ $e->nom }} est diplômé(e) ? Son accès sera désactivé.">
-                        @csrf @method('PATCH')
-                        <input type="hidden" name="statut" value="diplome">
-                        <button class="button is-small is-light">Diplômé</button>
-                    </form>
-                    <a href="{{ route('admin.users.edit', $e) }}" class="button is-small is-light">Fiche</a>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+
+    <form action="{{ route('admin.users.action-groupee') }}" method="POST" id="form-sans-classe">
+        @csrf
+        <div style="max-height:360px; overflow-y:auto;" class="mb-3">
+            <table class="table is-narrow is-fullwidth" style="background:transparent;">
+                <tbody>
+                @foreach($orphelins->groupBy(fn($e) => $e->promo ?? 0)->sortKeysDesc() as $promo => $groupe)
+                    <tr style="background:rgba(0,0,0,.05);">
+                        <td style="width:2rem;">
+                            <input type="checkbox" class="cocher-promo" data-promo="{{ $promo }}" aria-label="Cocher toute la promo">
+                        </td>
+                        <td colspan="2" class="has-text-weight-semibold">
+                            {{ $promo ? 'Promo '.$promo : 'Promo non définie' }} — {{ $groupe->count() }} étudiant(s)
+                        </td>
+                    </tr>
+                    @foreach($groupe as $e)
+                    <tr>
+                        <td><input type="checkbox" name="ids[]" value="{{ $e->id }}" class="cocher-etudiant" data-promo="{{ $promo }}"></td>
+                        <td>{{ $e->nom }} {{ $e->prenom }}</td>
+                        <td class="has-text-right"><a href="{{ route('admin.users.edit', $e) }}" class="button is-small is-light">Fiche</a></td>
+                    </tr>
+                    @endforeach
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons">
+            <button type="submit" name="action" value="diplome" class="button is-small is-link"
+                    data-confirm="Marquer les étudiants cochés comme diplômés ? Leur accès à l'application sera désactivé.">
+                <i class="fas fa-graduation-cap mr-1"></i> Marquer diplômés
+            </button>
+            <button type="submit" name="action" value="redouble" class="button is-small is-light"
+                    data-confirm="Faire redoubler les étudiants cochés (promo + 1) ?">
+                <i class="fas fa-redo mr-1"></i> Redoublent (promo + 1)
+            </button>
+            <span class="is-size-7 has-text-grey">Coche des étudiants ou toute une promo, puis choisis l'action.</span>
+        </div>
+    </form>
 </div>
+
+@push('scripts')
+<script nonce="{{ $cspNonce ?? '' }}">
+    document.querySelectorAll('.cocher-promo').forEach((entete) => {
+        entete.addEventListener('change', () => {
+            document.querySelectorAll('.cocher-etudiant[data-promo="' + entete.dataset.promo + '"]')
+                .forEach((c) => { c.checked = entete.checked; });
+        });
+    });
+</script>
+@endpush
 @endif

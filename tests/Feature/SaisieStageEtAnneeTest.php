@@ -109,4 +109,56 @@ class SaisieStageEtAnneeTest extends TestCase
             ->delete(route('admin.stages.destroy', $stage))->assertSessionHasErrors();
         $this->assertNotNull(Stage::find($stage->id));
     }
+
+    public function test_action_groupee_diplome_et_redouble_ne_touche_que_les_etudiants_sans_classe(): void
+    {
+        $this->travelTo('2026-10-01');
+        $prof     = User::factory()->professeur()->create();
+        $ancien1  = User::factory()->etudiant()->create(['promo' => 2024, 'statut' => 'actif']);
+        $ancien2  = User::factory()->etudiant()->create(['promo' => 2025, 'statut' => 'actif']);
+        $echec    = User::factory()->etudiant()->create(['promo' => 2026, 'statut' => 'actif']);
+        $sansPromo = User::factory()->etudiant()->create(['promo' => null, 'statut' => 'actif']);
+        $enCours  = User::factory()->etudiant()->create(['promo' => 2027, 'statut' => 'actif']);
+
+        // Diplôme pour les anciennes promos ; l'étudiant en cours, glissé dans la sélection, est ignoré
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), [
+            'action' => 'diplome', 'ids' => [$ancien1->id, $ancien2->id, $enCours->id],
+        ])->assertSessionHas('success');
+
+        $this->assertSame('diplome', $ancien1->fresh()->statut);
+        $this->assertSame($prof->id, $ancien2->fresh()->diplome_par);
+        $this->assertNotNull($ancien1->fresh()->diplome_at);
+        $this->assertSame('actif', $enCours->fresh()->statut, 'un étudiant ayant une classe n\'est pas concerné');
+
+        // Redoublement : promo + 1 ; sans promo, ignoré
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), [
+            'action' => 'redouble', 'ids' => [$echec->id, $sansPromo->id, $enCours->id],
+        ])->assertSessionHas('success');
+
+        $this->assertEquals(2027, $echec->fresh()->promo);
+        $this->assertSame('SIO2', $echec->fresh()->classe_courante);
+        $this->assertNull($sansPromo->fresh()->promo);
+        $this->assertEquals(2027, $enCours->fresh()->promo);
+    }
+
+    public function test_action_groupee_exige_une_selection_et_le_staff(): void
+    {
+        $prof = User::factory()->professeur()->create();
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), ['action' => 'diplome'])->assertSessionHasErrors('ids');
+
+        $etudiant = User::factory()->etudiant()->create(['promo' => 2024, 'statut' => 'actif']);
+        $this->actingAs($etudiant)->post(route('admin.users.action-groupee'), ['action' => 'diplome', 'ids' => [$etudiant->id]]);
+        $this->assertSame('actif', $etudiant->fresh()->statut);
+    }
+
+    public function test_le_tableau_de_bord_regroupe_les_sans_classe_par_promo_avec_actions_groupees(): void
+    {
+        $this->travelTo('2026-10-01');
+        User::factory()->etudiant()->create(['promo' => 2024, 'statut' => 'actif']);
+        User::factory()->etudiant()->create(['promo' => 2025, 'statut' => 'actif']);
+
+        $this->actingAs(User::factory()->professeur()->create())->get(route('professeur.dashboard'))
+            ->assertOk()->assertSee('Promo 2025')->assertSee('Promo 2024')
+            ->assertSee(route('admin.users.action-groupee'), false)->assertSee('Marquer diplômés');
+    }
 }

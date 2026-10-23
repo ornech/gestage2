@@ -353,6 +353,52 @@ class AdminUserController extends Controller
         );
     }
 
+    /**
+     * Traite en une fois plusieurs étudiants actifs sans classe (diplômés ou redoublants).
+     * Seuls ces étudiants sont concernés : un identifiant d'un autre étudiant est ignoré.
+     */
+    public function actionGroupee(Request $request)
+    {
+        $data = $request->validate([
+            'ids'    => ['required', 'array', 'min:1'],
+            'ids.*'  => ['integer', 'exists:users,id'],
+            'action' => ['required', Rule::in(['diplome', 'redouble'])],
+        ], ['ids.required' => 'Sélectionne au moins un étudiant.']);
+
+        $etudiants = User::role('Etudiant')->where('statut', 'actif')->sansClasse()
+            ->whereIn('id', $data['ids'])->get();
+
+        if ($data['action'] === 'diplome') {
+            foreach ($etudiants as $etudiant) {
+                $etudiant->update([
+                    'statut'      => StatutEtudiant::Diplome->value,
+                    'diplome_at'  => now(),
+                    'diplome_par' => $request->user()->id,
+                ]);
+            }
+
+            return back()->with('success', $etudiants->count().' étudiant(s) marqué(s) diplômé(s).');
+        }
+
+        $sansPromo = $etudiants->whereNull('promo');
+        foreach ($etudiants->whereNotNull('promo') as $etudiant) {
+            $etudiant->update(['promo' => $etudiant->promo + 1]);
+        }
+
+        $traites         = $etudiants->count() - $sansPromo->count();
+        $encoreSansClasse = $etudiants->whereNotNull('promo')->filter(fn($e) => $e->fresh()->classe_courante === null)->count();
+
+        $message = "{$traites} étudiant(s) passé(s) en promo + 1.";
+        if ($encoreSansClasse > 0) {
+            $message .= " {$encoreSansClasse} n'ont toujours pas de classe (promo très ancienne) : à traiter encore.";
+        }
+        if ($sansPromo->isNotEmpty()) {
+            $message .= " {$sansPromo->count()} sans promo ignoré(s) : à corriger depuis leur fiche.";
+        }
+
+        return back()->with('success', $message);
+    }
+
     public function destroy(User $user)
     {
         // Les stages sont conservés sans nom (clé étrangère « mise à null ») ; le journal, personnel, est supprimé avec le compte

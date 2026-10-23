@@ -16,6 +16,7 @@
         </div>
     </div>
 
+    @include('partials.flash')
     @include('partials.etudiants_sans_classe')
 
     {{-- ── Actions admin ───────────────────────────────────────────── --}}
