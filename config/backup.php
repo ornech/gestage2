@@ -69,7 +69,7 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_MAIL_TO', env('MAIL_FROM_ADDRESS')),
+            'to' => env('BACKUP_MAIL_TO', env('MAIL_FROM_ADDRESS', 'gestage@btssio17.fr')),
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'gestage@btssio17.fr'),
                 'name'    => env('MAIL_FROM_NAME', 'Gestage'),

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Env;
 use Spatie\Backup\Events\BackupHasFailed;
 use Spatie\Backup\Events\BackupWasSuccessful;
 use Spatie\Backup\Events\CleanupHasFailed;
@@ -45,5 +46,32 @@ class BackupNotificationsTest extends TestCase
 
         $this->assertTrue($commandes->contains(fn ($c) => str_contains($c, 'backup:monitor') && str_ends_with($c, '0 3 * * *')), $commandes->implode("\n"));
         $this->assertTrue($commandes->contains(fn ($c) => str_contains($c, 'backup:run') && str_ends_with($c, '0 2 * * *')));
+    }
+
+    /**
+     * `composer install` (post-autoload-dump → package:discover) charge cette config AVANT que le .env existe,
+     * par exemple en CI. Spatie refuse alors une adresse nulle et fait échouer toute l'installation.
+     */
+    public function test_l_adresse_des_alertes_est_valide_meme_sans_fichier_env(): void
+    {
+        $repo = Env::getRepository();
+        $avant = ['BACKUP_MAIL_TO' => $repo->get('BACKUP_MAIL_TO'), 'MAIL_FROM_ADDRESS' => $repo->get('MAIL_FROM_ADDRESS')];
+
+        foreach (array_keys($avant) as $variable) {
+            $repo->clear($variable);
+        }
+
+        try {
+            $config = require config_path('backup.php');
+        } finally {
+            foreach ($avant as $variable => $valeur) {
+                if ($valeur !== null) {
+                    $repo->set($variable, $valeur);
+                }
+            }
+        }
+
+        $this->assertNotFalse(filter_var($config['notifications']['mail']['to'], FILTER_VALIDATE_EMAIL));
+        $this->assertNotFalse(filter_var($config['notifications']['mail']['from']['address'], FILTER_VALIDATE_EMAIL));
     }
 }
