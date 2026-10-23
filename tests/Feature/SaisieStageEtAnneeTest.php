@@ -159,6 +159,48 @@ class SaisieStageEtAnneeTest extends TestCase
 
         $this->actingAs(User::factory()->professeur()->create())->get(route('professeur.dashboard'))
             ->assertOk()->assertSee('Promo 2025')->assertSee('Promo 2024')
-            ->assertSee(route('admin.users.action-groupee'), false)->assertSee('Marquer diplômés');
+            ->assertSee(route('admin.users.action-groupee'), false)->assertSee('Archiver')->assertSee('Échec')->assertSee('Redoublent');
+    }
+
+    public function test_archiver_et_echec_ne_comptent_pas_comme_diplomes(): void
+    {
+        $this->travelTo('2026-10-01');
+        $prof    = User::factory()->professeur()->create();
+        $ancien  = User::factory()->etudiant()->create(['promo' => 2024, 'statut' => 'actif']);
+        $rate    = User::factory()->etudiant()->create(['promo' => 2026, 'statut' => 'actif']);
+        $recu    = User::factory()->etudiant()->create(['promo' => 2026, 'statut' => 'actif']);
+
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), ['action' => 'archive', 'ids' => [$ancien->id]]);
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), ['action' => 'echec', 'ids' => [$rate->id]]);
+        $this->actingAs($prof)->post(route('admin.users.action-groupee'), ['action' => 'diplome', 'ids' => [$recu->id]]);
+
+        $this->assertSame('archive', $ancien->fresh()->statut);
+        $this->assertSame('echec', $rate->fresh()->statut);
+        $this->assertNull($ancien->fresh()->diplome_at);
+        $this->assertNull($rate->fresh()->diplome_par);
+        $this->assertSame('diplome', $recu->fresh()->statut);
+        $this->assertSame($prof->id, $recu->fresh()->diplome_par);
+        $this->assertSame(1, User::where('statut', 'diplome')->count(), 'seul le diplôme validé compte comme diplômé');
+    }
+
+    public function test_un_etudiant_archive_ou_en_echec_n_a_plus_acces(): void
+    {
+        foreach (['archive', 'echec'] as $statut) {
+            $etudiant = User::factory()->etudiant()->create(['statut' => $statut, 'promo' => 2024]);
+
+            $this->actingAs($etudiant)->get(route('etudiant.dashboard'))->assertRedirect(route('login'));
+            $this->assertGuest();
+        }
+    }
+
+    public function test_la_fiche_propose_les_statuts_archive_et_echec(): void
+    {
+        $etudiant = User::factory()->etudiant()->create(['promo' => 2024, 'statut' => 'actif']);
+        $admin    = User::factory()->administrateur()->create();
+
+        $this->actingAs($admin)->get(route('admin.users.edit', $etudiant))->assertOk()->assertSee('Archivé')->assertSee('Échec');
+        $this->actingAs($admin)->patch(route('admin.users.statut', $etudiant), ['statut' => 'echec']);
+        $this->assertSame('echec', $etudiant->fresh()->statut);
+        $this->actingAs($admin)->get(route('admin.users.edit', $etudiant))->assertOk()->assertSee('BTS non obtenu');
     }
 }

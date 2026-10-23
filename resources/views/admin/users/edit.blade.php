@@ -140,9 +140,9 @@
             <div class="box mt-3">
                 <p class="menu-label">Statut administratif</p>
 
-                {{-- Statuts : Actif | Démissionnaire | Diplômé (validé par un professeur) --}}
+                {{-- Statuts : Actif | Démissionnaire | Diplômé (validé par un professeur) | Archivé (résultat inconnu) | Échec --}}
                 <div class="buttons are-small mb-2">
-                    @foreach(['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire'], 'diplome' => ['is-link', 'Diplômé']] as $val => [$color, $label])
+                    @foreach(['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire'], 'diplome' => ['is-link', 'Diplômé'], 'archive' => ['is-dark', 'Archivé'], 'echec' => ['is-warning', 'Échec']] as $val => [$color, $label])
                         @if($user->statut === $val)
                             <span class="button is-small {{ $color }}">
                                 <i class="fas fa-check mr-1"></i> {{ $label }}
@@ -162,6 +162,9 @@
 
                 @if($user->statut === 'demissionnaire')
                     <p class="help is-danger mb-3"><i class="fas fa-ban mr-1"></i> Accès désactivé.</p>
+                @endif
+                @if(in_array($user->statut, ['archive', 'echec'], true))
+                    <p class="help mb-3"><i class="fas fa-ban mr-1"></i> {{ $user->statut === 'echec' ? 'BTS non obtenu' : 'Ancien, résultat non renseigné' }}. Accès désactivé.</p>
                 @endif
                 @if($user->estDiplome())
                     <p class="help is-link mb-3">

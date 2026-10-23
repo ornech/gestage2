@@ -70,7 +70,7 @@ class AdminUserController extends Controller
             $promos = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhereIn('statut', ['demissionnaire', 'diplome']);
+                      ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
                 })
                 ->whereNotNull('promo')
                 ->pluck('promo')
@@ -83,7 +83,7 @@ class AdminUserController extends Controller
             $query = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhereIn('statut', ['demissionnaire', 'diplome']);
+                      ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
                 });
 
             if ($promoFiltre) {
@@ -102,7 +102,7 @@ class AdminUserController extends Controller
         // ── Requête standard : actifs de l'année en cours ────────────────
         // Les diplômés validés restent consultables dans l'historique des années passées
         $query = User::role('Etudiant')
-                     ->whereIn('statut', ['actif', 'diplome']);
+                     ->whereIn('statut', ['actif', 'diplome', 'echec', 'archive']);
 
         // Filtre par classe (depuis le menu navbar ?classe=SIO1/SIO2)
         if ($classeParam === 'SIO1') {
@@ -322,14 +322,7 @@ class AdminUserController extends Controller
             'statut' => ['required', Rule::enum(StatutEtudiant::class)],
         ]);
 
-        // Validation du diplôme : on trace qui et quand ; tout autre statut efface la trace.
-        $diplome = $request->statut === StatutEtudiant::Diplome->value;
-
-        $user->update([
-            'statut'      => $request->statut,
-            'diplome_at'  => $diplome ? now() : null,
-            'diplome_par' => $diplome ? $request->user()->id : null,
-        ]);
+        $user->definirStatut(StatutEtudiant::from($request->statut), $request->user());
 
         return back()->with('success', "Statut de {$user->prenom} {$user->nom} mis à jour.");
     }
@@ -362,22 +355,19 @@ class AdminUserController extends Controller
         $data = $request->validate([
             'ids'    => ['required', 'array', 'min:1'],
             'ids.*'  => ['integer', 'exists:users,id'],
-            'action' => ['required', Rule::in(['diplome', 'redouble'])],
+            'action' => ['required', Rule::in(['diplome', 'archive', 'echec', 'redouble'])],
         ], ['ids.required' => 'Sélectionne au moins un étudiant.']);
 
         $etudiants = User::role('Etudiant')->where('statut', 'actif')->sansClasse()
             ->whereIn('id', $data['ids'])->get();
 
-        if ($data['action'] === 'diplome') {
+        if ($data['action'] !== 'redouble') {
+            $statut = StatutEtudiant::from($data['action']);
             foreach ($etudiants as $etudiant) {
-                $etudiant->update([
-                    'statut'      => StatutEtudiant::Diplome->value,
-                    'diplome_at'  => now(),
-                    'diplome_par' => $request->user()->id,
-                ]);
+                $etudiant->definirStatut($statut, $request->user());
             }
 
-            return back()->with('success', $etudiants->count().' étudiant(s) marqué(s) diplômé(s).');
+            return back()->with('success', $etudiants->count().' étudiant(s) : '.mb_strtolower($statut->libelle()).'.');
         }
 
         $sansPromo = $etudiants->whereNull('promo');

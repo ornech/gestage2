@@ -32,6 +32,24 @@ class User extends Authenticatable
     }
 
     /** Diplôme validé par un professeur (jamais déduit de la promo). */
+    /** Change le statut ; la trace (qui, quand) n'est gardée que pour le diplôme, validé explicitement. */
+    public function definirStatut(StatutEtudiant $statut, User $par): void
+    {
+        $diplome = $statut === StatutEtudiant::Diplome;
+
+        $this->update([
+            'statut'      => $statut->value,
+            'diplome_at'  => $diplome ? now() : null,
+            'diplome_par' => $diplome ? $par->id : null,
+        ]);
+    }
+
+    /** Statut de sortie du cycle (diplômé, archivé, échec) : l'accès à l'application est fermé. */
+    public function aQuitteLeCycle(): bool
+    {
+        return StatutEtudiant::tryFrom($this->statut)?->estSortie() ?? false;
+    }
+
     public function estDiplome(): bool
     {
         return $this->statut === StatutEtudiant::Diplome->value;

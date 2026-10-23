@@ -17,15 +17,15 @@ class EnsureStudentActive
         $user = auth()->user();
 
         // Le diplôme est validé par un professeur : il n'est jamais déduit de la promo.
-        $isDiplome  = $user->estDiplome();
+        $isSorti    = $user->aQuitteLeCycle();
         $isBloque   = $user->statut === 'demissionnaire';
 
-        if ($isDiplome || $isBloque) {
+        if ($isSorti || $isBloque) {
             auth()->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            $raison = $isDiplome
+            $raison = $isSorti
                 ? 'Votre formation est terminée. Merci pour votre passage.'
                 : 'Votre accès à cette application a été désactivé.';
 

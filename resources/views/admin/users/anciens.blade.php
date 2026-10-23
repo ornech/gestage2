@@ -76,6 +76,10 @@
                         <span class="tag is-danger is-light">Démissionnaire</span>
                     @elseif($user->estDiplome())
                         <span class="tag is-success is-light">Diplômé {{ $user->promo }}</span>
+                    @elseif($user->statut === 'echec')
+                        <span class="tag is-warning is-light">Échec {{ $user->promo }}</span>
+                    @elseif($user->statut === 'archive')
+                        <span class="tag is-light">Archivé {{ $user->promo }}</span>
                     @elseif($formationTerminee)
                         <span class="tag is-warning is-light">Diplôme à valider</span>
                         <form action="{{ route('admin.users.statut', $user) }}" method="POST" style="display:inline">

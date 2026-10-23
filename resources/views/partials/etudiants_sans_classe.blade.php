@@ -33,16 +33,27 @@
         </div>
 
         <div class="buttons">
+            <button type="submit" name="action" value="archive" class="button is-small is-dark"
+                    data-confirm="Archiver les étudiants cochés (sortie du cycle, résultat non renseigné) ? Leur accès sera désactivé.">
+                <i class="fas fa-archive mr-1"></i> Archiver
+            </button>
             <button type="submit" name="action" value="diplome" class="button is-small is-link"
-                    data-confirm="Marquer les étudiants cochés comme diplômés ? Leur accès à l'application sera désactivé.">
-                <i class="fas fa-graduation-cap mr-1"></i> Marquer diplômés
+                    data-confirm="Confirmer que les étudiants cochés ont obtenu leur diplôme ? Leur accès sera désactivé.">
+                <i class="fas fa-graduation-cap mr-1"></i> Diplômés
+            </button>
+            <button type="submit" name="action" value="echec" class="button is-small is-warning"
+                    data-confirm="Confirmer que les étudiants cochés n'ont pas obtenu leur diplôme ? Leur accès sera désactivé.">
+                <i class="fas fa-times-circle mr-1"></i> Échec
             </button>
             <button type="submit" name="action" value="redouble" class="button is-small is-light"
                     data-confirm="Faire redoubler les étudiants cochés (promo + 1) ?">
                 <i class="fas fa-redo mr-1"></i> Redoublent (promo + 1)
             </button>
-            <span class="is-size-7 has-text-grey">Coche des étudiants ou toute une promo, puis choisis l'action.</span>
         </div>
+        <p class="is-size-7 has-text-grey">
+            « Diplômés » seulement après validation du diplôme ; « Archiver » pour les anciens dont le résultat n'est pas connu
+            (par exemple repris de l'ancienne base) : cela ne fausse pas les statistiques de réussite.
+        </p>
     </form>
 </div>
 

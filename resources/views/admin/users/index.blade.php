@@ -88,12 +88,15 @@
                     'actif'          => 'is-success is-light',
                     'demissionnaire' => 'is-danger is-light',
                     'diplome'        => 'is-link is-light',
+                    'echec'          => 'is-warning is-light',
                     default          => 'is-light',
                 };
                 $statutLabel = match($user->statut) {
                     'actif'          => 'Actif',
                     'demissionnaire' => 'Démiss.',
                     'diplome'        => 'Diplômé',
+                    'archive'        => 'Archivé',
+                    'echec'          => 'Échec',
                     default          => '—',
                 };
             @endphp

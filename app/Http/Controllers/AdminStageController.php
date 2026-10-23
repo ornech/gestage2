@@ -44,8 +44,8 @@ class AdminStageController extends Controller
         $tuteurs = Employe::orderBy('nom')->get();
 
         // ── 3 filtres indépendants et cumulables ─────────────────────────
-        // Une année passée garde ses diplômés (ils ne sont plus « actifs » aujourd'hui mais y étaient)
-        $statuts    = $anneeSelectionnee < $anneeActive ? ['actif', 'diplome'] : ['actif'];
+        // Une année passée garde ceux qui en sont sortis depuis (diplômés, échecs, archivés : ils n'y étaient plus « actifs » aujourd'hui mais y étaient)
+        $statuts    = $anneeSelectionnee < $anneeActive ? ['actif', 'diplome', 'echec', 'archive'] : ['actif'];
         $classe     = $request->get('classe', 'tous');  // tous | sio1 | sio2
         $filtre     = $request->get('filtre', 'tous');  // tous | sans_stage | a_faire_signer | en_attente | validee
 
