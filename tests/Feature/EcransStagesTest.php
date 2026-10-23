@@ -65,6 +65,9 @@ class EcransStagesTest extends TestCase
         $this->actingAs($this->admin);
 
         $page = $this->get(route('admin.stages.index', ['classe' => 'sio2']))->assertOk();
+        // Le sélecteur d'année se soumet seul au changement (attribut data-autosubmit bien formé)
+        $page->assertSee('<select name="annee" data-autosubmit>', false);
+
         $page->assertSee($this->sio2Avec->nom)->assertSee($this->sio2Papier->nom)
              ->assertDontSee($this->sio1Sans->nom)
              ->assertSee(route('admin.stages.destroy', $this->stageCourant), false)

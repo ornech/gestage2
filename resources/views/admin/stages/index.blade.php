@@ -70,7 +70,7 @@
             <input type="hidden" name="classe" value="{{ $classe }}">
             <input type="hidden" name="filtre" value="{{ $filtre }}">
             <div class="select is-small">
-                <select name="annee" data-autosubmit">
+                <select name="annee" data-autosubmit>
                     @foreach($annees as $annee)
                         <option value="{{ $annee }}" {{ $annee === $anneeSelectionnee ? 'selected' : '' }}>
                             {{ $annee }}{{ $annee === $anneeActive ? ' ●' : '' }}
