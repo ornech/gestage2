@@ -21,6 +21,79 @@
         </div>
     @endif
 
+    @include('admin.partials.lien-invitation')
+
+    {{-- ── Comptes jamais activés ─────────────────────────────────── --}}
+    <div class="box mb-5">
+        <p class="menu-label mb-3">
+            Comptes en attente d'activation
+            @if($enAttente->isNotEmpty())
+                <span class="tag is-warning ml-2">{{ $enAttente->count() }}</span>
+            @else
+                <span class="tag is-success is-light ml-2">Aucun</span>
+            @endif
+        </p>
+
+        @if($enAttente->isEmpty())
+            <p class="has-text-grey is-italic is-size-7">Tous les comptes actifs ont choisi leur mot de passe.</p>
+        @else
+        <p class="is-size-7 has-text-grey mb-3">
+            Ces comptes n'ont pas encore choisi leur mot de passe. Corrigez l'adresse si elle est fausse (l'invitation est alors renvoyée
+            automatiquement), renvoyez l'invitation, ou affichez le lien pour le transmettre vous-même.
+        </p>
+        <div class="table-container"><table class="table is-fullwidth is-size-7">
+            <thead>
+                <tr><th>Nom</th><th>Adresse</th><th>Diagnostic</th><th>Créé le</th><th>Corriger l'adresse</th><th>Invitation</th></tr>
+            </thead>
+            <tbody>
+            @foreach($enAttente as $ligne)
+                @php $u = $ligne->user; @endphp
+                <tr>
+                    <td><strong>{{ $u->nom }}</strong> {{ $u->prenom }}</td>
+                    <td>{{ $u->email }}</td>
+                    <td>
+                        @if($ligne->raison)
+                            <span class="tag is-warning is-light">{{ $ligne->raison }}</span>
+                        @else
+                            <span class="tag is-success is-light">Adresse plausible</span>
+                        @endif
+                    </td>
+                    <td>{{ $u->created_at?->format('d/m/Y') }}</td>
+                    <td>
+                        <form action="{{ route('admin.comptes.update-email', $u) }}" method="POST" style="display:flex; gap:4px;">
+                            @csrf
+                            <input class="input is-small" type="email" name="email" value="{{ $u->email }}" style="max-width:220px;" required>
+                            <button type="submit" class="button is-primary is-small" title="Enregistrer et renvoyer l'invitation">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:4px;">
+                            <form action="{{ route('admin.comptes.inviter', $u) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="button is-small is-info is-light"
+                                        @if($ligne->raison) disabled title="Pas d'envoi possible : {{ $ligne->raison }}" @endif>
+                                    <i class="fas fa-envelope mr-1"></i> Renvoyer
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.comptes.inviter', $u) }}" method="POST"
+                                  data-confirm="Générer un nouveau lien pour {{ $u->prenom }} {{ $u->nom }} ? L'ancien lien ne fonctionnera plus.">
+                                @csrf
+                                <input type="hidden" name="sans_mail" value="1">
+                                <button type="submit" class="button is-small is-warning is-light">
+                                    <i class="fas fa-link mr-1"></i> Afficher le lien
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table></div>
+        @endif
+    </div>
+
     {{-- ── Doublons ──────────────────────────────────────────────── --}}
     <div class="box mb-5">
         <p class="menu-label mb-3">

@@ -222,3 +222,23 @@ La messagerie de l'académie (`@ac-poitiers.fr`) refuse les mails envoyés par l
 3. La personne ouvre le lien et choisit son mot de passe. Le lien est **personnel, à usage unique et valable 7 jours** : ne l'envoyez qu'à elle.
 
 Vous pouvez aussi cocher **« Ne pas envoyer d'email »** pour n'importe quelle adresse (réinitialisation, création, import Pronote). Les domaines concernés automatiquement se règlent dans le `.env` avec `INVITATION_DOMAINES_SANS_MAIL` (liste séparée par des virgules).
+
+---
+
+## Adresses email fausses ou provisoires
+
+Menu **Comptes › Comptes à vérifier / inviter** : liste tous les comptes qui n'ont pas encore choisi leur mot de passe, avec un diagnostic de leur adresse.
+
+| Diagnostic | Signification | Que faire |
+|---|---|---|
+| *adresse absente ou factice* | `@import.local` ou vide | Saisir la vraie adresse (l'invitation repart toute seule) |
+| *domaine suspect « gmial.com » : vouliez-vous écrire « gmail.com » ?* | Faute de frappe probable | Corriger l'adresse |
+| *le domaine « … » n'a pas de serveur de messagerie* | Le domaine n'existe pas | Corriger l'adresse |
+| *la messagerie @ac-poitiers.fr refuse les mails* | Messagerie académique | « Afficher le lien » et l'envoyer soi-même |
+| *Adresse plausible* | Rien d'anormal | « Renvoyer » si le mail n'est pas arrivé (spams, retard) |
+
+- **Corriger l'adresse** (coche verte) enregistre la nouvelle adresse, **invalide l'ancien lien** et renvoie l'invitation (par mail, ou en affichant le lien pour les adresses académiques).
+- Pour une adresse suspecte ou factice, **aucun mail n'est envoyé** : il pourrait arriver à un inconnu, et le lien donne la main sur le compte.
+- L'**aperçu de l'import Pronote** signale les adresses suspectes avant de confirmer.
+- Cette page n'agit que sur des comptes **jamais activés** : pour un compte déjà utilisé, passer par « Réinitialiser un mot de passe ».
+

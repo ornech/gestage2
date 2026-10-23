@@ -277,6 +277,7 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     // Nettoyage comptes — comptes @import.local et doublons
     Route::get('/admin/comptes/nettoyage',              [AdminUserController::class, 'nettoyage'])      ->name('admin.comptes.nettoyage');
     Route::post('/admin/comptes/{user}/update-email',   [AdminUserController::class, 'updateEmail'])    ->name('admin.comptes.update-email');
+    Route::post('/admin/comptes/{user}/inviter',        [AdminUserController::class, 'inviter'])        ->name('admin.comptes.inviter')->middleware('throttle:30,1');
     Route::post('/admin/comptes/fusionner',             [AdminUserController::class, 'fusionner'])      ->name('admin.comptes.fusionner');
 
     // Communication — envoi, templates, suivi RGPD
