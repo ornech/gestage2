@@ -58,6 +58,10 @@
         <div class="control">
             <form action="{{ route('imports.pronote.confirm') }}" method="POST">
                 @csrf
+                <label class="checkbox mb-3" style="display:block;">
+                    <input type="checkbox" name="sans_mail" value="1">
+                    Ne pas envoyer d'emails d'invitation : afficher les liens pour les transmettre moi-même
+                </label>
                 <button type="submit" class="button is-primary">
                     <i class="fas fa-check mr-2"></i> Confirmer l'import
                 </button>

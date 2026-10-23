@@ -210,3 +210,15 @@ L'application détecte automatiquement les doublons : deux comptes avec le même
 La fusion transfère tous les stages, journaux et conventions du compte supprimé vers le compte conservé, puis supprime le doublon.
 
 > **Attention** : cette opération est irréversible.
+
+---
+
+## Transmettre soi-même un lien d'invitation (sans email)
+
+La messagerie de l'académie (`@ac-poitiers.fr`) refuse les mails envoyés par le serveur de l'application. Pour ces adresses, **aucun mail n'est envoyé** : l'application affiche à la place un encart « Lien à transmettre à… » avec un bouton **Copier**.
+
+1. Réinitialisez le mot de passe (page `/admin/reset-password`), créez le compte ou importez les élèves comme d'habitude.
+2. Copiez le lien affiché et envoyez-le vous-même (depuis votre messagerie, Pronote, l'ENT…).
+3. La personne ouvre le lien et choisit son mot de passe. Le lien est **personnel, à usage unique et valable 7 jours** : ne l'envoyez qu'à elle.
+
+Vous pouvez aussi cocher **« Ne pas envoyer d'email »** pour n'importe quelle adresse (réinitialisation, création, import Pronote). Les domaines concernés automatiquement se règlent dans le `.env` avec `INVITATION_DOMAINES_SANS_MAIL` (liste séparée par des virgules).

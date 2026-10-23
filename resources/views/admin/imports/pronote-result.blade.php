@@ -37,11 +37,12 @@
 
     @if(!empty($liens))
     <div class="notification is-warning is-light">
-        <p class="mb-2"><strong>{{ count($liens) }} compte(s) sans adresse email distribuable</strong> —
+        <p class="mb-2"><strong>{{ count($liens) }} compte(s) sans email d'invitation envoyé</strong> —
         transmettez-leur ce lien personnel (valable 7 jours, usage unique) :</p>
         <ul>
             @foreach($liens as $l)
-                <li class="mb-1"><strong>{{ $l['nom'] }}</strong> : <code style="word-break:break-all;">{{ $l['lien'] }}</code></li>
+                <li class="mb-1"><strong>{{ $l['nom'] }}</strong> <span class="has-text-grey is-size-7">({{ $l['email'] }} — {{ $l['raison'] }})</span> :
+                    <code style="word-break:break-all;">{{ $l['lien'] }}</code></li>
             @endforeach
         </ul>
     </div>

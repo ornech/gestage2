@@ -164,9 +164,134 @@ class InvitationTest extends TestCase
     {
         $this->actingAs(User::factory()->administrateur()->create())
             ->post(route('admin.users.store'), ['nom' => 'Sans', 'prenom' => 'Mail', 'email' => 'sans.mail@import.local', 'role' => 'Etudiant'])
-            ->assertSessionHas('success', fn ($m) => str_contains($m, '/reset-password/'));
+            ->assertSessionHas('lien_invitation', fn ($l) => str_contains($l['lien'], '/reset-password/') && $l['email'] === 'sans.mail@import.local');
 
         Mail::assertNothingQueued();
+    }
+
+    // Mode lien (messagerie académique injoignable) --------------------------------------
+
+    public function test_les_adresses_academiques_ne_recoivent_pas_de_mail_mais_un_lien_s_affiche(): void
+    {
+        $prof = User::factory()->professeur()->create(['email' => 'prof.dupont@ac-poitiers.fr']);
+
+        $this->actingAs(User::factory()->administrateur()->create())
+            ->post(route('admin.reset-password.do'), ['user_id' => $prof->id])
+            ->assertSessionHas('lien_invitation', fn ($l) => $l['email'] === 'prof.dupont@ac-poitiers.fr'
+                && str_contains($l['raison'], 'ac-poitiers.fr'));
+
+        Mail::assertNothingQueued();
+    }
+
+    public function test_les_sous_domaines_academiques_sont_aussi_concernes(): void
+    {
+        $service = app(InvitationService::class);
+
+        $this->assertNotNull($service->raisonSansMail(User::factory()->make(['email' => 'x@ac-poitiers.fr'])));
+        $this->assertNotNull($service->raisonSansMail(User::factory()->make(['email' => 'x@mail.education.gouv.fr'])));
+        $this->assertNull($service->raisonSansMail(User::factory()->make(['email' => 'x@gmail.com'])));
+        $this->assertNull($service->raisonSansMail(User::factory()->make(['email' => 'x@pasac-poitiers.fr'])), 'pas un faux positif sur le suffixe');
+    }
+
+    public function test_la_liste_des_domaines_sans_mail_est_configurable(): void
+    {
+        config(['invitations.domaines_sans_mail' => ['lycee-test.fr']]);
+
+        $service = app(InvitationService::class);
+        $this->assertNotNull($service->raisonSansMail(User::factory()->make(['email' => 'x@lycee-test.fr'])));
+        $this->assertNull($service->raisonSansMail(User::factory()->make(['email' => 'x@ac-poitiers.fr'])));
+    }
+
+    public function test_la_case_sans_mail_affiche_le_lien_pour_une_adresse_pourtant_joignable(): void
+    {
+        $cible = User::factory()->etudiant()->create(['email' => 'eleve@gmail.com']);
+
+        $this->actingAs(User::factory()->administrateur()->create())
+            ->post(route('admin.reset-password.do'), ['user_id' => $cible->id, 'sans_mail' => '1'])
+            ->assertSessionHas('lien_invitation');
+
+        Mail::assertNothingQueued();
+    }
+
+    public function test_le_lien_affiche_a_l_admin_permet_de_choisir_le_mot_de_passe(): void
+    {
+        $prof = User::factory()->professeur()->create(['email' => 'prof@ac-poitiers.fr', 'password' => Hash::make('ancien-mot-de-passe')]);
+
+        $this->actingAs(User::factory()->administrateur()->create())
+            ->post(route('admin.reset-password.do'), ['user_id' => $prof->id]);
+
+        $lien = session('lien_invitation')['lien'];
+        auth()->logout();
+
+        $this->get($lien)->assertOk();
+        $this->post(route('password.update'), [
+            'token' => basename(parse_url($lien, PHP_URL_PATH)), 'email' => 'prof@ac-poitiers.fr',
+            'password' => 'Un-mot-de-passe-solide-42', 'password_confirmation' => 'Un-mot-de-passe-solide-42',
+        ])->assertRedirect(route('login'));
+
+        $this->assertTrue(Hash::check('Un-mot-de-passe-solide-42', $prof->fresh()->password));
+        $this->assertFalse(Hash::check('ancien-mot-de-passe', $prof->fresh()->password));
+    }
+
+    public function test_la_page_affiche_le_lien_et_le_bouton_copier(): void
+    {
+        $prof = User::factory()->professeur()->create(['email' => 'prof@ac-poitiers.fr']);
+        $admin = User::factory()->administrateur()->create();
+
+        $this->actingAs($admin)->post(route('admin.reset-password.do'), ['user_id' => $prof->id]);
+        $lien = session('lien_invitation')['lien'];
+
+        $this->actingAs($admin)->followingRedirects()
+            ->withSession(['lien_invitation' => session('lien_invitation')])
+            ->get(route('admin.reset-password'))
+            ->assertOk()
+            ->assertSee($lien, false)
+            ->assertSee('data-copy', false);
+    }
+
+    public function test_un_non_admin_ne_peut_pas_obtenir_de_lien(): void
+    {
+        $cible = User::factory()->etudiant()->create();
+
+        $this->actingAs(User::factory()->etudiant()->create())
+            ->post(route('admin.reset-password.do'), ['user_id' => $cible->id]);
+
+        $this->assertNull(session('lien_invitation'));
+        Mail::assertNothingQueued();
+    }
+
+    public function test_l_import_en_mode_lien_n_envoie_aucun_mail_et_liste_les_liens(): void
+    {
+        $this->actingAs(User::factory()->administrateur()->create());
+        $csv = "Élève;Classe;Régime;Mail;Date d'entrée;Date de sortie\r\n"
+            ."DUPONT Jean;SIO1;Externe;jean@example.fr;01/09/2025;\r\n"
+            ."MARTIN Lea;SIO1;Externe;lea@ac-poitiers.fr;01/09/2025;\r\n";
+
+        $this->post(route('imports.pronote.preview'), [
+            'fichier' => UploadedFile::fake()->createWithContent('p.csv', "\xEF\xBB\xBF".$csv), 'classe_forcee' => 'SIO1',
+        ]);
+        $this->post(route('imports.pronote.confirm'), ['sans_mail' => '1'])
+            ->assertOk()
+            ->assertSee('/reset-password/', false)
+            ->assertSee('jean@example.fr', false);
+
+        Mail::assertNothingQueued();
+    }
+
+    public function test_l_import_envoie_les_mails_sauf_aux_adresses_academiques(): void
+    {
+        $this->actingAs(User::factory()->administrateur()->create());
+        $csv = "Élève;Classe;Régime;Mail;Date d'entrée;Date de sortie\r\n"
+            ."DUPONT Jean;SIO1;Externe;jean@example.fr;01/09/2025;\r\n"
+            ."MARTIN Lea;SIO1;Externe;lea@ac-poitiers.fr;01/09/2025;\r\n";
+
+        $this->post(route('imports.pronote.preview'), [
+            'fichier' => UploadedFile::fake()->createWithContent('p.csv', "\xEF\xBB\xBF".$csv), 'classe_forcee' => 'SIO1',
+        ]);
+        $this->post(route('imports.pronote.confirm'))->assertOk()->assertSee('lea@ac-poitiers.fr', false);
+
+        Mail::assertQueued(InvitationCompte::class, 1);
+        Mail::assertQueued(InvitationCompte::class, fn ($m) => $m->hasTo('jean@example.fr'));
     }
 
     public function test_le_mail_s_affiche_correctement(): void
@@ -223,6 +348,16 @@ class InvitationTest extends TestCase
     }
 
     // Commande pour les comptes existants -------------------------------------------
+
+    public function test_la_commande_en_mode_sans_mail_n_envoie_rien(): void
+    {
+        $legacy = User::factory()->etudiant()->create(['password' => Hash::make('achanger')]);
+
+        $this->artisan('comptes:invitations-mdp-provisoire', ['--sans-mail' => true])->assertSuccessful();
+
+        $this->assertFalse(Hash::check('achanger', $legacy->fresh()->password));
+        Mail::assertNothingQueued();
+    }
 
     public function test_la_commande_repere_les_comptes_achanger_sans_toucher_aux_autres(): void
     {

@@ -138,6 +138,7 @@
         //   data-onchange / data-oninput="fn"      appelle la fonction globale fn
         //   data-reload                            recharge la page
         //   data-hover="#couleur"                  bordure colorée au survol
+        //   data-copy="#sélecteur"                 copie la valeur d'un champ dans le presse-papiers
         document.addEventListener('submit', (e) => {
             const form = e.target;
             if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) {
@@ -160,6 +161,20 @@
             }
             if (e.target.closest('[data-reload]')) {
                 window.location.reload();
+            }
+            const copier = e.target.closest('[data-copy]');
+            if (copier) {
+                const champ = document.querySelector(copier.dataset.copy);
+                if (champ) {
+                    champ.select();
+                    const fini = () => { copier.textContent = 'Copié ✓'; };
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(champ.value).then(fini, () => { document.execCommand('copy'); fini(); });
+                    } else {
+                        document.execCommand('copy');
+                        fini();
+                    }
+                }
             }
         });
         document.addEventListener('change', (e) => {

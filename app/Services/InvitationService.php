@@ -20,10 +20,10 @@ class InvitationService
 
     /**
      * @param  int  $rang  position dans un envoi groupé (étale les envois)
-     * @return array{lien: string, mail_envoye: bool} `mail_envoye` = false si l'adresse n'est pas
-     *                                                 distribuable : l'administrateur doit alors transmettre le lien lui-même.
+     * @param  bool  $envoyerMail  false = « mode lien » : aucun mail, l'administrateur transmet le lien lui-même
+     * @return array{lien: string, mail_envoye: bool, raison: ?string} `raison` explique pourquoi aucun mail n'est parti
      */
-    public function inviter(User $user, int $rang = 0): array
+    public function inviter(User $user, int $rang = 0, bool $envoyerMail = true): array
     {
         $user->forceFill([
             'password'              => Hash::make(Str::random(64)),
@@ -33,8 +33,10 @@ class InvitationService
         $token = Password::broker()->createToken($user);
         $lien  = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
-        if (! $this->adresseDistribuable($user)) {
-            return ['lien' => $lien, 'mail_envoye' => false];
+        $raison = $envoyerMail ? $this->raisonSansMail($user) : 'envoi par mail non demandé';
+
+        if ($raison !== null) {
+            return ['lien' => $lien, 'mail_envoye' => false, 'raison' => $raison];
         }
 
         $jours = (int) round(config('auth.passwords.'.config('auth.defaults.passwords').'.expire') / 1440);
@@ -44,14 +46,30 @@ class InvitationService
             new InvitationCompte($user, $lien, max($jours, 1))
         );
 
-        return ['lien' => $lien, 'mail_envoye' => true];
+        return ['lien' => $lien, 'mail_envoye' => true, 'raison' => null];
     }
 
-    /** Les comptes créés sans email réel (placeholder d'import) ne peuvent pas recevoir de mail. */
+    /** Null si un mail peut être envoyé ; sinon la raison, à afficher à l'administrateur. */
+    public function raisonSansMail(User $user): ?string
+    {
+        $email = strtolower((string) $user->email);
+
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL) || str_ends_with($email, '@import.local')) {
+            return 'adresse email absente ou factice';
+        }
+
+        $domaine = substr(strrchr($email, '@'), 1);
+        foreach (config('invitations.domaines_sans_mail', []) as $refuse) {
+            if ($domaine === $refuse || str_ends_with($domaine, '.'.$refuse)) {
+                return "la messagerie @{$refuse} refuse les mails de ce serveur";
+            }
+        }
+
+        return null;
+    }
+
     public function adresseDistribuable(User $user): bool
     {
-        return filled($user->email)
-            && filter_var($user->email, FILTER_VALIDATE_EMAIL)
-            && ! str_ends_with(strtolower($user->email), '@import.local');
+        return $this->raisonSansMail($user) === null;
     }
 }

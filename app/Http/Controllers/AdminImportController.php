@@ -45,7 +45,7 @@ class AdminImportController extends Controller
         }
 
         $counts = ['cree' => 0, 'redoublant' => 0, 'mis_a_jour' => 0, 'demissionnaire' => 0, 'invites' => 0];
-        $liens  = []; // comptes sans adresse distribuable : lien à transmettre à la main
+        $liens  = []; // comptes sans mail envoyé (adresse refusée ou « mode lien ») : lien à transmettre à la main
         $rang   = 0;
 
         foreach ($preview as $row) {
@@ -66,11 +66,11 @@ class AdminImportController extends Controller
                 $user->assignRole('Etudiant');
                 $counts['cree']++;
 
-                $invitation = $invitations->inviter($user, $rang++);
+                $invitation = $invitations->inviter($user, $rang++, ! $request->boolean('sans_mail'));
                 if ($invitation['mail_envoye']) {
                     $counts['invites']++;
                 } else {
-                    $liens[] = ['nom' => "{$user->prenom} {$user->nom}", 'email' => $user->email, 'lien' => $invitation['lien']];
+                    $liens[] = ['nom' => "{$user->prenom} {$user->nom}", 'email' => $user->email, 'lien' => $invitation['lien'], 'raison' => $invitation['raison']];
                 }
 
             } elseif ($row['action'] === 'redoublant') {

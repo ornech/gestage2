@@ -57,6 +57,11 @@
                 <input class="input" type="email" name="email"
                        value="{{ old('email') }}" placeholder="marie.dupont@lycee.fr" required>
                 <p class="help">Un email d'invitation lui sera envoyé pour qu'il choisisse lui-même son mot de passe.</p>
+                <label class="checkbox mt-2">
+                    <input type="checkbox" name="sans_mail" value="1">
+                    Ne pas envoyer d'email : afficher le lien pour le transmettre moi-même
+                </label>
+                <p class="help">Les adresses @ac-poitiers.fr (refusées par la messagerie académique) n'en reçoivent jamais : le lien s'affiche alors automatiquement.</p>
             </div>
 
             {{-- Champs spécifiques Étudiant --}}

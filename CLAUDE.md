@@ -42,7 +42,7 @@ Trois rôles Spatie (`Etudiant`, `Professeur`, `Administrateur`) déterminent to
 
 Quatre middlewares custom (dans `app/Http/Middleware/`) s'enchaînent sur les routes étudiants :
 
-- `ForcePasswordChange` — redirige vers changement de mot de passe si `force_password_change = true`. Tout compte créé (import Pronote, création admin, réinitialisation) reçoit un mot de passe aléatoire inconnu et un **email d'invitation** (`InvitationService`, lien Fortify `password.reset`, usage unique, 7 jours) ; il n'existe plus de mot de passe provisoire commun. `php artisan comptes:invitations-mdp-provisoire [--dry-run]` traite d'éventuels comptes anciens encore en « achanger »
+- `ForcePasswordChange` — redirige vers changement de mot de passe si `force_password_change = true`. Tout compte créé (import Pronote, création admin, réinitialisation) reçoit un mot de passe aléatoire inconnu et un **email d'invitation** (`InvitationService`, lien Fortify `password.reset`, usage unique, 7 jours) ; il n'existe plus de mot de passe provisoire commun. `php artisan comptes:invitations-mdp-provisoire [--dry-run] [--sans-mail]` traite d'éventuels comptes anciens encore en « achanger ». **Mode lien** : pour les domaines de `config/invitations.php` (`INVITATION_DOMAINES_SANS_MAIL`, par défaut `ac-poitiers.fr,education.gouv.fr`, dont la messagerie refuse les mails de l'hébergeur) ou si la case « Ne pas envoyer d'email » est cochée, aucun mail n'est envoyé : le lien est affiché à l'administrateur (création, réinitialisation, import)
 - `EnsureCguAccepted` — force l'acceptation des CGU avant tout accès
 - `EnsureStudentActive` — bloque les comptes désactivés
 - `EnsureStudentHasStage` — requis avant d'accéder au journal (un étudiant doit avoir un stage actif)

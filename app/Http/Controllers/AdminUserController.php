@@ -197,13 +197,11 @@ class AdminUserController extends Controller
 
         $user->assignRole($request->role);
 
-        $invitation = $invitations->inviter($user);
+        $invitation = $invitations->inviter($user, 0, ! $request->boolean('sans_mail'));
 
         return redirect()
             ->route('admin.users.edit', $user)
-            ->with('success', $invitation['mail_envoye']
-                ? "{$user->prenom} {$user->nom} créé(e). Un email d'invitation lui a été envoyé pour choisir son mot de passe."
-                : "{$user->prenom} {$user->nom} créé(e). Adresse non distribuable : transmettez-lui ce lien (valable 7 jours, usage unique) : {$invitation['lien']}");
+            ->with($this->confirmationInvitation($user, $invitation, "{$user->prenom} {$user->nom} créé(e)."));
     }
 
     public function professeurs()
@@ -229,11 +227,32 @@ class AdminUserController extends Controller
         $user = User::findOrFail($request->user_id);
 
         // L'ancien mot de passe est invalidé ; l'utilisateur en choisit un nouveau via un lien par mail.
-        $invitation = $invitations->inviter($user);
+        $invitation = $invitations->inviter($user, 0, ! $request->boolean('sans_mail'));
 
-        return back()->with('success', $invitation['mail_envoye']
-            ? "Mot de passe de {$user->prenom} {$user->nom} invalidé. Un email lui a été envoyé pour en choisir un nouveau."
-            : "Mot de passe de {$user->prenom} {$user->nom} invalidé. Adresse non distribuable : transmettez-lui ce lien (valable 7 jours, usage unique) : {$invitation['lien']}");
+        return back()->with($this->confirmationInvitation($user, $invitation, "Mot de passe de {$user->prenom} {$user->nom} invalidé."));
+    }
+
+    /**
+     * Message de confirmation après une invitation ; en « mode lien », le lien est transmis à la vue
+     * (jamais écrit dans les logs) pour que l'administrateur le copie.
+     *
+     * @return array<string, mixed>
+     */
+    private function confirmationInvitation(User $user, array $invitation, string $debut): array
+    {
+        if ($invitation['mail_envoye']) {
+            return ['success' => "{$debut} Un email lui a été envoyé pour choisir son mot de passe."];
+        }
+
+        return [
+            'success'         => "{$debut} Aucun email envoyé ({$invitation['raison']}) : transmettez-lui le lien ci-dessous.",
+            'lien_invitation' => [
+                'nom'    => "{$user->prenom} {$user->nom}",
+                'email'  => $user->email,
+                'lien'   => $invitation['lien'],
+                'raison' => $invitation['raison'],
+            ],
+        ];
     }
 
     public function toggleAdmin(User $user)

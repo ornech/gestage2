@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Hash;
 class InviterMotDePasseProvisoire extends Command
 {
     protected $signature = 'comptes:invitations-mdp-provisoire
-                            {--dry-run : liste les comptes concernés sans rien modifier ni envoyer}';
+                            {--dry-run : liste les comptes concernés sans rien modifier ni envoyer}
+                            {--sans-mail : aucun mail envoyé, les liens à transmettre à la main sont affichés}';
 
     protected $description = "Invalide le mot de passe provisoire « achanger » et envoie une invitation aux comptes concernés";
 
@@ -49,7 +50,7 @@ class InviterMotDePasseProvisoire extends Command
 
         $liens = [];
         foreach ($concernes->values() as $rang => $user) {
-            $resultat = $invitations->inviter($user, $rang);
+            $resultat = $invitations->inviter($user, $rang, ! $this->option('sans-mail'));
 
             if (! $resultat['mail_envoye']) {
                 $liens[] = [$user->prenom.' '.$user->nom, $resultat['lien']];
@@ -59,7 +60,7 @@ class InviterMotDePasseProvisoire extends Command
         $this->info(($concernes->count() - count($liens)).' invitation(s) mise(s) en file d\'envoi.');
 
         if ($liens) {
-            $this->warn(count($liens).' compte(s) sans adresse distribuable : transmettez-leur ce lien (valable 7 jours).');
+            $this->warn(count($liens).' compte(s) sans mail envoyé : transmettez-leur ce lien (personnel, valable 7 jours).');
             $this->table(['Utilisateur', 'Lien'], $liens);
         }
 

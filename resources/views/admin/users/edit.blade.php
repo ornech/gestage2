@@ -27,6 +27,8 @@
         </div>
     </div>
 
+    @include('admin.partials.lien-invitation')
+
     @if(session('success'))
         <div class="notification is-success is-light py-2 mb-4">{{ session('success') }}</div>
     @endif

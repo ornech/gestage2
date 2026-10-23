@@ -15,6 +15,8 @@
         </div>
     </div>
 
+    @include('admin.partials.lien-invitation')
+
     @if(session('success'))
     <div class="notification is-success is-light mb-4">
         <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
@@ -63,6 +65,17 @@
                 <span class="icon"><i class="fas fa-user-check"></i></span>
                 <span id="selected-label"></span>
                 <button type="button" id="clear-selection" class="delete is-small ml-2"></button>
+            </div>
+
+            <div class="field mt-4">
+                <label class="checkbox">
+                    <input type="checkbox" name="sans_mail" value="1">
+                    Ne pas envoyer d'email : afficher le lien pour le transmettre moi-même
+                </label>
+                <p class="help">
+                    À utiliser quand le mail ne peut pas arriver (par exemple une adresse @ac-poitiers.fr, que la messagerie
+                    académique refuse). Pour ces adresses, aucun mail n'est envoyé et le lien s'affiche automatiquement.
+                </p>
             </div>
 
             <div class="field is-grouped mt-4">
