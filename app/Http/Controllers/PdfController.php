@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\ConfigurationStage;
 use App\Models\Parametre;
 use App\Models\Stage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Mpdf\Mpdf;
 
 class PdfController extends Controller
 {
-    public function convention(Stage $stage)
+    /** Convention PDF : affichée dans le navigateur, ou téléchargée avec ?telecharger=1. */
+    public function convention(Request $request, Stage $stage)
     {
-        $this->authorize('view', $stage);
+        $this->authorize('convention', $stage);
+
+        // Étudiant supprimé : le stage est conservé sans nom, il n'y a plus de convention à éditer
+        abort_if($stage->etudiant_id === null, 404, "Cet étudiant a été supprimé : la convention n'est plus disponible.");
 
         $stage->load(['etudiant', 'entreprise', 'maitreDeStage']);
 
@@ -31,8 +37,7 @@ class PdfController extends Controller
         ];
 
         // ── Professeur principal de la classe ────────────────────────────
-        $annee = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
-        $configStage = ConfigurationStage::where('annee_scolaire', $annee)
+        $configStage = ConfigurationStage::where('annee_scolaire', $stage->annee_scolaire)
             ->where('classe', $stage->classe)
             ->with('profPrincipal')
             ->first();
@@ -62,19 +67,12 @@ class PdfController extends Controller
 
         $mpdf->WriteHTML($html);
 
-        $filename = 'convention-' . $stage->classe . '-' . $stage->etudiant->nom . '-' . $stage->etudiant->prenom . '.pdf';
+        $filename = Str::slug('convention '.$stage->classe.' '.$stage->etudiant->nom.' '.$stage->etudiant->prenom.' '.$stage->annee_scolaire).'.pdf';
+        $mode     = $request->boolean('telecharger') ? 'attachment' : 'inline';
 
         return response($mpdf->Output($filename, 'S'))
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
-    }
-
-    public function attestation(Stage $stage)
-    {
-        $this->authorize('view', $stage);
-
-        // TODO : générer l'attestation
-        return response('%PDF-1.4', 200)->header('Content-Type', 'application/pdf');
+            ->header('Content-Disposition', $mode.'; filename="'.$filename.'"');
     }
 
     // ── Articles juridiques Titre I ──────────────────────────────────────

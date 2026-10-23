@@ -28,10 +28,14 @@
                 <div class="buttons mt-3">
 
                     {{-- Bouton Convention PDF --}}
-                    <a href="{{ route('pdf.convention', $stage) }}" 
-                       class="button is-info">
-                        <i class="fas fa-file-pdf mr-2"></i> Télécharger la convention
+                    @can('convention', $stage)
+                    <a href="{{ route('pdf.convention', $stage) }}" target="_blank" rel="noopener" class="button is-info">
+                        <i class="fas fa-eye mr-2"></i> Voir la convention
                     </a>
+                    <a href="{{ route('pdf.convention', [$stage, 'telecharger' => 1]) }}" class="button is-info is-light">
+                        <i class="fas fa-file-pdf mr-2"></i> Télécharger
+                    </a>
+                    @endcan
 
                     {{-- Journal de stage --}}
                     <a href="{{ route('stages.journal.index', $stage) }}" class="button is-warning">

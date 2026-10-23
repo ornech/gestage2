@@ -22,9 +22,14 @@
             <a href="{{ route('stages.journal.index', $stage) }}" class="button is-info is-small">
                 <i class="fas fa-book-open mr-1"></i> Journal de stage
             </a>
+            @can('convention', $stage)
             <a href="{{ route('pdf.convention', $stage) }}" class="button is-link is-small" target="_blank" rel="noopener">
-                <i class="fas fa-file-pdf mr-1"></i> Convention PDF
+                <i class="fas fa-eye mr-1"></i> Voir la convention
             </a>
+            <a href="{{ route('pdf.convention', [$stage, 'telecharger' => 1]) }}" class="button is-link is-light is-small">
+                <i class="fas fa-download mr-1"></i> Télécharger
+            </a>
+            @endcan
             <a href="{{ route('stages.index') }}" class="button is-light is-small">← Retour</a>
         </div>
     </div>

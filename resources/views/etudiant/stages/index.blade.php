@@ -109,9 +109,14 @@
                 <a href="{{ route('stages.journal.index', $stage) }}" class="button is-light">
                     <i class="fas fa-book-open has-text-link mr-1"></i> Journal de stage
                 </a>
-                <a href="{{ route('pdf.convention', $stage) }}" class="button is-light">
-                    <i class="fas fa-file-pdf has-text-danger mr-1"></i> Convention PDF
+                @can('convention', $stage)
+                <a href="{{ route('pdf.convention', $stage) }}" class="button is-light" target="_blank" rel="noopener">
+                    <i class="fas fa-eye has-text-danger mr-1"></i> Voir la convention
                 </a>
+                <a href="{{ route('pdf.convention', [$stage, 'telecharger' => 1]) }}" class="button is-light">
+                    <i class="fas fa-download has-text-danger mr-1"></i> Télécharger
+                </a>
+                @endcan
             </div>
         </div>
         @endforeach
