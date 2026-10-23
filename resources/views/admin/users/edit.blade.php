@@ -206,7 +206,8 @@
                 @endphp
 
                 {{-- Convention hors app sans stage numérique --}}
-                @if($user->conventionPapier && $user->stages->isEmpty())
+                @php $sansStageCetteAnnee = $user->stages->where('annee_scolaire', $annee)->isEmpty(); @endphp
+                @if($user->conventionPapier && $sansStageCetteAnnee)
                 <div class="notification is-warning is-light py-2 mb-3">
                     <i class="fas fa-file-alt mr-2"></i>
                     <strong>Convention hors app</strong> — stage non saisi dans l'appli.
@@ -222,18 +223,7 @@
 
                 @foreach($user->stages as $stage)
                 @php
-                    // Période : depuis stage.classe ou calculée depuis la date de début
                     $periode = $stage->classe;
-                    if (!$periode && $stage->date_debut && $user->promo) {
-                        $sy = $stage->date_debut->month >= 9
-                            ? $stage->date_debut->year
-                            : $stage->date_debut->year - 1;
-                        $periode = match(true) {
-                            $sy === $user->promo - 2 => 'SIO1',
-                            $sy === $user->promo - 1 => 'SIO2',
-                            default => null,
-                        };
-                    }
                     $periodeColor = $periode === 'SIO1' ? 'is-info' : ($periode === 'SIO2' ? 'is-primary' : 'is-light');
 
                     $valBadge  = match($stage->statut_validation) {
@@ -248,6 +238,7 @@
                     <div class="level is-mobile mb-2">
                         <div class="level-left">
                             <span class="tag {{ $periodeColor }} mr-2">{{ $periode ?? '—' }}</span>
+                            <span class="tag is-light mr-2">{{ $stage->annee_scolaire }}</span>
                             @if($stage->entreprise)
                                 <a href="{{ route('stages.show', $stage) }}" class="has-text-weight-semibold">
                                     {{ $stage->entreprise->raison_sociale }}

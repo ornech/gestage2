@@ -13,6 +13,8 @@
         </div>
     </div>
 
+    @include('partials.etudiants_sans_classe')
+
     {{-- Alertes --}}
     @php
         $alertes = collect([
@@ -65,7 +67,7 @@
     </div>
 
     {{-- ── Modale export CSV ──────────────────────────────────────────── --}}
-    @php $anneesDisponibles = \App\Models\Stage::whereNotNull('annee_scolaire')->distinct()->orderByDesc('annee_scolaire')->pluck('annee_scolaire'); @endphp
+    @php $anneesDisponibles = \App\Models\Stage::anneesDisponibles(); @endphp
     <div id="modal-export-csv" class="modal">
         <div class="modal-background"></div>
         <div class="modal-card" style="max-width:380px;">

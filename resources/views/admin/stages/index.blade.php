@@ -107,7 +107,7 @@
             @php
                 $stage = $etudiant->stages->first();
                 $anneeEtude = $etudiant->promo ? (3 - ($etudiant->promo - $syInt)) : null;
-                $classeTag  = ($anneeEtude >= 1 && $anneeEtude <= 2) ? 'SIO'.$anneeEtude : null;
+                $classeTag  = $stage?->classe ?? (($anneeEtude >= 1 && $anneeEtude <= 2) ? 'SIO'.$anneeEtude : null);
             @endphp
             @if($stage)
             {{-- Étudiant AVEC stage --}}
@@ -271,13 +271,20 @@
                         <i class="fas fa-pen"></i>
                     </a>
                     @endrole
+                    <form action="{{ route('admin.stages.destroy', $stage) }}" method="POST" style="display:inline"
+                          data-confirm="Supprimer définitivement ce stage de {{ $etudiant->prenom }} {{ $etudiant->nom }} ({{ $stage->annee_scolaire }}) ? Il pourra être ressaisi.">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="button is-small is-danger is-light" title="Supprimer (saisie erronée)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
 
             @else
             {{-- Étudiant SANS stage --}}
             @php
-                $conv = $etudiant->conventionPapier;
+                $conv = $etudiant->conventionsPapier->first();
                 $rowBgPapier = $conv ? match($conv->statut) {
                     'hors_app'   => '#fdf2e9',
                     'en_attente' => '#e3f2fd',
@@ -361,6 +368,7 @@
                           method="POST"
                           data-confirm="Confirmer que {{ $etudiant->prenom }} {{ $etudiant->nom }} a remis une convention hors app ?">
                         @csrf @method('PATCH')
+                        <input type="hidden" name="annee" value="{{ $anneeSelectionnee }}">
                         <button type="submit" class="button is-small is-warning is-light" style="min-width:155px;">
                             ⚠ Convention hors app remise
                         </button>

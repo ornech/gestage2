@@ -2,7 +2,7 @@
     @role('Etudiant')
     @php
         $convPapier = auth()->user()->conventionPapier;
-        $aStage     = auth()->user()->stages()->exists();
+        $aStage     = auth()->user()->aUnStageCetteAnnee();
     @endphp
     @if($convPapier && !$aStage)
         <div style="background:#fff3cd; border-bottom:3px solid #ff9800; padding:12px 24px; display:flex; justify-content:space-between; align-items:center;">

@@ -143,7 +143,7 @@
                     <span class="has-text-grey">—</span>
                 @endif
             </td>
-            <td>{{ $stage->etudiant?->classe_courante ?? $stage->etudiant?->classe ?? '—' }}</td>
+            <td>{{ $stage->classe ?? '—' }}</td>
             <td>{{ $stage->date_debut?->format('d/m/Y') ?? '—' }}</td>
             <td>{{ $stage->date_fin?->format('d/m/Y') ?? '—' }}</td>
             <td>

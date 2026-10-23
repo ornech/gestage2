@@ -105,7 +105,7 @@
                         Informations
                     </p>
                     <ul style="font-size:.82rem; line-height:2; color:#b0b0c8;">
-                        @php $annee = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y')+1)); @endphp
+                        @php $annee = \App\Models\Parametre::anneeActive(); @endphp
                         <li><i class="fas fa-calendar-alt mr-1"></i> Année scolaire {{ $annee }}</li>
                         <li><i class="fas fa-code-branch mr-1"></i> Gestage {{ config('app.version') }} — Laravel {{ app()->version() }}</li>
                         <li><i class="fas fa-shield-alt mr-1"></i> Données hébergées en France</li>

@@ -28,18 +28,6 @@
                     </a>
                 @endforeach
             </div>
-
-            @if($anneeSelectionnee !== $anneeActive)
-                @role('Administrateur')
-                <form action="{{ route('admin.parametres.set-active') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="annee_scolaire" value="{{ $anneeSelectionnee }}">
-                    <button class="button is-warning is-light is-small">
-                        <i class="fas fa-star mr-1"></i> Définir comme année active
-                    </button>
-                </form>
-                @endrole
-            @endif
         </div>
 
         @role('Administrateur')
@@ -54,7 +42,7 @@
                 </div>
                 <div class="control">
                     <button class="button is-primary is-small">
-                        <i class="fas fa-plus mr-1"></i> Nouvelle année
+                        <i class="fas fa-plus mr-1"></i> Préparer une année
                     </button>
                 </div>
             </div>
