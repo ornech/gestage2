@@ -13,21 +13,4 @@ return [
         explode(',', env('INVITATION_DOMAINES_SANS_MAIL', 'ac-poitiers.fr,education.gouv.fr'))
     ))),
 
-
-    /*
-    | Domaines de messagerie courants : une adresse dont le domaine en est proche sans en être un
-    | (gmial.com, hotmial.fr…) est très probablement une faute de frappe → aucun mail n'est envoyé
-    | (il pourrait arriver à un inconnu) ; le lien est affiché à l'administrateur.
-    */
-    'domaines_courants' => [
-        'gmail.com', 'googlemail.com', 'hotmail.com', 'hotmail.fr', 'outlook.com', 'outlook.fr', 'live.fr', 'live.com',
-        'yahoo.fr', 'yahoo.com', 'orange.fr', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'neuf.fr', 'laposte.net', 'bbox.fr',
-        'icloud.com', 'me.com', 'msn.com', 'protonmail.com', 'proton.me', 'gmx.fr', 'gmx.com', 'aol.com', 'ac-poitiers.fr',
-    ],
-
-    /*
-    | Vérifie que le domaine possède un serveur de messagerie (enregistrement MX ou A dans le DNS).
-    */
-    'verifier_dns' => env('INVITATION_VERIFIER_DNS', true),
-
 ];

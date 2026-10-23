@@ -37,14 +37,7 @@
                 <tr>
                     <td>{{ $row['nom'] }}</td>
                     <td>{{ $row['prenom'] }}</td>
-                    <td>
-                        {{ $row['email'] }}
-                        @if(!empty($row['alerte_email']))
-                            <span class="tag is-warning is-light" title="{{ $row['alerte_email'] }}">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> {{ $row['alerte_email'] }}
-                            </span>
-                        @endif
-                    </td>
+                    <td>{{ $row['email'] }}</td>
                     <td>{{ $row['classe'] }}</td>
                     <td>{{ $row['promo'] }}</td>
                     <td>{{ $row['date_entree'] }}</td>

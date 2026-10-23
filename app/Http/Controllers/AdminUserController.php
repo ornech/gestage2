@@ -381,17 +381,6 @@ class AdminUserController extends Controller
 
     public function nettoyage()
     {
-        // Comptes qui n'ont jamais choisi leur mot de passe, avec le diagnostic de leur adresse
-        $invitations = app(InvitationService::class);
-        $enAttente = User::where('force_password_change', true)
-            ->where('statut', 'actif')
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn (User $u) => (object) [
-                'user'   => $u,
-                'raison' => $invitations->raisonSansMail($u),
-            ]);
-
         // Comptes avec email placeholder
         $importLocal = User::where('email', 'like', '%@import.local')
             ->orderBy('nom')
@@ -408,42 +397,14 @@ class AdminUserController extends Controller
                    $u->promo;
         })->filter(fn($g) => $g->count() > 1)->values();
 
-        return view('admin.users.nettoyage', compact('importLocal', 'doublons', 'enAttente'));
+        return view('admin.users.nettoyage', compact('importLocal', 'doublons'));
     }
 
-    public function updateEmail(Request $request, User $user, InvitationService $invitations)
+    public function updateEmail(Request $request, User $user)
     {
         $request->validate(['email' => 'required|email|unique:users,email,' . $user->id]);
-
-        // Un lien d'invitation en circulation est attaché à l'ancienne adresse : on l'invalide
-        \Illuminate\Support\Facades\Password::broker()->deleteToken($user);
-
         $user->update(['email' => $request->email]);
-
-        $anomalie = $invitations->anomalieAdresse($request->email);
-        $message  = 'Email mis à jour pour ' . $user->prenom . ' ' . $user->nom . '.'
-            . ($anomalie ? " Attention : {$anomalie}." : '');
-
-        // Compte jamais activé : sans nouvelle invitation, il resterait bloqué
-        if ($user->force_password_change) {
-            $invitation = $invitations->inviter($user, 0, ! $request->boolean('sans_mail'));
-
-            return back()->with($this->confirmationInvitation($user, $invitation, $message));
-        }
-
-        return back()->with('success', $message);
-    }
-
-    /** (Ré)envoie l'invitation d'un compte qui n'a jamais choisi son mot de passe. */
-    public function inviter(Request $request, User $user, InvitationService $invitations)
-    {
-        if (! $user->force_password_change) {
-            return back()->withErrors("{$user->prenom} {$user->nom} a déjà choisi son mot de passe : utilisez « Réinitialiser un mot de passe ».");
-        }
-
-        $invitation = $invitations->inviter($user, 0, ! $request->boolean('sans_mail'));
-
-        return back()->with($this->confirmationInvitation($user, $invitation, "Invitation de {$user->prenom} {$user->nom} régénérée."));
+        return back()->with('success', 'Email mis à jour pour ' . $user->prenom . ' ' . $user->nom . '.');
     }
 
     public function fusionner(Request $request)

@@ -181,7 +181,6 @@ class AdminImportController extends Controller
         $currentYear = (int) explode('-', $annee)[0];
         $promo       = $currentYear + (3 - $anneeClasse);
 
-        $invitations = app(InvitationService::class);
         $preview = [];
 
         foreach ($rows as $row) {
@@ -232,8 +231,6 @@ class AdminImportController extends Controller
                 'statut'      => $statut,
                 'action'      => $action,
                 'existing_id' => $existing?->id,
-                // Adresse probablement fausse (faute de frappe…) : signalée avant l'import, aucune invitation ne sera envoyée
-                'alerte_email' => $existing ? null : $invitations->anomalieAdresse($row['email']),
             ];
         }
 

@@ -138,17 +138,6 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link"><i class="fas fa-user-shield mr-2"></i> Comptes</a>
-                            <div class="navbar-dropdown">
-                                <a href="{{ route('admin.comptes.nettoyage') }}" class="navbar-item">
-                                    <i class="fas fa-user-clock mr-2"></i> Comptes à vérifier / inviter
-                                </a>
-                                <a href="{{ route('admin.reset-password') }}" class="navbar-item">
-                                    <i class="fas fa-key mr-2"></i> Réinitialiser un mot de passe
-                                </a>
-                            </div>
-                        </div>
                     @endrole
 
                 @endauth

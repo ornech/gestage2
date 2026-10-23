@@ -65,48 +65,11 @@ class InvitationService
             }
         }
 
-        return $this->anomalieAdresse($email);
+        return null;
     }
 
     public function adresseDistribuable(User $user): bool
     {
         return $this->raisonSansMail($user) === null;
-    }
-
-    /**
-     * Adresse syntaxiquement valide mais probablement fausse : domaine proche d'un domaine courant
-     * (faute de frappe) ou sans serveur de messagerie. Null si rien d'anormal.
-     */
-    public function anomalieAdresse(string $email): ?string
-    {
-        $email = strtolower(trim($email));
-
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return 'adresse email invalide';
-        }
-
-        $domaine = substr(strrchr($email, '@'), 1);
-        $courants = config('invitations.domaines_courants', []);
-
-        if (! in_array($domaine, $courants, true)) {
-            foreach ($courants as $reference) {
-                // Tolère 2 fautes sur les longs domaines (gmial.com = 2 pour gmail.com), 1 sur les courts
-                $tolerance = strlen($reference) >= 9 ? 2 : 1;
-                if (levenshtein($domaine, $reference) <= $tolerance) {
-                    return "domaine suspect « {$domaine} » : vouliez-vous écrire « {$reference} » ?";
-                }
-            }
-
-            if (config('invitations.verifier_dns') && ! $this->domaineRecoitDuCourrier($domaine)) {
-                return "le domaine « {$domaine} » n'a pas de serveur de messagerie";
-            }
-        }
-
-        return null;
-    }
-
-    private function domaineRecoitDuCourrier(string $domaine): bool
-    {
-        return checkdnsrr($domaine.'.', 'MX') || checkdnsrr($domaine.'.', 'A') || checkdnsrr($domaine.'.', 'AAAA');
     }
 }
