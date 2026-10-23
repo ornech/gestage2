@@ -77,9 +77,35 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'tuteur_id');
     }
 
+    /** Toutes les conventions papier de l'étudiant : une par année scolaire. */
+    public function conventionsPapier(): HasMany
+    {
+        return $this->hasMany(ConventionPapier::class, 'etudiant_id');
+    }
+
+    /** Convention papier de l'année scolaire active. */
     public function conventionPapier(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(\App\Models\ConventionPapier::class, 'etudiant_id');
+        return $this->hasOne(ConventionPapier::class, 'etudiant_id')
+            ->where('annee_scolaire', Parametre::anneeActive());
+    }
+
+    public function stageDeLAnnee(?string $annee = null): ?Stage
+    {
+        return $this->stages()->deLAnnee($annee ?? Parametre::anneeActive())->first();
+    }
+
+    public function aUnStageCetteAnnee(): bool
+    {
+        return $this->stages()->deLAnnee(Parametre::anneeActive())->exists();
+    }
+
+    /** Étudiants dont la promo ne correspond ni à SIO1 ni à SIO2 pour l'année en cours (à traiter par un professeur). */
+    public function scopeSansClasse(Builder $query): Builder
+    {
+        $promos = array_values(Parametre::promos(Parametre::anneeActive()));
+
+        return $query->where(fn($q) => $q->whereNull('promo')->orWhereNotIn('promo', $promos));
     }
 
     /**
@@ -90,12 +116,7 @@ class User extends Authenticatable
     {
         if (!$this->promo) return null;
 
-        // Cache statique : Parametre::get appelé une seule fois par request
-        static $sy = null;
-        if ($sy === null) {
-            $annee = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
-            $sy    = (int) explode('-', $annee)[0];
-        }
+        $sy = (int) explode('-', Parametre::anneeActive())[0];
 
         $anneeEtude = 3 - ($this->promo - $sy);
 

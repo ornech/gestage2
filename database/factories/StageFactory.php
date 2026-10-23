@@ -19,6 +19,7 @@ class StageFactory extends Factory
     $start = fake()->dateTimeBetween('-1 month', '+1 month');
     return [
         'titre' => fake()->sentence(),
+        'annee_scolaire' => \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1)),
         'date_debut' => $start,
         'date_fin' => fake()->dateTimeBetween($start, '+2 months'),
         'entreprise_id' => \App\Models\Entreprise::factory(),

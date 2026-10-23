@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ConventionPapier extends Model
 {
     protected $table    = 'conventions_papier';
-    protected $fillable = ['etudiant_id', 'statut'];
+    protected $fillable = ['etudiant_id', 'annee_scolaire', 'statut'];
 
     public function etudiant(): BelongsTo
     {

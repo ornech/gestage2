@@ -19,6 +19,13 @@ class StagePolicy
             || $user->id === $stage->etudiant_id;
     }
 
+    /** Voir ou télécharger la convention PDF : le staff toujours, l'étudiant pour son stage tant qu'il n'est pas rejeté. */
+    public function convention(User $user, Stage $stage): bool
+    {
+        return $user->hasAnyRole(['Professeur', 'Administrateur'])
+            || ($user->id === $stage->etudiant_id && $stage->statut_validation !== StatutValidation::Rejete->value);
+    }
+
     public function create(User $user): bool
     {
         return $user->hasRole('Etudiant');
@@ -46,6 +53,12 @@ class StagePolicy
     }
 
     public function validate(User $user): bool
+    {
+        return $user->hasAnyRole(['Professeur', 'Administrateur']);
+    }
+
+    /** Correction d'une saisie erronée : réservée au staff (le contrôle du journal est fait par le contrôleur). */
+    public function delete(User $user, Stage $stage): bool
     {
         return $user->hasAnyRole(['Professeur', 'Administrateur']);
     }

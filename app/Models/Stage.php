@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Stage extends Model
 {
@@ -33,6 +36,25 @@ class Stage extends Model
         'date_fin'                 => 'date',
         'mail_bienvenue_envoye_at' => 'datetime',
     ];
+
+    /** Année scolaire d'une date : à partir de septembre, celle qui commence cette année-là. */
+    public static function anneeScolaireDu(CarbonInterface $date): string
+    {
+        $debut = $date->month >= 9 ? $date->year : $date->year - 1;
+
+        return $debut.'-'.($debut + 1);
+    }
+
+    public function scopeDeLAnnee(Builder $query, string $annee): Builder
+    {
+        return $query->where('annee_scolaire', $annee);
+    }
+
+    /** Années scolaires pour lesquelles au moins un stage existe, de la plus récente à la plus ancienne. */
+    public static function anneesDisponibles(): Collection
+    {
+        return static::query()->distinct()->orderByDesc('annee_scolaire')->pluck('annee_scolaire');
+    }
 
     public function entreprise(): BelongsTo
     {
