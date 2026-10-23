@@ -89,7 +89,11 @@ La table `Parametre` (clé-valeur) remplace les fichiers de config pour tout ce 
 
 ### Convention papier
 
-Flux d'état distinct du statut de validation du stage : `a_faire_signer` → `en_attente` → `validee`. Modèle `ConventionPapier`, géré par l'admin via `AdminStageController`.
+Flux d'état distinct du statut de validation du stage : `hors_app` → `en_attente` → `validee`. Modèle `ConventionPapier`, géré par l'admin via `AdminStageController`. C'est l'autre voie pour valider un stage (convention signée sur papier, non générée par l'application) : une par étudiant **et par année scolaire**, reprise puis supprimée à la création du stage de cette année (`App\Services\CreationStage`). `User::conventionPapier` = celle de l'année active, `conventionsPapier` = toutes.
+
+### Stage et année scolaire
+
+Un stage appartient à une **année scolaire** (`stages.annee_scolaire`, obligatoire), jamais à une promo : un seul stage par étudiant et par année (clé unique), donc un redoublant a un stage par année dans la même classe. Toute requête sur les stages doit être restreinte à l'année voulue (`Stage::deLAnnee()`, `User::aUnStageCetteAnnee()`) ; `Parametre::anneeActive()` donne l'année en cours : elle est **calculée** (bascule le 1er septembre), aucune valeur n'est stockée. La saisie d'un stage par l'étudiant est fermée sans classe courante ou sans dates de stage dans `ConfigurationStage` (`CreationStage::raisonFermeture`) ; les étudiants actifs sans classe (diplôme/redoublement à traiter par un professeur) sont listés sur les tableaux de bord.
 
 ## Tests
 

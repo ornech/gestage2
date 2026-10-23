@@ -73,6 +73,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Le test du contenu de la convention PDF lit le texte du PDF avec pdftotext
+      - name: Outils PDF
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
       - name: Environnement
         run: |
           cp .env.example .env
