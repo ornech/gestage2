@@ -200,6 +200,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::get('/admin/stages/recherche-siret',        [AdminStageController::class, 'rechercheSiret'])      ->name('admin.stages.recherche-siret')->middleware('throttle:siret');
     Route::post('/admin/stages/maitre-de-stage',       [AdminStageController::class, 'ajouterMaitreDeStage'])->name('admin.stages.maitre-de-stage.store');
     Route::put('/admin/stages/{stage}/assign',        [AdminStageController::class, 'assign']) ->name('admin.stages.assign');
+    Route::delete('/admin/stages/{stage}',                    [AdminStageController::class, 'destroy'])          ->name('admin.stages.destroy');
     Route::patch('/admin/stages/{stage}/valider',             [AdminStageController::class, 'valider'])          ->name('admin.stages.valider');
     Route::patch('/admin/stages/{stage}/rejeter',             [AdminStageController::class, 'rejeter'])          ->name('admin.stages.rejeter');
     Route::patch('/admin/stages/{stage}/convention/{statut}', [AdminStageController::class, 'updateConvention'])  ->name('admin.stages.convention');
@@ -213,7 +214,6 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::get('/admin/parametres/convention',  [AdminParametreController::class, 'convention'])      ->name('admin.parametres.convention');
     Route::put('/admin/parametres/convention',  [AdminParametreController::class, 'updateConvention'])->name('admin.parametres.convention.update');
     Route::post('/admin/parametres/nouvelle-annee', [AdminParametreController::class, 'nouvelleAnnee'])->name('admin.parametres.nouvelle-annee');
-    Route::post('/admin/parametres/set-active',     [AdminParametreController::class, 'setActive'])    ->name('admin.parametres.set-active');
 });
 
 // Bascule SPE — Admin uniquement
@@ -244,7 +244,6 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/stages/{stage}/pdf/convention',  [PdfController::class, 'convention']) ->name('pdf.convention');
-    Route::get('/stages/{stage}/pdf/attestation', [PdfController::class, 'attestation'])->name('pdf.attestation');
 });
 
 

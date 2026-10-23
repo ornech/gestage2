@@ -147,7 +147,7 @@ class AdminUserController extends Controller
 
     public function create()
     {
-        $annee       = \App\Models\Parametre::get('annee_scolaire', '2025-2026');
+        $annee       = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
         $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
 
@@ -174,7 +174,7 @@ class AdminUserController extends Controller
         ]);
 
         // Calcul automatique de la promo depuis la classe
-        $annee       = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $annee       = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
         $promo = match($request->classe) {
             'SIO1' => $currentYear + 2,
@@ -280,7 +280,7 @@ class AdminUserController extends Controller
         abort_unless($user->hasRole('Etudiant'), 404);
 
         $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
-        $annee       = \App\Models\Parametre::get('annee_scolaire', '2025-2026');
+        $annee       = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
 
         $user->load([
@@ -288,7 +288,7 @@ class AdminUserController extends Controller
             'conventionPapier',
         ]);
 
-        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear'));
+        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear', 'annee'));
     }
 
     public function update(Request $request, User $user)
@@ -355,8 +355,9 @@ class AdminUserController extends Controller
 
     public function destroy(User $user)
     {
+        // Les stages sont conservés sans nom (clé étrangère « mise à null ») ; le journal, personnel, est supprimé avec le compte
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'Étudiant supprimé.');
+        return redirect()->route('admin.users.index')->with('success', 'Étudiant supprimé : ses stages sont conservés sans nom.');
     }
 
     public function anonymize(User $user)
@@ -414,8 +415,18 @@ class AdminUserController extends Controller
             'supprimer_id' => 'required|exists:users,id|different:garder_id',
         ]);
 
-        $garder    = User::with(['conventionPapier'])->findOrFail($request->garder_id);
-        $supprimer = User::with(['conventionPapier'])->findOrFail($request->supprimer_id);
+        $garder    = User::with(['conventionsPapier'])->findOrFail($request->garder_id);
+        $supprimer = User::with(['conventionsPapier'])->findOrFail($request->supprimer_id);
+
+        // Un seul stage par année scolaire : la fusion ne peut pas en créer deux la même année
+        $conflits = $garder->stages()->pluck('annee_scolaire')
+            ->intersect($supprimer->stages()->pluck('annee_scolaire'));
+
+        if ($conflits->isNotEmpty()) {
+            return back()->withErrors(
+                "Les deux comptes ont un stage pour " . $conflits->implode(', ') . " : supprime l'un des deux stages avant de fusionner."
+            );
+        }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($garder, $supprimer) {
             $DB = \Illuminate\Support\Facades\DB::class;
@@ -431,17 +442,14 @@ class AdminUserController extends Controller
                 ->where('etudiant_id', $supprimer->id)
                 ->update(['etudiant_id' => $garder->id]);
 
-            // 3. Convention papier — contrainte UNIQUE sur etudiant_id
-            if ($supprimer->conventionPapier) {
-                if (!$garder->conventionPapier) {
-                    $DB::table('conventions_papier')
-                        ->where('etudiant_id', $supprimer->id)
-                        ->update(['etudiant_id' => $garder->id]);
+            // 3. Conventions papier — contrainte UNIQUE (étudiant, année)
+            $anneesGarder = $garder->conventionsPapier->pluck('annee_scolaire');
+            foreach ($supprimer->conventionsPapier as $convention) {
+                if ($anneesGarder->contains($convention->annee_scolaire)) {
+                    // Les deux ont une convention cette année → on garde celle du compte conservé
+                    $convention->delete();
                 } else {
-                    // Les deux ont une convention → on garde celle du compte conservé
-                    $DB::table('conventions_papier')
-                        ->where('etudiant_id', $supprimer->id)
-                        ->delete();
+                    $convention->update(['etudiant_id' => $garder->id]);
                 }
             }
 

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employe;
-use App\Mail\BienvenueMaitreDeStage;
-use Illuminate\Support\Facades\Mail;
+use App\Models\Parametre;
+use App\Services\MailBienvenueStage;
 
 class EmployeController extends Controller
 {
@@ -87,7 +87,7 @@ class EmployeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Employe $employe)
+    public function update(Request $request, Employe $employe, MailBienvenueStage $mails)
      {
         $this->authorize('update', $employe);
 
@@ -103,18 +103,16 @@ class EmployeController extends Controller
             $emailChange = $employe->email !== $request->email;
             $employe->update($validated);
 
-            // Si l'email change, renvoyer immédiatement le mail sur les stages déjà validés
+            // Si l'email change, renvoyer le mail sur les stages validés de l'année en cours
+            // (les maîtres de stage des années passées n'ont pas à être sollicités de nouveau)
             if ($emailChange && $request->email) {
                 $stagesValides = $employe->stages()
+                    ->deLAnnee(Parametre::anneeActive())
                     ->where('statut_convention', 'validee')
-                    ->with('etudiant.tuteur')
                     ->get();
 
                 foreach ($stagesValides as $stage) {
-                    Mail::to($request->email)->send(
-                        new BienvenueMaitreDeStage($employe, $stage->etudiant, $stage->etudiant->tuteur)
-                    );
-                    $stage->update(['mail_bienvenue_envoye_at' => now()]);
+                    $mails->envoyer($stage, $request->email, renvoi: true);
                 }
             }
 

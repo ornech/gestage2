@@ -470,6 +470,9 @@ class ImportLegacyDb extends Command
                 'etudiant_id'        => $etudiantId,
                 'professeur_id'      => $professeurId,
                 'classe'             => $old->classe      ?: null,
+                'annee_scolaire'     => $old->dateDebut
+                    ? \App\Models\Stage::anneeScolaireDu(\Carbon\Carbon::parse($old->dateDebut))
+                    : \App\Models\Parametre::anneeActive(),
                 'titre'              => null,
                 'description'        => $this->fix($old->description),
                 'date_debut'         => $old->dateDebut   ?: null,

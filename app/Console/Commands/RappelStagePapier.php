@@ -16,23 +16,16 @@ class RappelStagePapier extends Command
 
     public function handle(): int
     {
-        $anneeActive = Parametre::get('annee_scolaire', date('Y') . '-' . (date('Y') + 1));
-        $syInt       = (int) explode('-', $anneeActive)[0];
-        $promoSio2   = $syInt + 1;
-        $promoSio1   = $syInt + 2;
-        $promosActives = [$promoSio2, $promoSio1];
+        $anneeActive = Parametre::anneeActive();
+        $promosActives = array_values(Parametre::promos($anneeActive));
 
-        // Un étudiant est concerné s'il n'a pas saisi de stage pour SA classe ACTUELLE
-        // (et non "aucun stage du tout", sans quoi un stage de SIO1 déjà saisi masquerait
-        // à tort le besoin de saisir le nouveau stage de SIO2).
+        // Un étudiant est concerné s'il n'a pas saisi de stage pour l'ANNÉE SCOLAIRE ACTIVE
+        // (et non "aucun stage du tout" ni "pour sa classe" : le stage de SIO1 de l'an dernier,
+        // ou celui d'une première année de SIO1 avant redoublement, ne dispense pas du nouveau).
         $base = fn() => User::role('Etudiant')
             ->where('statut', 'actif')
-            ->where(function ($q) use ($promoSio1, $promoSio2) {
-                $q->where(fn($q2) => $q2->where('promo', $promoSio1)
-                                        ->whereDoesntHave('stages', fn($s) => $s->where('classe', 'SIO1')))
-                  ->orWhere(fn($q2) => $q2->where('promo', $promoSio2)
-                                          ->whereDoesntHave('stages', fn($s) => $s->where('classe', 'SIO2')));
-            })
+            ->whereIn('promo', $promosActives)
+            ->whereDoesntHave('stages', fn($s) => $s->deLAnnee($anneeActive))
             ->with('tuteur');
 
         // 1) Rien saisi du tout (ni stage, ni convention hors app)

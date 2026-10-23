@@ -8,10 +8,10 @@ use Carbon\Carbon;
 use App\Http\Controllers\Concerns\RechercheSiretTrait;
 use App\Models\Employe;
 use App\Models\Stage;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Models\Entreprise;
+use App\Models\Parametre;
+use App\Services\CreationStage;
 
 class StageController extends Controller
 {
@@ -28,28 +28,20 @@ class StageController extends Controller
     /**
      * Enregistrement d'un stage
      */
-    public function store(Request $request)
+    public function store(Request $request, CreationStage $creation)
     {
         $this->authorize('create', Stage::class);
 
         $user = auth()->user();
 
-        // Vérifier que l'étudiant est encore en BTS (promo null = compte de test, autorisé)
-        if ($user->promo && $user->promo < date('Y')) {
-            abort(403, "Vous n'êtes plus autorisé à ajouter un stage.");
+        if ($raison = $creation->raisonFermeture($user)) {
+            return back()->withErrors($raison);
         }
 
-        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
-
-        $existe = Stage::where('etudiant_id', $user->id)
-                       ->where('annee_scolaire', $annee)
-                       ->exists();
-
-        if ($existe) {
+        if ($user->aUnStageCetteAnnee()) {
             return back()->withErrors("Vous avez déjà ajouté un stage pour votre année.");
         }
 
-        // Validation
         $request->validate([
             'entreprise_id'      => 'required|exists:entreprises,id',
             'maitre_de_stage_id' => [
@@ -60,32 +52,13 @@ class StageController extends Controller
             'duree'              => 'required|integer|min:1',
         ]);
 
-        // Calcul de la date de fin
-        $date_debut = Carbon::parse($request->date_debut);
-        $date_fin = $date_debut->copy()->addWeeks((int) $request->duree);
-
-        $entreprise = \App\Models\Entreprise::find($request->entreprise_id);
-
-        // Transférer le statut de la convention hors app si elle existe
-        $convPapier = \App\Models\ConventionPapier::where('etudiant_id', $user->id)->first();
-
-        $statutConvention = StatutConvention::depuisConventionPapier($convPapier)->value;
-
-        $stage = Stage::create([
-            'titre'              => "Stage chez {$entreprise->raison_sociale}",
-            'entreprise_id'      => $request->entreprise_id,
-            'maitre_de_stage_id' => $request->maitre_de_stage_id,
-            'etudiant_id'        => $user->id,
-            'classe'             => $user->classe_courante ?? $request->classe,
-            'annee_scolaire'     => $annee,
-            'date_debut'         => $date_debut,
-            'date_fin'           => $date_fin,
-            'statut_convention'  => $statutConvention,
-            'statut_validation'  => ($convPapier ? StatutValidation::Valide : StatutValidation::EnAttente)->value,
-        ]);
-
-        // Supprimer la convention papier maintenant que le stage est saisi
-        $convPapier?->delete();
+        $creation->creer(
+            $user,
+            (int) $request->entreprise_id,
+            (int) $request->maitre_de_stage_id,
+            $request->date_debut,
+            (int) $request->duree,
+        );
 
         return redirect()->route('entreprises.show', $request->entreprise_id)
                          ->with('success', 'Stage ajouté avec succès.');
@@ -164,6 +137,7 @@ public function edit(Stage $stage)
     {
         $stages = Stage::with(['entreprise', 'maitreDeStage'])
             ->where('etudiant_id', auth()->id())
+            ->orderByDesc('annee_scolaire')
             ->get();
 
         return view('etudiant.stages.index', compact('stages'));
@@ -172,15 +146,17 @@ public function edit(Stage $stage)
     /**
      * Formulaire unifié de saisie d'un stage (étudiant)
      */
-    public function etudiantNouveau()
+    public function etudiantNouveau(CreationStage $creation)
     {
         $user = auth()->user();
 
-        $annee  = \App\Models\Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        if ($raison = $creation->raisonFermeture($user)) {
+            return redirect()->route('etudiant.dashboard')->withErrors($raison);
+        }
 
-        if (Stage::where('etudiant_id', $user->id)
-                ->where('annee_scolaire', $annee)
-                ->exists()) {
+        $annee = Parametre::anneeActive();
+
+        if ($user->aUnStageCetteAnnee()) {
             return redirect()->route('etudiant.dashboard')
                 ->withErrors("Tu as déjà un stage enregistré pour cette année.");
         }

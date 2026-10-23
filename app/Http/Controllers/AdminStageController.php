@@ -6,15 +6,15 @@ use App\Enums\StatutConvention;
 use App\Enums\StatutConventionPapier;
 use App\Enums\StatutValidation;
 use App\Http\Controllers\Concerns\RechercheSiretTrait;
-use App\Mail\BienvenueMaitreDeStage;
 use App\Models\ConfigurationStage;
 use App\Models\ConventionPapier;
 use App\Models\Employe;
 use App\Models\Parametre;
 use App\Models\Stage;
 use App\Models\User;
+use App\Services\CreationStage;
+use App\Services\MailBienvenueStage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class AdminStageController extends Controller
 {
@@ -22,7 +22,7 @@ class AdminStageController extends Controller
 
     public function index(Request $request)
     {
-        $anneeActive       = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $anneeActive       = Parametre::anneeActive();
         $anneeSelectionnee = $request->get('annee', $anneeActive);
         $syInt             = (int) explode('-', $anneeSelectionnee)[0];
         $filtre            = $request->get('filtre', 'tous');
@@ -44,8 +44,15 @@ class AdminStageController extends Controller
         $tuteurs = Employe::orderBy('nom')->get();
 
         // ── 3 filtres indépendants et cumulables ─────────────────────────
+        // Une année passée garde ses diplômés (ils ne sont plus « actifs » aujourd'hui mais y étaient)
+        $statuts    = $anneeSelectionnee < $anneeActive ? ['actif', 'diplome'] : ['actif'];
         $classe     = $request->get('classe', 'tous');  // tous | sio1 | sio2
         $filtre     = $request->get('filtre', 'tous');  // tous | sans_stage | a_faire_signer | en_attente | validee
+
+        // Un stage appartient à une année scolaire : tout ce qui concerne les stages
+        // (liste, filtres, compteurs) est restreint à l'année sélectionnée
+        $deLAnnee       = fn($s) => $s->where('annee_scolaire', $anneeSelectionnee);
+        $papierDeLAnnee = fn($cp) => $cp->where('annee_scolaire', $anneeSelectionnee);
 
         $classeFiltre = match($classe) {
             'sio1'  => $promoSio1,
@@ -60,32 +67,40 @@ class AdminStageController extends Controller
         };
 
         // ── Requête étudiant-centrique ────────────────────────────────────
+        // Un étudiant fait partie de la liste s'il est dans la classe cette année-là d'après sa promo,
+        // ou s'il y a eu un stage cette année-là dans cette classe (sa promo a pu changer depuis : redoublement).
+        $promos     = $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2];
+        $appartient = fn($q) => $q
+            ->where(fn($q2) => $q2->whereIn('statut', $statuts)->whereIn('promo', $promos))
+            ->orWhereHas('stages', fn($s) => $deLAnnee($s)
+                ->when($classe !== 'tous', fn($s2) => $s2->where('classe', strtoupper($classe))));
+
         $query = User::role('Etudiant')
-            ->whereIn('statut', ['actif'])
-            ->whereIn('promo', $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2])
+            ->where($appartient)
             ->with([
                 'stages' => fn($q) => $q
+                    ->where('annee_scolaire', $anneeSelectionnee)
                     ->with(['entreprise', 'maitreDeStage'])
                     ->withCount('journalEntries')
                     // Restreindre les stages chargés au filtre actif → cohérence couleurs
                     ->when(in_array($filtre, ['a_faire_signer', 'en_attente', 'validee']),
                         fn($s) => $s->where('statut_convention', $filtre))
                     ->orderBy('date_debut', 'desc'),
-                'conventionPapier',
+                'conventionsPapier' => $papierDeLAnnee,
             ]);
 
         // Filtre sur le statut de la convention (indépendant de la classe)
         if ($filtre === 'sans_stage') {
-            $query->whereDoesntHave('stages')->whereDoesntHave('conventionPapier');
+            $query->whereDoesntHave('stages', $deLAnnee)->whereDoesntHave('conventionsPapier', $papierDeLAnnee);
         } elseif ($filtre === 'hors_app') {
-            $query->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'hors_app'))
-                  ->whereDoesntHave('stages');
+            $query->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', 'hors_app'))
+                  ->whereDoesntHave('stages', $deLAnnee);
         } elseif (in_array($filtre, ['a_faire_signer', 'en_attente', 'validee'])) {
-            $query->where(function ($q) use ($filtre) {
-                $q->whereHas('stages', fn($s) => $s->where('statut_convention', $filtre))
-                  ->orWhere(function ($q2) use ($filtre) {
-                      $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', $filtre))
-                         ->whereDoesntHave('stages');
+            $query->where(function ($q) use ($filtre, $deLAnnee, $papierDeLAnnee) {
+                $q->whereHas('stages', fn($s) => $deLAnnee($s)->where('statut_convention', $filtre))
+                  ->orWhere(function ($q2) use ($filtre, $deLAnnee, $papierDeLAnnee) {
+                      $q2->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', $filtre))
+                         ->whereDoesntHave('stages', $deLAnnee);
                   });
             });
         }
@@ -102,27 +117,26 @@ class AdminStageController extends Controller
         $etudiants = $query->orderBy('promo')->orderBy('nom')->get();
 
         // ── Compteurs par statut pour les double tags ─────────────────────
-        $promos = $classeFiltre ? [$classeFiltre] : [$promoSio1, $promoSio2];
-        $baseCount = fn() => User::role('Etudiant')->whereIn('statut', ['actif'])->whereIn('promo', $promos);
+        $baseCount = fn() => User::role('Etudiant')->where($appartient);
 
         $compteurs = [
             'tous'           => ($baseCount)()->count(),
-            'sans_stage'     => ($baseCount)()->whereDoesntHave('stages')->whereDoesntHave('conventionPapier')->count(),
+            'sans_stage'     => ($baseCount)()->whereDoesntHave('stages', $deLAnnee)->whereDoesntHave('conventionsPapier', $papierDeLAnnee)->count(),
             'hors_app'       => ($baseCount)()
-                                    ->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'hors_app'))
-                                    ->whereDoesntHave('stages')
+                                    ->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', 'hors_app'))
+                                    ->whereDoesntHave('stages', $deLAnnee)
                                     ->count(),
             'a_faire_signer' => ($baseCount)()->where(fn($q) =>
-                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'a_faire_signer'))
-                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'a_faire_signer'))->whereDoesntHave('stages'))
+                $q->whereHas('stages', fn($s) => $deLAnnee($s)->where('statut_convention', 'a_faire_signer'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', 'a_faire_signer'))->whereDoesntHave('stages', $deLAnnee))
             )->count(),
             'en_attente'     => ($baseCount)()->where(fn($q) =>
-                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'en_attente'))
-                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'en_attente'))->whereDoesntHave('stages'))
+                $q->whereHas('stages', fn($s) => $deLAnnee($s)->where('statut_convention', 'en_attente'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', 'en_attente'))->whereDoesntHave('stages', $deLAnnee))
             )->count(),
             'validee'        => ($baseCount)()->where(fn($q) =>
-                $q->whereHas('stages', fn($s) => $s->where('statut_convention', 'validee'))
-                  ->orWhere(fn($q2) => $q2->whereHas('conventionPapier', fn($cp) => $cp->where('statut', 'validee'))->whereDoesntHave('stages'))
+                $q->whereHas('stages', fn($s) => $deLAnnee($s)->where('statut_convention', 'validee'))
+                  ->orWhere(fn($q2) => $q2->whereHas('conventionsPapier', fn($cp) => $papierDeLAnnee($cp)->where('statut', 'validee'))->whereDoesntHave('stages', $deLAnnee))
             )->count(),
         ];
 
@@ -138,7 +152,7 @@ class AdminStageController extends Controller
      */
     public function exportMaitresCsv(Request $request)
     {
-        $annee  = $request->get('annee', Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1)));
+        $annee  = $request->get('annee', Parametre::anneeActive());
         $classe = $request->get('classe');
 
         $query = Stage::with(['maitreDeStage', 'entreprise', 'etudiant'])
@@ -200,7 +214,7 @@ class AdminStageController extends Controller
             ->orderBy('nom')
             ->get(['id', 'nom', 'prenom', 'classe', 'classe_id']);
 
-        $annee = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $annee = Parametre::anneeActive();
 
         return view('admin.stages.creer', compact('etudiants', 'annee'));
     }
@@ -241,7 +255,7 @@ class AdminStageController extends Controller
      * Reprend la logique de StageController::store, en ciblant l'étudiant sélectionné
      * plutôt que l'utilisateur connecté.
      */
-    public function creer(Request $request)
+    public function creer(Request $request, CreationStage $creation)
     {
         $validated = $request->validate([
             'etudiant_id'        => 'required|exists:users,id',
@@ -257,33 +271,26 @@ class AdminStageController extends Controller
         $etudiant = User::findOrFail($validated['etudiant_id']);
         abort_unless($etudiant->hasRole('Etudiant'), 422, "L'utilisateur sélectionné n'est pas un étudiant.");
 
-        if (Stage::where('etudiant_id', $etudiant->id)->where('annee_scolaire', $annee)->exists()) {
+        // Sans classe, le stage serait créé sans classe : à régler d'abord (diplômé, redoublant, promo)
+        if (!$etudiant->classe_courante) {
+            return back()->withInput()->withErrors(
+                "Cet étudiant n'a pas de classe cette année : indique d'abord s'il est diplômé ou s'il redouble, ou corrige sa promo."
+            );
+        }
+
+        if ($etudiant->aUnStageCetteAnnee()) {
             return back()->withInput()->withErrors(
                 "Cet étudiant a déjà un stage enregistré pour cette année. Modifie-le directement depuis « Tous les stages »."
             );
         }
 
-        $entreprise = \App\Models\Entreprise::findOrFail($validated['entreprise_id']);
-        $dateDebut  = \Carbon\Carbon::parse($validated['date_debut']);
-        $dateFin    = $dateDebut->copy()->addWeeks((int) $validated['duree']);
-
-        $convPapier = ConventionPapier::where('etudiant_id', $etudiant->id)->first();
-        $statutConvention = StatutConvention::depuisConventionPapier($convPapier)->value;
-
-        Stage::create([
-            'titre'              => "Stage chez {$entreprise->raison_sociale}",
-            'entreprise_id'      => $entreprise->id,
-            'maitre_de_stage_id' => $validated['maitre_de_stage_id'],
-            'etudiant_id'        => $etudiant->id,
-            'classe'             => $etudiant->classe_courante,
-            'annee_scolaire'     => $annee,
-            'date_debut'         => $dateDebut,
-            'date_fin'           => $dateFin,
-            'statut_convention'  => $statutConvention,
-            'statut_validation'  => ($convPapier ? StatutValidation::Valide : StatutValidation::EnAttente)->value,
-        ]);
-
-        $convPapier?->delete();
+        $creation->creer(
+            $etudiant,
+            (int) $validated['entreprise_id'],
+            (int) $validated['maitre_de_stage_id'],
+            $validated['date_debut'],
+            (int) $validated['duree'],
+        );
 
         return redirect()->route('admin.dashboard')
             ->with('success', "Stage créé pour {$etudiant->prenom} {$etudiant->nom}.");
@@ -292,7 +299,10 @@ class AdminStageController extends Controller
     public function assign(Request $request, Stage $stage)
     {
         $request->validate([
-            'maitre_de_stage_id' => 'nullable|exists:employes,id',
+            'maitre_de_stage_id' => [
+                'nullable',
+                \Illuminate\Validation\Rule::exists('employes', 'id')->where('entreprise_id', $stage->entreprise_id),
+            ],
         ]);
 
         $stage->update(['maitre_de_stage_id' => $request->maitre_de_stage_id]);
@@ -300,7 +310,7 @@ class AdminStageController extends Controller
         return back()->with('success', 'Maître de stage assigné.');
     }
 
-    public function updateConvention(Stage $stage, string $statut)
+    public function updateConvention(Stage $stage, string $statut, MailBienvenueStage $mails)
     {
         $nouveau = StatutConvention::tryFrom($statut);
 
@@ -317,15 +327,8 @@ class AdminStageController extends Controller
         $stage->update($data);
 
         // Mail de bienvenue au maître de stage — une seule fois, à la validation de la convention
-        if ($nouveau === StatutConvention::Validee && $stage->mail_bienvenue_envoye_at === null) {
-            $stage->load(['maitreDeStage', 'etudiant.tuteur']);
-            $employe = $stage->maitreDeStage;
-            if ($employe?->email) {
-                Mail::to($employe->email)->send(
-                    new BienvenueMaitreDeStage($employe, $stage->etudiant, $stage->etudiant->tuteur)
-                );
-                $stage->update(['mail_bienvenue_envoye_at' => now()]);
-            }
+        if ($nouveau === StatutConvention::Validee) {
+            $mails->envoyer($stage);
         }
 
         return back();
@@ -335,10 +338,12 @@ class AdminStageController extends Controller
      * Crée un placeholder de convention quand un étudiant a remis sa convention
      * directement sans passer par l'application (statut initial "hors app").
      */
-    public function marquerHorsAppli(User $user)
+    public function marquerHorsAppli(Request $request, User $user)
     {
+        $annee = $request->validate(['annee' => ['nullable', 'regex:/^\d{4}-\d{4}$/']])['annee'] ?? Parametre::anneeActive();
+
         ConventionPapier::updateOrCreate(
-            ['etudiant_id' => $user->id],
+            ['etudiant_id' => $user->id, 'annee_scolaire' => $annee],
             ['statut' => StatutConventionPapier::HorsApp->value]
         );
 
@@ -383,6 +388,20 @@ class AdminStageController extends Controller
         }
 
         return back();
+    }
+
+    /** Supprime un stage mal saisi, pour que l'étudiant (ou le staff) puisse le ressaisir. */
+    public function destroy(Stage $stage)
+    {
+        $this->authorize('delete', $stage);
+
+        if ($stage->journalEntries()->exists()) {
+            return back()->withErrors("Ce stage a déjà des entrées de journal : il ne peut pas être supprimé.");
+        }
+
+        $stage->delete();
+
+        return back()->with('success', 'Stage supprimé.');
     }
 
     public function valider(Stage $stage)

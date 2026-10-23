@@ -177,7 +177,7 @@ class AdminImportController extends Controller
     private function analyzeRows(array $rows, string $classe): array
     {
         $anneeClasse = (int) substr($classe, -1); // SIO1→1, SIO2→2
-        $annee       = Parametre::get('annee_scolaire', date('Y').'-'.(date('Y') + 1));
+        $annee       = Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
         $promo       = $currentYear + (3 - $anneeClasse);
 

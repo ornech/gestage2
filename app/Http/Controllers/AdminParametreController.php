@@ -11,7 +11,7 @@ class AdminParametreController extends Controller
 {
     public function index(Request $request)
     {
-        $anneeActive      = Parametre::get('annee_scolaire', '2025-2026');
+        $anneeActive      = Parametre::anneeActive();
         $anneeSelectionnee = $request->get('annee', $anneeActive);
 
         // Toutes les années configurées + l'année active (toujours présente)
@@ -64,13 +64,13 @@ class AdminParametreController extends Controller
             ->with('success', "Configuration {$annee} enregistrée.");
     }
 
+    /** Prépare la configuration (professeur principal, dates de stage) d'une année à venir. */
     public function nouvelleAnnee(Request $request)
     {
         $request->validate([
             'annee_scolaire' => ['required', 'regex:/^\d{4}-\d{4}$/', 'unique:configurations_stage,annee_scolaire'],
         ]);
 
-        // Créer les deux entrées vides pour la nouvelle année
         foreach (['SIO1', 'SIO2'] as $classe) {
             ConfigurationStage::create([
                 'annee_scolaire' => $request->annee_scolaire,
@@ -78,25 +78,9 @@ class AdminParametreController extends Controller
             ]);
         }
 
-        // Mettre à jour l'année scolaire active
-        Parametre::set('annee_scolaire', $request->annee_scolaire);
-
         return redirect()
             ->route('admin.parametres.index', ['annee' => $request->annee_scolaire])
-            ->with('success', "Année {$request->annee_scolaire} créée et activée.");
-    }
-
-    public function setActive(Request $request)
-    {
-        $request->validate([
-            'annee_scolaire' => ['required', 'regex:/^\d{4}-\d{4}$/'],
-        ]);
-
-        Parametre::set('annee_scolaire', $request->annee_scolaire);
-
-        return redirect()
-            ->route('admin.parametres.index', ['annee' => $request->annee_scolaire])
-            ->with('success', "Année {$request->annee_scolaire} définie comme année active.");
+            ->with('success', "Année {$request->annee_scolaire} créée : renseignez les dates de stage et le professeur principal.");
     }
 
     public function toggleSpe()

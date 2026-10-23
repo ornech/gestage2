@@ -16,7 +16,8 @@ class EnsureStudentHasStage
 
         $user = auth()->user();
 
-        if (!$user->stages()->exists()) {
+        // Le journal exige le stage de l'année scolaire active (un stage d'une autre année ne compte pas)
+        if (!$user->aUnStageCetteAnnee()) {
             return redirect()->route('etudiant.stages.index')
                 ->withErrors([
                     'stage' => 'Vous devez saisir les informations de votre stage avant d\'accéder au journal de stage.',
