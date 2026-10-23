@@ -101,8 +101,8 @@
                 };
             @endphp
             <tr>
-                <td>{{ $user->nom }}</td>
-                <td>{{ $user->prenom }}</td>
+                <td><a href="{{ route('admin.users.edit', $user) }}" class="has-text-weight-semibold">{{ $user->nom }}</a></td>
+                <td><a href="{{ route('admin.users.edit', $user) }}">{{ $user->prenom }}</a></td>
                 <td>{{ $user->email }}</td>
                 <td>
                     @if($classeAnnee)

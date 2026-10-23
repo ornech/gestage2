@@ -7,8 +7,8 @@ use App\Models\ConfigurationStage;
 use App\Models\Parametre;
 use App\Models\User;
 use App\Services\InvitationService;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
@@ -16,8 +16,8 @@ class AdminUserController extends Controller
     public function index(Request $request)
     {
         // Année scolaire courante uniquement (pas d'anticipation)
-        $mois        = (int) date('m');
-        $anneeCalc   = $mois >= 9
+        $mois = (int) date('m');
+        $anneeCalc = $mois >= 9
             ? date('Y').'-'.((int) date('Y') + 1)
             : ((int) date('Y') - 1).'-'.date('Y');
         $anneeActive = Parametre::get('annee_scolaire', $anneeCalc);
@@ -27,11 +27,11 @@ class AdminUserController extends Controller
         $annees = User::role('Etudiant')
             ->whereNotNull('promo')
             ->pluck('promo')
-            ->flatMap(fn($p) => [($p - 2).'-'.($p - 1), ($p - 1).'-'.$p])
+            ->flatMap(fn ($p) => [($p - 2).'-'.($p - 1), ($p - 1).'-'.$p])
             ->merge(ConfigurationStage::toutesLesAnnees())
             ->prepend($anneeActive)
             ->unique()
-            ->filter(fn($a) => (int) explode('-', $a)[0] <= $syActif) // exclure les années futures
+            ->filter(fn ($a) => (int) explode('-', $a)[0] <= $syActif) // exclure les années futures
             ->sortDesc()
             ->values();
 
@@ -43,7 +43,7 @@ class AdminUserController extends Controller
         $syInt = (int) explode('-', $anneeSelectionnee)[0];
 
         $classeParam = $request->get('classe', 'tous');
-        $filtre      = $request->get('filtre', 'annee');
+        $filtre = $request->get('filtre', 'annee');
 
         $promoSio1 = $syInt + 2;
         $promoSio2 = $syInt + 1;
@@ -59,10 +59,10 @@ class AdminUserController extends Controller
         }
 
         $stats = [
-            'actifs'         => (clone $baseActifs)->count(),
-            'demissionnaires'=> User::role('Etudiant')->where('statut', 'demissionnaire')->count(),
-            'slam'           => (clone $baseActifs)->where('spe', 'SLAM')->count(),
-            'sisr'           => (clone $baseActifs)->where('spe', 'SISR')->count(),
+            'actifs' => (clone $baseActifs)->count(),
+            'demissionnaires' => User::role('Etudiant')->where('statut', 'demissionnaire')->count(),
+            'slam' => (clone $baseActifs)->where('spe', 'SLAM')->count(),
+            'sisr' => (clone $baseActifs)->where('spe', 'SISR')->count(),
         ];
 
         // ── Vue "Anciennes promos" ───────────────────────────────────────
@@ -70,7 +70,7 @@ class AdminUserController extends Controller
             $promos = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
+                        ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
                 })
                 ->whereNotNull('promo')
                 ->pluck('promo')
@@ -83,7 +83,7 @@ class AdminUserController extends Controller
             $query = User::role('Etudiant')
                 ->where(function ($q) use ($syActif) {
                     $q->where('promo', '<=', $syActif)
-                      ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
+                        ->orWhereIn('statut', ['demissionnaire', 'diplome', 'archive', 'echec']);
                 });
 
             if ($promoFiltre) {
@@ -96,13 +96,14 @@ class AdminUserController extends Controller
                 ->withQueryString();
 
             $sy = $syActif;
+
             return view('admin.users.anciens', compact('users', 'sy', 'promos', 'promoFiltre'));
         }
 
         // ── Requête standard : actifs de l'année en cours ────────────────
         // Les diplômés validés restent consultables dans l'historique des années passées
         $query = User::role('Etudiant')
-                     ->whereIn('statut', ['actif', 'diplome', 'echec', 'archive']);
+            ->whereIn('statut', ['actif', 'diplome', 'echec', 'archive']);
 
         // Filtre par classe (depuis le menu navbar ?classe=SIO1/SIO2)
         if ($classeParam === 'SIO1') {
@@ -127,9 +128,9 @@ class AdminUserController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('nom',    'like', "%$search%")
-                  ->orWhere('prenom', 'like', "%$search%")
-                  ->orWhere('email',  'like', "%$search%");
+                $q->where('nom', 'like', "%$search%")
+                    ->orWhere('prenom', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -147,9 +148,9 @@ class AdminUserController extends Controller
 
     public function create()
     {
-        $annee       = \App\Models\Parametre::anneeActive();
+        $annee = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
-        $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
+        $tuteurs = User::role('Professeur')->orderBy('nom')->get();
 
         return view('admin.users.create', compact('tuteurs', 'currentYear'));
     }
@@ -163,35 +164,35 @@ class AdminUserController extends Controller
             : ['Etudiant', 'Professeur'];
 
         $request->validate([
-            'nom'       => 'required|string|max:255',
-            'prenom'    => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email',
-            'role'      => ['required', Rule::in($rolesAutorises)],
-            'classe'    => 'nullable|in:SIO1,SIO2',
-            'promo'     => 'nullable|integer|min:2020|max:2040',
-            'spe'       => 'nullable|in:SLAM,SISR',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'role' => ['required', Rule::in($rolesAutorises)],
+            'classe' => 'nullable|in:SIO1,SIO2',
+            'promo' => 'nullable|integer|min:2020|max:2040',
+            'spe' => 'nullable|in:SLAM,SISR',
             'tuteur_id' => 'nullable|exists:users,id',
         ]);
 
         // Calcul automatique de la promo depuis la classe
-        $annee       = \App\Models\Parametre::anneeActive();
+        $annee = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
-        $promo = match($request->classe) {
+        $promo = match ($request->classe) {
             'SIO1' => $currentYear + 2,
             'SIO2' => $currentYear + 1,
             default => $request->promo,
         };
 
         $user = User::create([
-            'nom'       => strtoupper($request->nom),
-            'prenom'    => $request->prenom,
-            'email'     => $request->email,
-            'password'  => bcrypt(Str::random(64)), // remplacé par l'invitation ci-dessous
-            'classe'    => $request->classe,
-            'promo'     => $promo,
-            'spe'       => $request->spe,
+            'nom' => strtoupper($request->nom),
+            'prenom' => $request->prenom,
+            'email' => $request->email,
+            'password' => bcrypt(Str::random(64)), // remplacé par l'invitation ci-dessous
+            'classe' => $request->classe,
+            'promo' => $promo,
+            'spe' => $request->spe,
             'tuteur_id' => $request->tuteur_id,
-            'statut'    => 'actif',
+            'statut' => 'actif',
             'force_password_change' => true,
         ]);
 
@@ -217,6 +218,7 @@ class AdminUserController extends Controller
     public function resetPasswordForm()
     {
         $users = User::orderBy('nom')->get(['id', 'nom', 'prenom', 'email']);
+
         return view('admin.users.reset-password', compact('users'));
     }
 
@@ -245,11 +247,11 @@ class AdminUserController extends Controller
         }
 
         return [
-            'success'         => "{$debut} Aucun email envoyé ({$invitation['raison']}) : transmettez-lui le lien ci-dessous.",
+            'success' => "{$debut} Aucun email envoyé ({$invitation['raison']}) : transmettez-lui le lien ci-dessous.",
             'lien_invitation' => [
-                'nom'    => "{$user->prenom} {$user->nom}",
-                'email'  => $user->email,
-                'lien'   => $invitation['lien'],
+                'nom' => "{$user->prenom} {$user->nom}",
+                'email' => $user->email,
+                'lien' => $invitation['lien'],
                 'raison' => $invitation['raison'],
             ],
         ];
@@ -279,12 +281,12 @@ class AdminUserController extends Controller
     {
         abort_unless($user->hasRole('Etudiant'), 404);
 
-        $tuteurs     = User::role('Professeur')->orderBy('nom')->get();
-        $annee       = \App\Models\Parametre::anneeActive();
+        $tuteurs = User::role('Professeur')->orderBy('nom')->get();
+        $annee = \App\Models\Parametre::anneeActive();
         $currentYear = (int) explode('-', $annee)[0];
 
         $user->load([
-            'stages'          => fn($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),
+            'stages' => fn ($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),
             'conventionPapier',
         ]);
 
@@ -296,21 +298,20 @@ class AdminUserController extends Controller
         abort_unless($user->hasRole('Etudiant'), 404);
 
         $request->validate([
-            'nom'       => 'required|string|max:255',
-            'prenom'    => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email,'.$user->id,
-            'classe'    => 'nullable|in:SIO1,SIO2',
-            'promo'     => 'nullable|integer',
-            'spe'       => 'nullable|in:SLAM,SISR,',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'classe' => 'nullable|in:SIO1,SIO2',
+            'promo' => 'nullable|integer',
+            'spe' => 'nullable|in:SLAM,SISR,',
             'tuteur_id' => 'nullable|exists:users,id',
         ]);
 
         $user->update($request->only('nom', 'prenom', 'email', 'classe', 'promo', 'spe', 'tuteur_id'));
 
-        // Rediriger vers la liste de la classe de l'étudiant
-        $classe = $request->classe ?? $user->fresh()->classe;
+        // On reste sur la fiche : l'enregistrement est confirmé là où l'utilisateur a saisi
         return redirect()
-            ->route('admin.users.index', array_filter(['classe' => $classe]))
+            ->route('admin.users.edit', $user)
             ->with('success', "{$user->prenom} {$user->nom} mis à jour.");
     }
 
@@ -331,18 +332,18 @@ class AdminUserController extends Controller
     {
         abort_unless($user->hasRole('Etudiant'), 404);
 
-        if (!$user->promo) {
-            return back()->withErrors("Promotion non définie pour cet étudiant.");
+        if (! $user->promo) {
+            return back()->withErrors('Promotion non définie pour cet étudiant.');
         }
 
         $anciennePromo = $user->promo;
         $user->update([
-            'promo'  => $anciennePromo + 1,
+            'promo' => $anciennePromo + 1,
             'statut' => 'actif',
         ]);
 
         return back()->with('success',
-            "{$user->prenom} {$user->nom} redouble — promo {$anciennePromo} → " . ($anciennePromo + 1) . "."
+            "{$user->prenom} {$user->nom} redouble — promo {$anciennePromo} → ".($anciennePromo + 1).'.'
         );
     }
 
@@ -353,8 +354,8 @@ class AdminUserController extends Controller
     public function actionGroupee(Request $request)
     {
         $data = $request->validate([
-            'ids'    => ['required', 'array', 'min:1'],
-            'ids.*'  => ['integer', 'exists:users,id'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
             'action' => ['required', Rule::in(['diplome', 'archive', 'echec', 'redouble'])],
         ], ['ids.required' => 'Sélectionne au moins un étudiant.']);
 
@@ -375,8 +376,8 @@ class AdminUserController extends Controller
             $etudiant->update(['promo' => $etudiant->promo + 1]);
         }
 
-        $traites         = $etudiants->count() - $sansPromo->count();
-        $encoreSansClasse = $etudiants->whereNotNull('promo')->filter(fn($e) => $e->fresh()->classe_courante === null)->count();
+        $traites = $etudiants->count() - $sansPromo->count();
+        $encoreSansClasse = $etudiants->whereNotNull('promo')->filter(fn ($e) => $e->fresh()->classe_courante === null)->count();
 
         $message = "{$traites} étudiant(s) passé(s) en promo + 1.";
         if ($encoreSansClasse > 0) {
@@ -393,17 +394,19 @@ class AdminUserController extends Controller
     {
         // Les stages sont conservés sans nom (clé étrangère « mise à null ») ; le journal, personnel, est supprimé avec le compte
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'Étudiant supprimé : ses stages sont conservés sans nom.');
     }
 
     public function anonymize(User $user)
     {
         $user->update([
-            'nom'       => 'Anonyme',
-            'prenom'    => 'Anonyme',
-            'email'     => 'anonyme_'.$user->id.'@supprime.invalid',
+            'nom' => 'Anonyme',
+            'prenom' => 'Anonyme',
+            'email' => 'anonyme_'.$user->id.'@supprime.invalid',
             'telephone' => null,
         ]);
+
         return redirect()->route('admin.users.index')->with('success', 'Étudiant anonymisé.');
     }
 
@@ -413,6 +416,7 @@ class AdminUserController extends Controller
 
         $request->validate(['tuteur_id' => 'nullable|exists:users,id']);
         $user->update(['tuteur_id' => $request->tuteur_id]);
+
         return back()->with('success', 'Tuteur assigné.');
     }
 
@@ -429,29 +433,30 @@ class AdminUserController extends Controller
             ->get(['id', 'nom', 'prenom', 'promo', 'email', 'statut', 'classe']);
 
         $doublons = $tous->groupBy(function ($u) {
-            return preg_replace('/\s+/', ' ', trim($u->nom)) . '|' .
-                   preg_replace('/\s+/', ' ', trim($u->prenom)) . '|' .
+            return preg_replace('/\s+/', ' ', trim($u->nom)).'|'.
+                   preg_replace('/\s+/', ' ', trim($u->prenom)).'|'.
                    $u->promo;
-        })->filter(fn($g) => $g->count() > 1)->values();
+        })->filter(fn ($g) => $g->count() > 1)->values();
 
         return view('admin.users.nettoyage', compact('importLocal', 'doublons'));
     }
 
     public function updateEmail(Request $request, User $user)
     {
-        $request->validate(['email' => 'required|email|unique:users,email,' . $user->id]);
+        $request->validate(['email' => 'required|email|unique:users,email,'.$user->id]);
         $user->update(['email' => $request->email]);
-        return back()->with('success', 'Email mis à jour pour ' . $user->prenom . ' ' . $user->nom . '.');
+
+        return back()->with('success', 'Email mis à jour pour '.$user->prenom.' '.$user->nom.'.');
     }
 
     public function fusionner(Request $request)
     {
         $request->validate([
-            'garder_id'    => 'required|exists:users,id',
+            'garder_id' => 'required|exists:users,id',
             'supprimer_id' => 'required|exists:users,id|different:garder_id',
         ]);
 
-        $garder    = User::with(['conventionsPapier'])->findOrFail($request->garder_id);
+        $garder = User::with(['conventionsPapier'])->findOrFail($request->garder_id);
         $supprimer = User::with(['conventionsPapier'])->findOrFail($request->supprimer_id);
 
         // Un seul stage par année scolaire : la fusion ne peut pas en créer deux la même année
@@ -460,7 +465,7 @@ class AdminUserController extends Controller
 
         if ($conflits->isNotEmpty()) {
             return back()->withErrors(
-                "Les deux comptes ont un stage pour " . $conflits->implode(', ') . " : supprime l'un des deux stages avant de fusionner."
+                'Les deux comptes ont un stage pour '.$conflits->implode(', ')." : supprime l'un des deux stages avant de fusionner."
             );
         }
 
@@ -490,19 +495,19 @@ class AdminUserController extends Controller
             }
 
             // 4. Rôles Spatie — CASCADE DELETE, il faut les transférer avant
-            $modelType    = get_class($garder);
-            $rolesGarder  = $DB::table('model_has_roles')
+            $modelType = get_class($garder);
+            $rolesGarder = $DB::table('model_has_roles')
                 ->where('model_id', $garder->id)->where('model_type', $modelType)
                 ->pluck('role_id');
-            $rolesSuppr   = $DB::table('model_has_roles')
+            $rolesSuppr = $DB::table('model_has_roles')
                 ->where('model_id', $supprimer->id)->where('model_type', $modelType)
                 ->pluck('role_id');
 
             foreach ($rolesSuppr->diff($rolesGarder) as $roleId) {
                 $DB::table('model_has_roles')->insert([
-                    'role_id'    => $roleId,
+                    'role_id' => $roleId,
                     'model_type' => $modelType,
-                    'model_id'   => $garder->id,
+                    'model_id' => $garder->id,
                 ]);
             }
 
@@ -517,12 +522,12 @@ class AdminUserController extends Controller
 
             // 7. Normaliser le nom + récupérer l'email réel si le compte conservé est @import.local
             $emailFinal = $garder->email;
-            if (str_ends_with($garder->email, '@import.local') && !str_ends_with($supprimer->email, '@import.local')) {
+            if (str_ends_with($garder->email, '@import.local') && ! str_ends_with($supprimer->email, '@import.local')) {
                 $emailFinal = $supprimer->email;
             }
 
             $garder->update([
-                'nom'   => preg_replace('/\s+/', ' ', trim($garder->nom)),
+                'nom' => preg_replace('/\s+/', ' ', trim($garder->nom)),
                 'email' => $emailFinal,
             ]);
 
@@ -531,6 +536,6 @@ class AdminUserController extends Controller
         });
 
         return back()->with('success',
-            'Comptes fusionnés — ' . $garder->prenom . ' ' . trim($garder->nom) . ' conservé (ID ' . $garder->id . ').');
+            'Comptes fusionnés — '.$garder->prenom.' '.trim($garder->nom).' conservé (ID '.$garder->id.').');
     }
 }

@@ -38,106 +38,88 @@
         </div>
     @endif
 
-    <div class="columns">
-
-        {{-- Colonne gauche : Identité + Statut --}}
-        <div class="column is-two-fifths">
-
-            @php $readOnly = !auth()->user()->hasRole('Administrateur'); @endphp
+    @php $readOnly = !auth()->user()->hasRole('Administrateur'); @endphp
             <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant">
                 @csrf @method('PUT')
 
-                <div class="box mb-3">
-                    <p class="menu-label">Identité</p>
-                    <div class="field">
-                        <label class="label is-small">Nom</label>
-                        <input class="input is-small" type="text" name="nom"
-                               value="{{ old('nom', $user->nom) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                    </div>
-                    <div class="field">
-                        <label class="label is-small">Prénom</label>
-                        <input class="input is-small" type="text" name="prenom"
-                               value="{{ old('prenom', $user->prenom) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                    </div>
-                    <div class="field">
-                        <label class="label is-small">Email</label>
-                        <input class="input is-small" type="email" name="email"
-                               value="{{ old('email', $user->email) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                    </div>
-                </div>
-
-                <div class="box mb-3">
-                    <p class="menu-label">Scolarité</p>
-                    <div class="columns is-mobile is-variable is-2">
-                        <div class="column">
-                            <div class="field">
-                                <label class="label is-small">Classe</label>
-                                <div class="select is-fullwidth is-small">
-                                    <select name="classe" id="classe-select" data-onchange="updatePromo" {{ $readOnly ? 'disabled' : '' }}>
-                                        <option value="">—</option>
-                                        @foreach(['SIO1', 'SIO2'] as $c)
-                                        @php $current = $user->classe_courante ?? $user->classe; @endphp
-                                            <option value="{{ $c }}" {{ old('classe', $current) === $c ? 'selected' : '' }}>{{ $c }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                <div class="box mb-4">
+                    <p class="menu-label">Identité et scolarité</p>
+                    <div class="columns is-multiline is-variable is-2">
+                        <div class="column is-4">
+                            <label class="label is-small" for="f-nom">Nom</label>
+                            <input class="input is-small" type="text" name="nom" id="f-nom"
+                                   value="{{ old('nom', $user->nom) }}" required {{ $readOnly ? 'disabled' : '' }}>
+                        </div>
+                        <div class="column is-4">
+                            <label class="label is-small" for="f-prenom">Prénom</label>
+                            <input class="input is-small" type="text" name="prenom" id="f-prenom"
+                                   value="{{ old('prenom', $user->prenom) }}" required {{ $readOnly ? 'disabled' : '' }}>
+                        </div>
+                        <div class="column is-4">
+                            <label class="label is-small" for="f-email">Email</label>
+                            <input class="input is-small" type="email" name="email" id="f-email"
+                                   value="{{ old('email', $user->email) }}" required {{ $readOnly ? 'disabled' : '' }}>
+                        </div>
+                        @php $current = $user->classe_courante ?? $user->classe; @endphp
+                        <div class="column is-3">
+                            <label class="label is-small" for="classe-select">Classe</label>
+                            <div class="select is-fullwidth is-small">
+                                <select name="classe" id="classe-select" data-onchange="updatePromo" {{ $readOnly ? 'disabled' : '' }}>
+                                    <option value="">—</option>
+                                    @foreach(['SIO1', 'SIO2'] as $c)
+                                        <option value="{{ $c }}" {{ old('classe', $current) === $c ? 'selected' : '' }}>{{ $c }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
-                        <div class="column">
-                            <div class="field">
-                                <label class="label is-small">
-                                    Promo
-                                    <span class="has-text-grey is-size-7"></span>
-                                </label>
-                                <input class="input is-small" type="number" name="promo" id="promo-input"
-                                       value="{{ old('promo', $user->promo) }}" min="2020" max="2040" {{ $readOnly ? 'disabled' : '' }}>
+                        <div class="column is-3">
+                            <label class="label is-small" for="promo-input">Promo</label>
+                            <input class="input is-small" type="number" name="promo" id="promo-input"
+                                   value="{{ old('promo', $user->promo) }}" min="2020" max="2040" {{ $readOnly ? 'disabled' : '' }}>
+                        </div>
+                        <div class="column is-3">
+                            <label class="label is-small" for="f-spe">Spécialité</label>
+                            <div class="select is-fullwidth is-small">
+                                <select name="spe" id="f-spe" {{ $readOnly ? 'disabled' : '' }}>
+                                    <option value="">— Non définie —</option>
+                                    <option value="SLAM" {{ old('spe', $user->spe) === 'SLAM' ? 'selected' : '' }}>SLAM</option>
+                                    <option value="SISR" {{ old('spe', $user->spe) === 'SISR' ? 'selected' : '' }}>SISR</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="column is-3">
+                            <label class="label is-small" for="f-tuteur">Tuteur référent</label>
+                            <div class="select is-fullwidth is-small">
+                                <select name="tuteur_id" id="f-tuteur" {{ $readOnly ? 'disabled' : '' }}>
+                                    <option value="">— Aucun —</option>
+                                    @foreach($tuteurs as $tuteur)
+                                        <option value="{{ $tuteur->id }}"
+                                            {{ old('tuteur_id', $user->tuteur_id) == $tuteur->id ? 'selected' : '' }}>
+                                            {{ $tuteur->prenom }} {{ $tuteur->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <div class="field">
-                        <label class="label is-small">Spécialité</label>
-                        <div class="select is-fullwidth is-small">
-                            <select name="spe" {{ $readOnly ? 'disabled' : '' }}>
-                                <option value="">— Non définie —</option>
-                                <option value="SLAM" {{ old('spe', $user->spe) === 'SLAM' ? 'selected' : '' }}>SLAM</option>
-                                <option value="SISR" {{ old('spe', $user->spe) === 'SISR' ? 'selected' : '' }}>SISR</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label is-small">Tuteur référent</label>
-                        <div class="select is-fullwidth is-small">
-                            <select name="tuteur_id" {{ $readOnly ? 'disabled' : '' }}>
-                                <option value="">— Aucun —</option>
-                                @foreach($tuteurs as $tuteur)
-                                    <option value="{{ $tuteur->id }}"
-                                        {{ old('tuteur_id', $user->tuteur_id) == $tuteur->id ? 'selected' : '' }}>
-                                        {{ $tuteur->prenom }} {{ $tuteur->nom }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field is-grouped">
                     @unless($readOnly)
-                    <div class="control">
+                    <div class="buttons is-right mb-0">
                         <button type="submit" class="button is-primary is-small">
                             <i class="fas fa-save mr-1"></i> Enregistrer
                         </button>
                     </div>
                     @endunless
-                    <div class="control">
-                        <a href="{{ route('admin.users.index', ['classe' => $user->classe_courante ?? $user->classe]) }}"
-                           class="button is-light is-small">Annuler</a>
-                    </div>
                 </div>
             </form>
 
+    <div class="columns">
+
+        {{-- Colonne gauche : Statut --}}
+        <div class="column is-two-fifths">
+
             {{-- Statut administratif --}}
             @role('Professeur|Administrateur')
-            <div class="box mt-3">
+            <div class="box">
                 <p class="menu-label">Statut administratif</p>
 
                 {{-- Statuts : Actif | Démissionnaire | Diplômé (validé par un professeur) | Archivé (résultat inconnu) | Échec --}}
@@ -197,7 +179,7 @@
 
         {{-- Colonne droite : Historique des stages --}}
         <div class="column">
-            <div class="box" style="height:100%;">
+            <div class="box">
                 <p class="menu-label">Historique des stages</p>
 
                 @php
@@ -287,9 +269,5 @@ function updatePromo() {
         input.value = promos[sel.value];
     }
 }
-// Synchroniser à la soumission du formulaire
-document.querySelector('form#form-etudiant')?.addEventListener('submit', function() {
-    updatePromo();
-});
 </script>
 @endsection
