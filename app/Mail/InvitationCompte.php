@@ -17,7 +17,10 @@ class InvitationCompte extends Mailable
         public User $utilisateur,
         public string $lien,
         public int $validiteJours,
-    ) {}
+    ) {
+        // Mis en file seulement une fois la transaction validée (import) : le worker ne doit pas lire un compte absent
+        $this->afterCommit();
+    }
 
     public function envelope(): Envelope
     {

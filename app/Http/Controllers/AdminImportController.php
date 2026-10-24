@@ -8,6 +8,7 @@ use App\Services\InvitationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -48,67 +49,70 @@ class AdminImportController extends Controller
         $liens  = []; // comptes sans mail envoyé (adresse refusée ou « mode lien ») : lien à transmettre à la main
         $rang   = 0;
 
-        foreach ($preview as $row) {
-            if ($row['action'] === 'create') {
-                $user = User::create([
-                    'nom'                   => $row['nom'],
-                    'prenom'                => $row['prenom'],
-                    'email'                 => $row['email'],
-                    'email_pronote'         => $row['email'],
-                    'password'              => Hash::make(Str::random(64)), // remplacé par l'invitation ci-dessous
-                    'force_password_change' => true,
-                    'classe'                => $row['classe'],
-                    'promo'                 => $row['promo'],
-                    'date_entree'           => $row['date_entree'],
-                    'date_sortie'           => $row['date_sortie'],
-                    'statut'                => $row['statut'],
-                ]);
-                $user->assignRole('Etudiant');
-                $counts['cree']++;
+        // Tout ou rien : une erreur en cours d'import n'en laisse pas la moitié en base
+        DB::transaction(function () use ($preview, $request, $invitations, &$counts, &$liens, &$rang) {
+            foreach ($preview as $row) {
+                if ($row['action'] === 'create') {
+                    $user = User::create([
+                        'nom'                   => $row['nom'],
+                        'prenom'                => $row['prenom'],
+                        'email'                 => $row['email'],
+                        'email_pronote'         => $row['email'],
+                        'password'              => Hash::make(Str::random(64)), // remplacé par l'invitation ci-dessous
+                        'force_password_change' => true,
+                        'classe'                => $row['classe'],
+                        'promo'                 => $row['promo'],
+                        'date_entree'           => $row['date_entree'],
+                        'date_sortie'           => $row['date_sortie'],
+                        'statut'                => $row['statut'],
+                    ]);
+                    $user->assignRole('Etudiant');
+                    $counts['cree']++;
 
-                $invitation = $invitations->inviter($user, $rang++, ! $request->boolean('sans_mail'));
-                if ($invitation['mail_envoye']) {
-                    $counts['invites']++;
-                } else {
-                    $liens[] = ['nom' => "{$user->prenom} {$user->nom}", 'email' => $user->email, 'lien' => $invitation['lien'], 'raison' => $invitation['raison']];
+                    $invitation = $invitations->inviter($user, $rang++, ! $request->boolean('sans_mail'));
+                    if ($invitation['mail_envoye']) {
+                        $counts['invites']++;
+                    } else {
+                        $liens[] = ['nom' => "{$user->prenom} {$user->nom}", 'email' => $user->email, 'lien' => $invitation['lien'], 'raison' => $invitation['raison']];
+                    }
+
+                } elseif ($row['action'] === 'redoublant') {
+                    $existing = User::find($row['existing_id']);
+                    User::where('id', $row['existing_id'])->update([
+                        'classe'      => $row['classe'],
+                        'promo'       => $existing ? $existing->promo + 1 : $row['promo'],
+                        'date_entree' => $row['date_entree'],
+                        'statut'      => 'actif',
+                    ]);
+                    $counts['redoublant']++;
+
+                } elseif ($row['action'] === 'update') {
+                    $updateData = [
+                        'classe'      => $row['classe'],
+                        'promo'       => $row['promo'],
+                        'date_entree' => $row['date_entree'],
+                        'statut'      => $row['statut'],
+                    ];
+
+                    // Remplacer un email placeholder par le vrai email Pronote
+                    $existing = User::find($row['existing_id']);
+                    if ($existing && str_ends_with($existing->email, '@import.local')) {
+                        $updateData['email']         = $row['email'];
+                        $updateData['email_pronote'] = $row['email'];
+                    }
+
+                    User::where('id', $row['existing_id'])->update($updateData);
+                    $counts['mis_a_jour']++;
+
+                } elseif ($row['action'] === 'demissionnaire') {
+                    User::where('id', $row['existing_id'])->update([
+                        'statut'      => 'demissionnaire',
+                        'date_sortie' => $row['date_sortie'],
+                    ]);
+                    $counts['demissionnaire']++;
                 }
-
-            } elseif ($row['action'] === 'redoublant') {
-                $existing = User::find($row['existing_id']);
-                User::where('id', $row['existing_id'])->update([
-                    'classe'      => $row['classe'],
-                    'promo'       => $existing ? $existing->promo + 1 : $row['promo'],
-                    'date_entree' => $row['date_entree'],
-                    'statut'      => 'actif',
-                ]);
-                $counts['redoublant']++;
-
-            } elseif ($row['action'] === 'update') {
-                $updateData = [
-                    'classe'      => $row['classe'],
-                    'promo'       => $row['promo'],
-                    'date_entree' => $row['date_entree'],
-                    'statut'      => $row['statut'],
-                ];
-
-                // Remplacer un email placeholder par le vrai email Pronote
-                $existing = User::find($row['existing_id']);
-                if ($existing && str_ends_with($existing->email, '@import.local')) {
-                    $updateData['email']         = $row['email'];
-                    $updateData['email_pronote'] = $row['email'];
-                }
-
-                User::where('id', $row['existing_id'])->update($updateData);
-                $counts['mis_a_jour']++;
-
-            } elseif ($row['action'] === 'demissionnaire') {
-                User::where('id', $row['existing_id'])->update([
-                    'statut'      => 'demissionnaire',
-                    'date_sortie' => $row['date_sortie'],
-                ]);
-                $counts['demissionnaire']++;
             }
-        }
+        });
 
         session()->forget('pronote_preview');
 

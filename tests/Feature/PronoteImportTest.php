@@ -282,6 +282,30 @@ class PronoteImportTest extends TestCase
         $this->assertSame(1, User::where('email', 'jean@example.fr')->count());
     }
 
+    public function test_une_erreur_en_cours_d_import_annule_tout(): void
+    {
+        $this->preview([
+            ['DUPONT Jean', 'jean@example.fr', '01/09/2025', ''],
+            ['MARTIN Paul', 'paul@example.fr', '01/09/2025', ''],
+        ]);
+
+        // Le second élève fait échouer l'invitation : le premier ne doit pas rester en base
+        $this->mock(\App\Services\InvitationService::class, function ($mock) {
+            $mock->shouldReceive('inviter')->once()->andReturnUsing(fn ($u) => ['lien' => 'x', 'mail_envoye' => true, 'raison' => null]);
+            $mock->shouldReceive('inviter')->once()->andThrow(new \RuntimeException('panne'));
+        });
+
+        $this->withoutExceptionHandling();
+        try {
+            $this->post(route('imports.pronote.confirm'));
+            $this->fail('exception attendue');
+        } catch (\RuntimeException) {
+        }
+
+        $this->assertSame(0, User::whereIn('email', ['jean@example.fr', 'paul@example.fr'])->count());
+        $this->assertNotNull(session('pronote_preview'), 'la prévisualisation reste disponible pour relancer');
+    }
+
     // Accès -----------------------------------------------------------------
 
     public function test_un_etudiant_ne_peut_pas_importer(): void
