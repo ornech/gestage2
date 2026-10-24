@@ -83,13 +83,11 @@
     <div class="box mb-4">
         <div class="level is-mobile mb-3">
             <div class="level-left"><p class="menu-label mb-0">Identité et scolarité</p></div>
-            @unless($readOnly)
             <div class="level-right">
                 <button type="button" class="button is-light is-small" data-toggle-edition>
                     <i class="fas fa-pen mr-1"></i> Modifier
                 </button>
             </div>
-            @endunless
         </div>
 
         <div class="columns is-multiline is-mobile mb-0">
@@ -126,9 +124,10 @@
             </div>
         </div>
 
+        {{-- Zone d'édition : identité (admin) + statut administratif (prof / admin) --}}
+        <div id="zone-edition" {!! $ouvrirEdition ? '' : 'hidden' !!}>
         @unless($readOnly)
-        <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant"
-              {!! $ouvrirEdition ? '' : 'hidden' !!}>
+        <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant">
             @csrf @method('PUT')
             <hr style="margin:12px 0;">
             <div class="columns is-multiline is-variable is-2">
@@ -181,16 +180,9 @@
             </div>
         </form>
         @endunless
-    </div>
-
-    <div class="columns">
-
-        {{-- Colonne gauche : Statut --}}
-        <div class="column is-two-fifths">
-
-            {{-- Statut administratif --}}
             @role('Professeur|Administrateur')
-            <div class="box">
+            <hr style="margin:12px 0;">
+            <div>
                 <p class="menu-label">Statut administratif</p>
 
                 {{-- Statuts : Actif | Démissionnaire | Diplômé (validé par un professeur) | Archivé (résultat inconnu) | Échec --}}
@@ -245,8 +237,10 @@
                 </form>
             </div>
             @endrole
-
         </div>
+    </div>
+
+    <div class="columns">
 
         {{-- Colonne droite : Historique des stages --}}
         <div class="column">
@@ -345,9 +339,10 @@
 <script nonce="{{ $cspNonce ?? '' }}">
 document.querySelectorAll('[data-toggle-edition]').forEach(function (b) {
     b.addEventListener('click', function () {
-        var f = document.getElementById('form-etudiant');
-        f.hidden = !f.hidden;
-        if (!f.hidden) { document.getElementById('f-nom').focus(); }
+        var z = document.getElementById('zone-edition');
+        z.hidden = !z.hidden;
+        var nom = document.getElementById('f-nom');
+        if (!z.hidden && nom) { nom.focus(); }
     });
 });
 const promos = { 'SIO1': {{ $currentYear + 2 }}, 'SIO2': {{ $currentYear + 1 }} };

@@ -67,4 +67,17 @@ class NavigationEtudiantsTest extends TestCase
             ->assertOk()
             ->assertSee('Pas de stage', false);
     }
+
+    public function test_statut_administratif_est_dans_la_zone_de_modification_pour_un_professeur(): void
+    {
+        $prof = User::factory()->professeur()->create();
+        $etu = User::factory()->etudiant()->create(['promo' => 2027, 'statut' => 'actif']);
+
+        $this->actingAs($prof)->get(route('admin.users.edit', $etu))
+            ->assertOk()
+            ->assertSee('id="zone-edition"', false)
+            ->assertSee('Statut administratif')
+            ->assertSee('data-toggle-edition', false)
+            ->assertDontSee('id="form-etudiant"', false);
+    }
 }
