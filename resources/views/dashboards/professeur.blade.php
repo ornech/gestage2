@@ -160,11 +160,12 @@
                     </p>
                 @endif
 
-                <hr style="margin:8px 0;">
+                <hr style="margin:6px 0;">
 
                 {{-- Spécialités --}}
-                <p class="heading mb-1">Spécialités</p>
-                <div class="tags mb-3">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Spécialités</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['slam'] > 0)
                         <span class="tag is-info is-light">{{ $c['slam'] }} SLAM</span>
                     @endif
@@ -175,22 +176,26 @@
                     @if($sansSpe > 0)
                         <span class="tag is-light has-text-grey">{{ $sansSpe }} non définie</span>
                     @endif
+                    </div>
                 </div>
 
                 {{-- Statuts administratifs --}}
-                <p class="heading mb-1">Statuts</p>
-                <div class="tags mb-3">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Statuts</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['actifs'] > 0)
                         <span class="tag is-success is-light">{{ $c['actifs'] }} actif(s)</span>
                     @endif
                     @if($c['demissionnaires'] > 0)
                         <span class="tag is-danger is-light">{{ $c['demissionnaires'] }} démissionnaire(s)</span>
                     @endif
+                    </div>
                 </div>
 
                 {{-- Conventions --}}
-                <p class="heading mb-1">Conventions</p>
-                <div class="tags">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Conventions</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['sans_stage'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'sans_stage']) }}"
                            class="tag is-danger">{{ $c['sans_stage'] }} sans stage</a>
@@ -213,6 +218,7 @@
                     @if($c['sans_stage'] === 0 && $c['papier_pending'] === 0 && $c['a_faire_signer'] === 0 && $c['en_attente'] === 0 && $c['remis'] > 0)
                         <span class="tag is-success">✓ Toutes les conventions sont remises</span>
                     @endif
+                    </div>
                 </div>
 
             </div>

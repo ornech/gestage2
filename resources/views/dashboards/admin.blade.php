@@ -46,24 +46,39 @@
                     @endif
                 </div>
 
+                <div class="level is-mobile mb-2">
+                    <div class="level-left">
                 @if($c['config']?->stage_date_debut)
-                    <p class="is-size-7 mb-3">
+                    <p class="is-size-7 mb-0">
                         <i class="fas fa-calendar-alt mr-1 has-text-{{ $classe === 'SIO1' ? 'info' : 'primary' }}"></i>
                         Stage du <strong>{{ $c['config']->stage_date_debut->format('d/m/Y') }}</strong>
                         au <strong>{{ $c['config']->stage_date_fin->format('d/m/Y') }}</strong>
                         — {{ $c['config']->duree_en_semaines }} semaine(s)
                     </p>
                 @else
-                    <p class="is-size-7 has-text-grey mb-3">
+                    <p class="is-size-7 has-text-grey mb-0">
                         <i class="fas fa-calendar-times mr-1"></i> Dates non définies
                         <a href="{{ route('admin.parametres.index') }}" class="ml-1">→ Paramètres</a>
                     </p>
                 @endif
+                    </div>
+                    <div class="level-right">
+                    <div class="buttons are-small mb-0">
+                        <a href="{{ route('admin.users.index', ['classe' => $classe]) }}" class="button is-small {{ $color }} is-light">
+                            <i class="fas fa-users mr-1"></i> Étudiants
+                        </a>
+                        <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe)]) }}" class="button is-small is-light">
+                            <i class="fas fa-briefcase mr-1"></i> Stages
+                        </a>
+                    </div>
+                    </div>
+                </div>
 
-                <hr style="margin:8px 0;">
+                <hr style="margin:6px 0;">
 
-                <p class="heading mb-1">Spécialités</p>
-                <div class="tags mb-3">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Spécialités</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['slam'] > 0)
                         <a href="{{ route('admin.users.index', ['classe' => $classe, 'spe' => 'SLAM']) }}"
                            class="tag is-info is-light">{{ $c['slam'] }} SLAM</a>
@@ -77,10 +92,12 @@
                         <a href="{{ route('admin.users.index', ['classe' => $classe, 'spe' => 'aucune']) }}"
                            class="tag is-light has-text-grey">{{ $sansSpe }} non définie</a>
                     @endif
+                    </div>
                 </div>
 
-                <p class="heading mb-1">Statuts</p>
-                <div class="tags mb-3">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Statuts</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['actifs'] > 0)
                         <a href="{{ route('admin.users.index', ['classe' => $classe]) }}"
                            class="tag is-success is-light">{{ $c['actifs'] }} actif(s)</a>
@@ -89,10 +106,12 @@
                         <a href="{{ route('admin.users.index', ['classe' => $classe, 'filtre' => 'anciens']) }}"
                            class="tag is-danger is-light">{{ $c['demissionnaires'] }} démissionnaire(s)</a>
                     @endif
+                    </div>
                 </div>
 
-                <p class="heading mb-1">Conventions</p>
-                <div class="tags mb-3">
+                <div class="is-flex is-align-items-baseline mb-1">
+                    <p class="heading mb-0 mr-3" style="min-width:88px;">Conventions</p>
+                    <div class="tags mb-0" style="margin-bottom:-.5rem;">
                     @if($c['sans_stage'] > 0)
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'sans_stage']) }}"
                            class="tag is-danger">{{ $c['sans_stage'] }} sans stage</a>
@@ -113,17 +132,7 @@
                         <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe), 'filtre' => 'validee']) }}"
                            class="tag is-success is-light">{{ $c['remis'] }} remis ✓</a>
                     @endif
-                </div>
-
-                <div class="buttons are-small">
-                    <a href="{{ route('admin.users.index', ['classe' => $classe]) }}"
-                       class="button is-small {{ $color }} is-light">
-                        <i class="fas fa-users mr-1"></i> Étudiants {{ $classe }}
-                    </a>
-                    <a href="{{ route('admin.stages.index', ['classe' => strtolower($classe)]) }}"
-                       class="button is-small is-light">
-                        <i class="fas fa-briefcase mr-1"></i> Stages {{ $classe }}
-                    </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -213,7 +222,7 @@
                         <span class="is-size-7 has-text-grey">Envoi, templates, RGPD</span>
                     </span>
                 </a>
-                <div id="btn-export-csv" style="cursor:pointer;" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                <div id="btn-export-csv" class="is-flex is-align-items-center py-2 admin-action" style="cursor:pointer;">
                     <span class="icon mr-3" style="color:#7209b7;"><i class="fas fa-file-csv fa-lg"></i></span>
                     <span>
                         <span class="has-text-weight-semibold" style="display:block;">Export maîtres de stage</span>
