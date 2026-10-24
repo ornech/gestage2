@@ -235,13 +235,14 @@
         @if($user->stages->isEmpty())
             <p class="has-text-grey is-italic is-size-7">Aucun stage enregistré.</p>
         @else
-        <div class="columns is-multiline">
+        {{-- Grille fluide : les cartes se partagent toute la largeur disponible (1 stage = pleine largeur, 2 = moitié…) --}}
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1rem;">
             @foreach($user->stages as $stage)
             @php
                 $convBadge = $convBadgeMap[$stage->statut_convention] ?? ['is-light', '—'];
                 $bordure = $stage->classe === 'SIO1' ? '#3273dc' : ($stage->classe === 'SIO2' ? '#00d1b2' : '#dbdbdb');
             @endphp
-            <div class="column is-12-tablet is-6-desktop is-4-widescreen">
+            <div>
                 <div class="box p-3 mb-0" style="height:100%; border-left:4px solid {{ $bordure }};">
                     <div class="mb-2">
                         @if($stage->classe)
