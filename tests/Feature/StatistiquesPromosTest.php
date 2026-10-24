@@ -41,10 +41,12 @@ class StatistiquesPromosTest extends TestCase
         $this->etudiants();
         $prof = User::factory()->professeur()->create();
 
-        $this->actingAs($prof)->get(route('admin.statistiques', ['promos' => [2025], 'mode' => 'pourcentages']))
+        $this->actingAs($prof)->get(route('admin.statistiques', ['promos' => [2025]]))
             ->assertOk()
             ->assertSee('Statistiques des promos')
-            ->assertSee('75 %');
+            ->assertSee('75 %')
+            ->assertSee('stats-data', false)
+            ->assertSee('Spécialité dominante : SLAM');
 
         $etu = User::factory()->etudiant()->create(['promo' => 2026]);
         $this->actingAs($etu)->get(route('admin.statistiques'))->assertRedirect();
@@ -59,5 +61,18 @@ class StatistiquesPromosTest extends TestCase
         $admin = User::factory()->administrateur()->create();
 
         $this->actingAs($admin)->get(route('admin.statistiques', ['spe' => 'XXX']))->assertSessionHasErrors('spe');
+    }
+
+    public function test_export_csv_et_clic_vers_la_liste_filtree_par_statut(): void
+    {
+        $this->etudiants();
+        $prof = User::factory()->professeur()->create();
+
+        $csv = $this->actingAs($prof)->get(route('admin.statistiques.csv', ['promos' => [2025]]));
+        $csv->assertOk()->assertDownload('statistiques-promos.csv');
+
+        $this->actingAs($prof)->get(route('admin.users.index', ['filtre' => 'anciens', 'promo' => 2025, 'statut' => 'demissionnaire']))
+            ->assertOk()
+            ->assertViewHas('users', fn ($u) => $u->total() === 1);
     }
 }

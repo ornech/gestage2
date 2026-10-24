@@ -190,6 +190,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::patch('/admin/users/{user}/spe',           [AdminUserController::class, 'updateSpe'])   ->name('admin.users.spe');
     Route::patch('/admin/users/{user}/statut',        [AdminUserController::class, 'updateStatut'])->name('admin.users.statut');
     Route::get('/admin/statistiques',                 [AdminStatistiqueController::class, 'index'])->name('admin.statistiques');
+    Route::get('/admin/statistiques/export',          [AdminStatistiqueController::class, 'csv'])  ->name('admin.statistiques.csv');
     Route::post('/admin/users/action-groupee',        [AdminUserController::class, 'actionGroupee'])->name('admin.users.action-groupee');
     Route::patch('/admin/users/{user}/redoubler',     [AdminUserController::class, 'redoubler'])   ->name('admin.users.redoubler');
     Route::patch('/admin/users/{user}/assign-tuteur', [AdminUserController::class, 'assignTuteur'])->name('admin.users.assign-tuteur');

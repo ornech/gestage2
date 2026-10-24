@@ -99,6 +99,10 @@ class AdminUserController extends Controller
                 });
             }
 
+            if ($request->filled('statut') && StatutEtudiant::tryFrom($request->statut)) {
+                $query->where('statut', $request->statut);
+            }
+
             $users = $query->orderByDesc('promo')
                 ->orderBy('nom')
                 ->paginate(30)

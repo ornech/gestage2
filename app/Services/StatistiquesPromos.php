@@ -64,6 +64,7 @@ class StatistiquesPromos
             'statuts' => $statuts,
             'specialites' => ['SLAM' => $slam, 'SISR' => $sisr, 'aucune' => $total - $slam - $sisr],
             'avec_stage' => $groupe->where('a_stage', true)->count(),
+            'actifs_sans_stage' => $groupe->where('statut', StatutEtudiant::Actif->value)->where('a_stage', false)->count(),
             'convention_validee' => $groupe->where('a_convention_validee', true)->count(),
             'taux_diplomes' => $this->pourcent($statuts['diplome'], $total),
             'taux_demission' => $this->pourcent($statuts['demissionnaire'], $total),
