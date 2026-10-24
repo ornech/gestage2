@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AdminParametreController;
 use App\Http\Controllers\AdminSpeController;
 use App\Http\Controllers\AdminStageController;
+use App\Http\Controllers\AdminStatistiqueController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\CguController;
 use App\Http\Controllers\CompanyController;
@@ -188,6 +189,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::put('/admin/users/{user}',                 [AdminUserController::class, 'update'])      ->name('admin.users.update');
     Route::patch('/admin/users/{user}/spe',           [AdminUserController::class, 'updateSpe'])   ->name('admin.users.spe');
     Route::patch('/admin/users/{user}/statut',        [AdminUserController::class, 'updateStatut'])->name('admin.users.statut');
+    Route::get('/admin/statistiques',                 [AdminStatistiqueController::class, 'index'])->name('admin.statistiques');
     Route::post('/admin/users/action-groupee',        [AdminUserController::class, 'actionGroupee'])->name('admin.users.action-groupee');
     Route::patch('/admin/users/{user}/redoubler',     [AdminUserController::class, 'redoubler'])   ->name('admin.users.redoubler');
     Route::patch('/admin/users/{user}/assign-tuteur', [AdminUserController::class, 'assignTuteur'])->name('admin.users.assign-tuteur');

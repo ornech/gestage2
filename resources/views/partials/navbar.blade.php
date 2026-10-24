@@ -52,6 +52,10 @@
                                 <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item has-text-grey">
                                     <i class="fas fa-history mr-2"></i> Anciennes promos
                                 </a>
+                                <hr class="navbar-divider">
+                                <a href="{{ route('admin.statistiques') }}" class="navbar-item">
+                                    <i class="fas fa-chart-bar mr-2"></i> Statistiques
+                                </a>
                             </div>
                         </div>
                         <div class="navbar-item has-dropdown is-hoverable">
@@ -98,6 +102,10 @@
                                 </a>
                                 <a href="{{ route('admin.users.index', ['filtre' => 'anciens']) }}" class="navbar-item has-text-grey">
                                     <i class="fas fa-history mr-2"></i> Anciennes promos
+                                </a>
+                                <hr class="navbar-divider">
+                                <a href="{{ route('admin.statistiques') }}" class="navbar-item">
+                                    <i class="fas fa-chart-bar mr-2"></i> Statistiques
                                 </a>
                             </div>
                         </div>
