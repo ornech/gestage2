@@ -19,172 +19,13 @@
     @include('partials.flash')
     @include('partials.etudiants_sans_classe')
 
-    {{-- ── Actions admin ───────────────────────────────────────────── --}}
-    <div class="columns is-multiline mb-4">
 
-        <div class="column is-3">
-            <a href="{{ route('admin.parametres.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#f97316">
-                <span class="icon is-large mb-2" style="color:#f97316;"><i class="fas fa-calendar-alt fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Dates de stage</p>
-                <p class="is-size-7 has-text-grey">Configurer l'année scolaire</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('admin.users.create') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#3273dc">
-                <span class="icon is-large has-text-info mb-2"><i class="fas fa-user-plus fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Créer un compte</p>
-                <p class="is-size-7 has-text-grey">Étudiant, prof ou admin</p>
-            </a>
-        </div>
-
-
-        <div class="column is-3">
-            <a href="{{ route('admin.stages.creer.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#23d160">
-                <span class="icon is-large has-text-success mb-2"><i class="fas fa-briefcase fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Créer un stage</p>
-                <p class="is-size-7 has-text-grey">Passe-droit pour un étudiant bloqué</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('admin.reset-password') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#f5a623">
-                <span class="icon is-large has-text-warning mb-2"><i class="fas fa-key fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Réinitialiser un mot de passe</p>
-                <p class="is-size-7 has-text-grey">Générer un mot de passe temporaire</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('admin.professeurs.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#485fc7">
-                <span class="icon is-large has-text-dark mb-2"><i class="fas fa-chalkboard-teacher fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Gérer les professeurs</p>
-                <p class="is-size-7 has-text-grey">Droits d'accès et admin</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('entreprises.create') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#00d1b2">
-                <span class="icon is-large has-text-primary mb-2"><i class="fas fa-building fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Ajouter une entreprise</p>
-                <p class="is-size-7 has-text-grey">Saisie manuelle</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('entreprises.import.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#209cee">
-                <span class="icon is-large has-text-link mb-2"><i class="fas fa-search fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Importer une entreprise</p>
-                <p class="is-size-7 has-text-grey">via son n° de siret</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <a href="{{ route('imports.pronote.form') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#7209b7">
-                <span class="icon is-large mb-2" style="color:#7209b7;"><i class="fas fa-file-import fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Import Pronote</p>
-                <p class="is-size-7 has-text-grey">Import et mise à jour des effectifs</p>
-            </a>
-        </div>
-
-
-
-
-
-        <div class="column is-3">
-            <a href="{{ route('admin.communication.index') }}" class="box has-text-centered p-4" style="display:block; border:2px dashed #dbdbdb; transition:.15s; text-decoration:none;"
-               data-hover="#3273dc">
-                <span class="icon is-large has-text-info mb-2"><i class="fas fa-bullhorn fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Communication</p>
-                <p class="is-size-7 has-text-grey">Envoi, templates, RGPD</p>
-            </a>
-        </div>
-
-        <div class="column is-3">
-            <div id="btn-export-csv" class="box has-text-centered p-4" style="cursor:pointer; border:2px dashed #dbdbdb; transition:.15s;"
-                 data-hover="#23d160">
-                <span class="icon is-large mb-2" style="color:#23d160;"><i class="fas fa-file-csv fa-2x"></i></span>
-                <p class="has-text-weight-semibold">Export maîtres de stage</p>
-                <p class="is-size-7 has-text-grey">Télécharger la liste CSV</p>
-            </div>
-        </div>
-
-        @if($aValider > 0)
-        <div class="column is-3">
-            <a href="{{ route('admin.stages.index', ['filtre' => 'a_faire_signer']) }}" class="box has-text-centered p-4" style="display:block; border:2px solid #f5a623; transition:.15s; text-decoration:none;">
-                <span class="icon is-large has-text-warning mb-2"><i class="fas fa-pen fa-2x"></i></span>
-                <p class="has-text-weight-semibold has-text-warning-dark">{{ $aValider }} convention(s) à faire signer</p>
-                <p class="is-size-7 has-text-grey">En attente de signature employeur</p>
-            </a>
-        </div>
-        @endif
-
-    </div>
-
-    {{-- ── Modale export CSV ──────────────────────────────────────────── --}}
-    @php $anneesDisponibles = \App\Models\Stage::anneesDisponibles(); @endphp
-    <div id="modal-export-csv" class="modal">
-        <div class="modal-background"></div>
-        <div class="modal-card" style="max-width:380px;">
-            <header class="modal-card-head">
-                <p class="modal-card-title"><i class="fas fa-file-csv mr-2"></i>Export maîtres de stage</p>
-                <button class="delete js-modal-close" aria-label="close"></button>
-            </header>
-            <form method="GET" action="{{ route('admin.stages.export-maitres') }}">
-            <section class="modal-card-body">
-                <div class="field">
-                    <label class="label">Année scolaire</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select name="annee">
-                                @foreach($anneesDisponibles as $a)
-                                    <option value="{{ $a }}" {{ $a === $annee ? 'selected' : '' }}>{{ $a }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Section</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select name="classe">
-                                <option value="">Toutes les sections</option>
-                                <option value="SIO1">SIO1</option>
-                                <option value="SIO2">SIO2</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <footer class="modal-card-foot" style="justify-content:space-between;">
-                <button type="submit" class="button is-success">
-                    <i class="fas fa-download mr-1"></i> Télécharger CSV
-                </button>
-                <button type="button" class="button js-modal-close">Annuler</button>
-            </footer>
-            </form>
-        </div>
-    </div>
-    <script nonce="{{ $cspNonce ?? '' }}">
-    (function () {
-        var modal  = document.getElementById('modal-export-csv');
-        var opener = document.getElementById('btn-export-csv');
-        opener.addEventListener('click', function () { modal.classList.add('is-active'); });
-        modal.querySelector('.modal-background').addEventListener('click', function () { modal.classList.remove('is-active'); });
-        modal.querySelectorAll('.js-modal-close').forEach(function (el) {
-            el.addEventListener('click', function () { modal.classList.remove('is-active'); });
-        });
-    })();
-    </script>
+    @if($aValider > 0)
+    <a href="{{ route('admin.stages.index', ['filtre' => 'a_faire_signer']) }}" class="notification is-warning is-light py-3 mb-4" style="display:block; text-decoration:none;">
+        <i class="fas fa-pen mr-2"></i>
+        <strong>{{ $aValider }} convention(s) à faire signer</strong> — en attente de signature employeur
+    </a>
+    @endif
 
     {{-- ── Cards SIO1 / SIO2 (même vue que dashboard prof) ──────────── --}}
     <div class="columns">
@@ -288,6 +129,158 @@
         </div>
         @endforeach
     </div>
+
+    {{-- ── Actions admin, regroupées par thème ─────────────────────── --}}
+    <div class="columns is-multiline mb-4">
+        <div class="column is-6-tablet is-3-desktop">
+            <div class="box p-4" style="height:100%; border-top:3px solid #f97316;">
+                <p class="heading mb-2" style="color:#f97316;"><i class="fas fa-calendar-alt mr-1"></i> Année scolaire</p>
+                <a href="{{ route('admin.parametres.index') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#f97316;"><i class="fas fa-calendar-alt fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Dates de stage</span>
+                        <span class="is-size-7 has-text-grey">Configurer l'année scolaire</span>
+                    </span>
+                </a>
+                <a href="{{ route('imports.pronote.form') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#f97316;"><i class="fas fa-file-import fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Import Pronote</span>
+                        <span class="is-size-7 has-text-grey">Import et mise à jour des effectifs</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div class="column is-6-tablet is-3-desktop">
+            <div class="box p-4" style="height:100%; border-top:3px solid #3273dc;">
+                <p class="heading mb-2" style="color:#3273dc;"><i class="fas fa-users mr-1"></i> Comptes</p>
+                <a href="{{ route('admin.users.create') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#3273dc;"><i class="fas fa-user-plus fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Créer un compte</span>
+                        <span class="is-size-7 has-text-grey">Étudiant, prof ou admin</span>
+                    </span>
+                </a>
+                <a href="{{ route('admin.reset-password') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#3273dc;"><i class="fas fa-key fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Réinitialiser un mot de passe</span>
+                        <span class="is-size-7 has-text-grey">Générer un mot de passe temporaire</span>
+                    </span>
+                </a>
+                <a href="{{ route('admin.professeurs.index') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#3273dc;"><i class="fas fa-chalkboard-teacher fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Gérer les professeurs</span>
+                        <span class="is-size-7 has-text-grey">Droits d'accès et admin</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div class="column is-6-tablet is-3-desktop">
+            <div class="box p-4" style="height:100%; border-top:3px solid #00a38a;">
+                <p class="heading mb-2" style="color:#00a38a;"><i class="fas fa-briefcase mr-1"></i> Stages et entreprises</p>
+                <a href="{{ route('admin.stages.creer.form') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#00a38a;"><i class="fas fa-briefcase fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Créer un stage</span>
+                        <span class="is-size-7 has-text-grey">Passe-droit pour un étudiant bloqué</span>
+                    </span>
+                </a>
+                <a href="{{ route('entreprises.create') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#00a38a;"><i class="fas fa-building fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Ajouter une entreprise</span>
+                        <span class="is-size-7 has-text-grey">Saisie manuelle</span>
+                    </span>
+                </a>
+                <a href="{{ route('entreprises.import.form') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#00a38a;"><i class="fas fa-search fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Importer une entreprise</span>
+                        <span class="is-size-7 has-text-grey">via son n° de siret</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div class="column is-6-tablet is-3-desktop">
+            <div class="box p-4" style="height:100%; border-top:3px solid #7209b7;">
+                <p class="heading mb-2" style="color:#7209b7;"><i class="fas fa-bullhorn mr-1"></i> Communication et exports</p>
+                <a href="{{ route('admin.communication.index') }}" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#7209b7;"><i class="fas fa-bullhorn fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Communication</span>
+                        <span class="is-size-7 has-text-grey">Envoi, templates, RGPD</span>
+                    </span>
+                </a>
+                <div id="btn-export-csv" style="cursor:pointer;" class="is-flex is-align-items-center py-2 admin-action" style="text-decoration:none; color:inherit;">
+                    <span class="icon mr-3" style="color:#7209b7;"><i class="fas fa-file-csv fa-lg"></i></span>
+                    <span>
+                        <span class="has-text-weight-semibold" style="display:block;">Export maîtres de stage</span>
+                        <span class="is-size-7 has-text-grey">Télécharger la liste CSV</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Modale export CSV ──────────────────────────────────────────── --}}
+    @php $anneesDisponibles = \App\Models\Stage::anneesDisponibles(); @endphp
+    <div id="modal-export-csv" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card" style="max-width:380px;">
+            <header class="modal-card-head">
+                <p class="modal-card-title"><i class="fas fa-file-csv mr-2"></i>Export maîtres de stage</p>
+                <button class="delete js-modal-close" aria-label="close"></button>
+            </header>
+            <form method="GET" action="{{ route('admin.stages.export-maitres') }}">
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Année scolaire</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="annee">
+                                @foreach($anneesDisponibles as $a)
+                                    <option value="{{ $a }}" {{ $a === $annee ? 'selected' : '' }}>{{ $a }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Section</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="classe">
+                                <option value="">Toutes les sections</option>
+                                <option value="SIO1">SIO1</option>
+                                <option value="SIO2">SIO2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot" style="justify-content:space-between;">
+                <button type="submit" class="button is-success">
+                    <i class="fas fa-download mr-1"></i> Télécharger CSV
+                </button>
+                <button type="button" class="button js-modal-close">Annuler</button>
+            </footer>
+            </form>
+        </div>
+    </div>
+    <script nonce="{{ $cspNonce ?? '' }}">
+    (function () {
+        var modal  = document.getElementById('modal-export-csv');
+        var opener = document.getElementById('btn-export-csv');
+        opener.addEventListener('click', function () { modal.classList.add('is-active'); });
+        modal.querySelector('.modal-background').addEventListener('click', function () { modal.classList.remove('is-active'); });
+        modal.querySelectorAll('.js-modal-close').forEach(function (el) {
+            el.addEventListener('click', function () { modal.classList.remove('is-active'); });
+        });
+    })();
+    </script>
+
 
 </div>
 @endsection
