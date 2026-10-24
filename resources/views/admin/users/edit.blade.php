@@ -63,10 +63,12 @@
         $statuts = ['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire'], 'diplome' => ['is-link', 'Diplômé'], 'archive' => ['is-dark', 'Archivé'], 'echec' => ['is-warning', 'Échec']];
         [$statutClasse, $statutLibelle] = $statuts[$user->statut] ?? ['is-light', $user->statut];
         $ouvrirEdition = $errors->any() || old('nom') !== null;
+        // Cycle de la convention (stages.statut_convention et conventions_papier.statut)
         $convBadgeMap = [
-            'hors_app'   => ['is-warning is-light', 'Hors app — remise'],
-            'en_attente' => ['is-info is-light',    'En attente proviseur'],
-            'validee'    => ['is-success is-light', 'Validée'],
+            'a_faire_signer' => ['is-warning is-light', 'À faire signer'],
+            'hors_app'       => ['is-warning is-light', 'Hors app — remise'],
+            'en_attente'     => ['is-info is-light',    'En attente de validation'],
+            'validee'        => ['is-success',          'Validée ✓'],
         ];
     @endphp
 
@@ -230,80 +232,65 @@
         </div>
         @endif
 
-        <div class="table-container">
-        <table class="table is-fullwidth is-hoverable is-narrow" style="vertical-align:middle;">
-            <thead>
-                <tr>
-                    <th>Année</th>
-                    <th>Classe</th>
-                    <th>Entreprise</th>
-                    <th>Période</th>
-                    <th>Maître de stage</th>
-                    <th>Validation</th>
-                    <th>Convention</th>
-                    <th class="has-text-right">Accès</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($user->stages as $stage)
-                @php
-                    $valBadge = match($stage->statut_validation) {
-                        'valide' => ['is-success is-light', 'Validé'],
-                        'rejete' => ['is-danger is-light', 'Rejeté'],
-                        default  => ['is-warning is-light', 'En attente'],
-                    };
-                    $convBadge = $convBadgeMap[$stage->statut_convention] ?? null;
-                @endphp
-                <tr>
-                    <td class="is-nowrap">{{ $stage->annee_scolaire }}</td>
-                    <td>
+        @if($user->stages->isEmpty())
+            <p class="has-text-grey is-italic is-size-7">Aucun stage enregistré.</p>
+        @else
+        <div class="columns is-multiline">
+            @foreach($user->stages as $stage)
+            @php
+                $convBadge = $convBadgeMap[$stage->statut_convention] ?? ['is-light', '—'];
+                $bordure = $stage->classe === 'SIO1' ? '#3273dc' : ($stage->classe === 'SIO2' ? '#00d1b2' : '#dbdbdb');
+            @endphp
+            <div class="column is-12-tablet is-6-desktop is-4-widescreen">
+                <div class="box p-3 mb-0" style="height:100%; border-left:4px solid {{ $bordure }};">
+                    <div class="mb-2">
                         @if($stage->classe)
-                            <span class="tag {{ $stage->classe === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $stage->classe }}</span>
+                            <span class="tag {{ $stage->classe === 'SIO1' ? 'is-info' : 'is-primary' }} mr-1">{{ $stage->classe }}</span>
                         @endif
-                    </td>
-                    <td>
+                        <span class="tag is-light">{{ $stage->annee_scolaire }}</span>
+                    </div>
+                    <p class="has-text-weight-semibold mb-1">
                         @if($stage->entreprise)
-                            <a href="{{ route('stages.show', $stage) }}" class="has-text-weight-semibold">{{ $stage->entreprise->raison_sociale }}</a>
+                            <a href="{{ route('stages.show', $stage) }}">{{ $stage->entreprise->raison_sociale }}</a>
                         @else
-                            <span class="has-text-grey">—</span>
+                            <span class="has-text-grey">Entreprise non renseignée</span>
                         @endif
-                    </td>
-                    <td class="is-nowrap is-size-7">
+                    </p>
+                    <p class="is-size-7 has-text-grey mb-1">
+                        <i class="fas fa-calendar-alt mr-1"></i>
                         @if($stage->date_debut)
-                            {{ $stage->date_debut->format('d/m/Y') }} → {{ $stage->date_fin?->format('d/m/Y') ?? '?' }}
+                            Du {{ $stage->date_debut->format('d/m/Y') }} au {{ $stage->date_fin?->format('d/m/Y') ?? '?' }}
                         @else
-                            —
+                            Dates non renseignées
                         @endif
-                    </td>
-                    <td>{{ $stage->maitreDeStage ? $stage->maitreDeStage->prenom.' '.$stage->maitreDeStage->nom : '—' }}</td>
-                    <td><span class="tag {{ $valBadge[0] }}">{{ $valBadge[1] }}</span></td>
-                    <td>
-                        @if($convBadge)
-                            <span class="tag {{ $convBadge[0] }}">{{ $convBadge[1] }}</span>
-                        @else
-                            <span class="has-text-grey">—</span>
+                    </p>
+                    <p class="is-size-7 has-text-grey mb-2">
+                        <i class="fas fa-user-tie mr-1"></i>
+                        {{ $stage->maitreDeStage ? $stage->maitreDeStage->prenom.' '.$stage->maitreDeStage->nom : 'Maître de stage non renseigné' }}
+                    </p>
+                    <p class="mb-3">
+                        <span class="is-size-7 has-text-grey mr-1">Convention :</span>
+                        <span class="tag {{ $convBadge[0] }}">{{ $convBadge[1] }}</span>
+                        @if($stage->statut_validation === 'rejete')
+                            <span class="tag is-danger is-light ml-1" title="{{ $stage->note_rejet }}">Stage rejeté</span>
                         @endif
-                    </td>
-                    <td class="has-text-right is-nowrap">
-                        <a href="{{ route('stages.show', $stage) }}" class="button is-small is-info is-light" title="Voir le stage">
-                            <i class="fas fa-briefcase"></i>
+                    </p>
+                    <div class="buttons are-small mb-0">
+                        <a href="{{ route('stages.show', $stage) }}" class="button is-small is-info is-light">
+                            <i class="fas fa-briefcase mr-1"></i> Stage
                         </a>
-                        <a href="{{ route('stages.journal.index', $stage) }}" class="button is-small is-light" title="Journal ({{ $stage->journal_entries_count }} saisie(s))">
-                            <i class="fas fa-book mr-1"></i> {{ $stage->journal_entries_count }}
+                        <a href="{{ route('stages.journal.index', $stage) }}" class="button is-small is-light">
+                            <i class="fas fa-book mr-1"></i> Journal ({{ $stage->journal_entries_count }})
                         </a>
-                        <a href="{{ route('pdf.convention', $stage) }}" class="button is-small is-light" target="_blank" rel="noopener" title="Convention PDF">
-                            <i class="fas fa-file-pdf"></i>
+                        <a href="{{ route('pdf.convention', $stage) }}" class="button is-small is-light" target="_blank" rel="noopener">
+                            <i class="fas fa-file-pdf mr-1"></i> Convention
                         </a>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="8" class="has-text-centered has-text-grey is-italic">Aucun stage enregistré.</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
+        @endif
     </div>
 
 </div>
