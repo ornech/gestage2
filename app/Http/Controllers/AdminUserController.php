@@ -90,6 +90,15 @@ class AdminUserController extends Controller
                 $query->where('promo', $promoFiltre);
             }
 
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('nom', 'like', "%$search%")
+                        ->orWhere('prenom', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%");
+                });
+            }
+
             $users = $query->orderByDesc('promo')
                 ->orderBy('nom')
                 ->paginate(30)

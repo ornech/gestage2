@@ -80,4 +80,16 @@ class NavigationEtudiantsTest extends TestCase
             ->assertSee('data-toggle-edition', false)
             ->assertDontSee('id="form-etudiant"', false);
     }
+
+    public function test_recherche_dans_les_anciennes_promos(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        User::factory()->etudiant()->create(['nom' => 'ZZTROUVE', 'prenom' => 'Erwan', 'promo' => 2020, 'statut' => 'demissionnaire']);
+        User::factory()->etudiant()->create(['nom' => 'YYAUTRE', 'prenom' => 'Paul', 'promo' => 2020, 'statut' => 'demissionnaire']);
+
+        $this->actingAs($admin)->get(route('admin.users.index', ['filtre' => 'anciens', 'search' => 'erwan']))
+            ->assertOk()
+            ->assertSee('ZZTROUVE')
+            ->assertDontSee('YYAUTRE');
+    }
 }
