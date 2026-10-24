@@ -89,9 +89,16 @@
         @foreach($entreprise->employes as $employe)
         <tr>
             <td>{{ $employe->prenom }} {{ $employe->nom }}</td>
-            <td>{{ $employe->email ?? '—' }}</td>
+            @php($voitCoordonnees = auth()->user()->hasAnyRole(['Professeur', 'Administrateur']) || in_array($employe->id, $monMaitreDeStageIds))
             <td>
-                @if(auth()->user()->hasAnyRole(['Professeur', 'Administrateur']) || in_array($employe->id, $monMaitreDeStageIds))
+                @if($voitCoordonnees)
+                    {{ $employe->email ?? '—' }}
+                @else
+                    <span class="has-text-grey-light" title="Visible uniquement par ton propre maître de stage">masqué</span>
+                @endif
+            </td>
+            <td>
+                @if($voitCoordonnees)
                     {{ $employe->telephone ?? '—' }}
                 @else
                     <span class="has-text-grey-light" title="Visible uniquement par ton propre maître de stage">masqué</span>

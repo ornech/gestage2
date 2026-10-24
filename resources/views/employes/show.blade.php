@@ -32,7 +32,13 @@
                 </tr>
                 <tr>
                     <th>Email</th>
-                    <td>{{ $employe->email ?? '—' }}</td>
+                    <td>
+                        @if(auth()->user()->hasAnyRole(['Professeur', 'Administrateur']) || $estMonMaitreDeStage)
+                            {{ $employe->email ?? '—' }}
+                        @else
+                            <span class="has-text-grey-light" title="Visible uniquement par ton propre maître de stage">masqué</span>
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <th>Téléphone</th>
