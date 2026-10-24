@@ -20,6 +20,24 @@
             </div>
         </div>
         <div class="level-right">
+            <div class="buttons has-addons mr-3">
+                @if($precedent)
+                    <a href="{{ route('admin.users.edit', $precedent) }}" class="button is-light is-small"
+                       title="{{ $precedent->prenom }} {{ $precedent->nom }}">
+                        <i class="fas fa-chevron-left mr-1"></i> Précédent
+                    </a>
+                @else
+                    <span class="button is-light is-small" disabled><i class="fas fa-chevron-left mr-1"></i> Précédent</span>
+                @endif
+                @if($suivant)
+                    <a href="{{ route('admin.users.edit', $suivant) }}" class="button is-light is-small"
+                       title="{{ $suivant->prenom }} {{ $suivant->nom }}">
+                        Suivant <i class="fas fa-chevron-right ml-1"></i>
+                    </a>
+                @else
+                    <span class="button is-light is-small" disabled>Suivant <i class="fas fa-chevron-right ml-1"></i></span>
+                @endif
+            </div>
             <a href="{{ route('admin.users.index', ['classe' => $user->classe_courante ?? $user->classe]) }}"
                class="button is-light is-small">
                 ← Retour à la liste

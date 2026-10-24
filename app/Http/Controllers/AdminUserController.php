@@ -290,7 +290,37 @@ class AdminUserController extends Controller
             'conventionPapier',
         ]);
 
-        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear', 'annee'));
+        [$precedent, $suivant] = $this->voisins($user);
+
+        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear', 'annee', 'precedent', 'suivant'));
+    }
+
+    /**
+     * Étudiants précédent et suivant dans la liste de la même promo (ordre alphabétique, comme la liste).
+     *
+     * @return array{0: ?User, 1: ?User}
+     */
+    private function voisins(User $user): array
+    {
+        if ($user->promo === null) {
+            return [null, null];
+        }
+
+        $base = fn () => User::role('Etudiant')
+            ->whereIn('statut', ['actif', 'diplome', 'echec', 'archive'])
+            ->where('promo', $user->promo)
+            ->where('id', '!=', $user->id);
+
+        // Ordre (nom, prénom, id) : on compare la clé complète pour que les homonymes restent stables
+        $apres = fn ($q, $op) => $q->where(fn ($w) => $w
+            ->where('nom', $op, $user->nom)
+            ->orWhere(fn ($x) => $x->where('nom', $user->nom)->where('prenom', $op, $user->prenom))
+            ->orWhere(fn ($x) => $x->where('nom', $user->nom)->where('prenom', $user->prenom)->where('id', $op, $user->id)));
+
+        $precedent = $apres($base(), '<')->orderByDesc('nom')->orderByDesc('prenom')->orderByDesc('id')->first();
+        $suivant = $apres($base(), '>')->orderBy('nom')->orderBy('prenom')->orderBy('id')->first();
+
+        return [$precedent, $suivant];
     }
 
     public function update(Request $request, User $user)
