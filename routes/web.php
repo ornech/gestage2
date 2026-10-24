@@ -186,6 +186,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::post('/admin/users',                       [AdminUserController::class, 'store'])       ->name('admin.users.store');
     Route::get('/admin/users/{user}/edit',            [AdminUserController::class, 'edit'])        ->name('admin.users.edit');
     Route::put('/admin/users/{user}',                 [AdminUserController::class, 'update'])      ->name('admin.users.update');
+    Route::patch('/admin/users/{user}/spe',           [AdminUserController::class, 'updateSpe'])   ->name('admin.users.spe');
     Route::patch('/admin/users/{user}/statut',        [AdminUserController::class, 'updateStatut'])->name('admin.users.statut');
     Route::post('/admin/users/action-groupee',        [AdminUserController::class, 'actionGroupee'])->name('admin.users.action-groupee');
     Route::patch('/admin/users/{user}/redoubler',     [AdminUserController::class, 'redoubler'])   ->name('admin.users.redoubler');

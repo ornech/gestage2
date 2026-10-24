@@ -56,79 +56,132 @@
         </div>
     @endif
 
-    @php $readOnly = !auth()->user()->hasRole('Administrateur'); @endphp
-            <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant">
-                @csrf @method('PUT')
+    @php
+        $readOnly = !auth()->user()->hasRole('Administrateur');
+        $current = $user->classe_courante ?? $user->classe;
+        $stageAnnee = $user->stages->firstWhere('annee_scolaire', $annee);
+        $statutLabels = ['actif' => ['is-success', 'Actif'], 'demissionnaire' => ['is-danger', 'Démissionnaire'], 'diplome' => ['is-link', 'Diplômé'], 'archive' => ['is-dark', 'Archivé'], 'echec' => ['is-warning', 'Échec']];
+        [$statutClasse, $statutLibelle] = $statutLabels[$user->statut] ?? ['is-light', $user->statut];
+        $ouvrirEdition = $errors->any() || old('nom') !== null;
+    @endphp
 
-                <div class="box mb-4">
-                    <p class="menu-label">Identité et scolarité</p>
-                    <div class="columns is-multiline is-variable is-2">
-                        <div class="column is-4">
-                            <label class="label is-small" for="f-nom">Nom</label>
-                            <input class="input is-small" type="text" name="nom" id="f-nom"
-                                   value="{{ old('nom', $user->nom) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                        </div>
-                        <div class="column is-4">
-                            <label class="label is-small" for="f-prenom">Prénom</label>
-                            <input class="input is-small" type="text" name="prenom" id="f-prenom"
-                                   value="{{ old('prenom', $user->prenom) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                        </div>
-                        <div class="column is-4">
-                            <label class="label is-small" for="f-email">Email</label>
-                            <input class="input is-small" type="email" name="email" id="f-email"
-                                   value="{{ old('email', $user->email) }}" required {{ $readOnly ? 'disabled' : '' }}>
-                        </div>
-                        @php $current = $user->classe_courante ?? $user->classe; @endphp
-                        <div class="column is-3">
-                            <label class="label is-small" for="classe-select">Classe</label>
-                            <div class="select is-fullwidth is-small">
-                                <select name="classe" id="classe-select" data-onchange="updatePromo" {{ $readOnly ? 'disabled' : '' }}>
-                                    <option value="">—</option>
-                                    @foreach(['SIO1', 'SIO2'] as $c)
-                                        <option value="{{ $c }}" {{ old('classe', $current) === $c ? 'selected' : '' }}>{{ $c }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="column is-3">
-                            <label class="label is-small" for="promo-input">Promo</label>
-                            <input class="input is-small" type="number" name="promo" id="promo-input"
-                                   value="{{ old('promo', $user->promo) }}" min="2020" max="2040" {{ $readOnly ? 'disabled' : '' }}>
-                        </div>
-                        <div class="column is-3">
-                            <label class="label is-small" for="f-spe">Spécialité</label>
-                            <div class="select is-fullwidth is-small">
-                                <select name="spe" id="f-spe" {{ $readOnly ? 'disabled' : '' }}>
-                                    <option value="">— Non définie —</option>
-                                    <option value="SLAM" {{ old('spe', $user->spe) === 'SLAM' ? 'selected' : '' }}>SLAM</option>
-                                    <option value="SISR" {{ old('spe', $user->spe) === 'SISR' ? 'selected' : '' }}>SISR</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="column is-3">
-                            <label class="label is-small" for="f-tuteur">Tuteur référent</label>
-                            <div class="select is-fullwidth is-small">
-                                <select name="tuteur_id" id="f-tuteur" {{ $readOnly ? 'disabled' : '' }}>
-                                    <option value="">— Aucun —</option>
-                                    @foreach($tuteurs as $tuteur)
-                                        <option value="{{ $tuteur->id }}"
-                                            {{ old('tuteur_id', $user->tuteur_id) == $tuteur->id ? 'selected' : '' }}>
-                                            {{ $tuteur->prenom }} {{ $tuteur->nom }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+    {{-- Accès rapide : stage et journal de l'année active --}}
+    <div class="buttons mb-3">
+        @if($stageAnnee)
+            <a href="{{ route('stages.show', $stageAnnee) }}" class="button is-info is-small">
+                <i class="fas fa-briefcase mr-1"></i> Stage {{ $annee }}
+            </a>
+            <a href="{{ route('stages.journal.index', $stageAnnee) }}" class="button is-info is-light is-small">
+                <i class="fas fa-book mr-1"></i> Journal ({{ $stageAnnee->journal_entries_count }} saisie(s))
+            </a>
+        @else
+            <span class="button is-small" disabled><i class="fas fa-briefcase mr-1"></i> Aucun stage {{ $annee }}</span>
+        @endif
+    </div>
+
+    {{-- Synthèse de l'étudiant --}}
+    <div class="box mb-4">
+        <div class="level is-mobile mb-3">
+            <div class="level-left"><p class="menu-label mb-0">Identité et scolarité</p></div>
+            @unless($readOnly)
+            <div class="level-right">
+                <button type="button" class="button is-light is-small" data-toggle-edition>
+                    <i class="fas fa-pen mr-1"></i> Modifier
+                </button>
+            </div>
+            @endunless
+        </div>
+
+        <div class="columns is-multiline is-mobile mb-0">
+            <div class="column is-6-mobile is-2-desktop">
+                <p class="heading">Classe</p>
+                <p class="has-text-weight-semibold">{{ $current ?? '—' }}</p>
+            </div>
+            <div class="column is-6-mobile is-2-desktop">
+                <p class="heading">Promo</p>
+                <p class="has-text-weight-semibold">{{ $user->promo ?? '—' }}</p>
+            </div>
+            <div class="column is-6-mobile is-3-desktop">
+                <p class="heading">Spécialité</p>
+                <form action="{{ route('admin.users.spe', $user) }}" method="POST">
+                    @csrf @method('PATCH')
+                    <div class="select is-small">
+                        <select name="spe" data-autosubmit aria-label="Spécialité">
+                            <option value="">— Non définie —</option>
+                            <option value="SLAM" {{ $user->spe === 'SLAM' ? 'selected' : '' }}>SLAM</option>
+                            <option value="SISR" {{ $user->spe === 'SISR' ? 'selected' : '' }}>SISR</option>
+                        </select>
                     </div>
-                    @unless($readOnly)
-                    <div class="buttons is-right mb-0">
-                        <button type="submit" class="button is-primary is-small">
-                            <i class="fas fa-save mr-1"></i> Enregistrer
-                        </button>
-                    </div>
-                    @endunless
+                </form>
+            </div>
+            <div class="column is-6-mobile is-3-desktop">
+                <p class="heading">Tuteur référent</p>
+                <p class="has-text-weight-semibold">
+                    {{ $user->tuteur ? $user->tuteur->prenom.' '.$user->tuteur->nom : '—' }}
+                </p>
+            </div>
+            <div class="column is-6-mobile is-2-desktop">
+                <p class="heading">Statut</p>
+                <span class="tag {{ $statutClasse }}">{{ $statutLibelle }}</span>
+            </div>
+        </div>
+
+        @unless($readOnly)
+        <form action="{{ route('admin.users.update', $user) }}" method="POST" id="form-etudiant"
+              {!! $ouvrirEdition ? '' : 'hidden' !!}>
+            @csrf @method('PUT')
+            <hr style="margin:12px 0;">
+            <div class="columns is-multiline is-variable is-2">
+                <div class="column is-4">
+                    <label class="label is-small" for="f-nom">Nom</label>
+                    <input class="input is-small" type="text" name="nom" id="f-nom" value="{{ old('nom', $user->nom) }}" required>
                 </div>
-            </form>
+                <div class="column is-4">
+                    <label class="label is-small" for="f-prenom">Prénom</label>
+                    <input class="input is-small" type="text" name="prenom" id="f-prenom" value="{{ old('prenom', $user->prenom) }}" required>
+                </div>
+                <div class="column is-4">
+                    <label class="label is-small" for="f-email">Email</label>
+                    <input class="input is-small" type="email" name="email" id="f-email" value="{{ old('email', $user->email) }}" required>
+                </div>
+                <div class="column is-4">
+                    <label class="label is-small" for="classe-select">Classe</label>
+                    <div class="select is-fullwidth is-small">
+                        <select name="classe" id="classe-select" data-onchange="updatePromo">
+                            <option value="">—</option>
+                            @foreach(['SIO1', 'SIO2'] as $c)
+                                <option value="{{ $c }}" {{ old('classe', $current) === $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <label class="label is-small" for="promo-input">Promo</label>
+                    <input class="input is-small" type="number" name="promo" id="promo-input" value="{{ old('promo', $user->promo) }}" min="2020" max="2040">
+                </div>
+                <div class="column is-4">
+                    <label class="label is-small" for="f-tuteur">Tuteur référent</label>
+                    <div class="select is-fullwidth is-small">
+                        <select name="tuteur_id" id="f-tuteur">
+                            <option value="">— Aucun —</option>
+                            @foreach($tuteurs as $tuteur)
+                                <option value="{{ $tuteur->id }}" {{ old('tuteur_id', $user->tuteur_id) == $tuteur->id ? 'selected' : '' }}>
+                                    {{ $tuteur->prenom }} {{ $tuteur->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons is-right mb-0">
+                <button type="button" class="button is-light is-small" data-toggle-edition>Annuler</button>
+                <button type="submit" class="button is-primary is-small">
+                    <i class="fas fa-save mr-1"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+        @endunless
+    </div>
 
     <div class="columns">
 
@@ -267,6 +320,17 @@
                         <span class="tag {{ $valBadge[0] }}">{{ $valBadge[1] }}</span>
                         <span class="tag {{ $convBadge[0] }}">{{ $convBadge[1] }}</span>
                     </div>
+                    <div class="buttons are-small mt-2 mb-0">
+                        <a href="{{ route('stages.show', $stage) }}" class="button is-small is-info is-light">
+                            <i class="fas fa-briefcase mr-1"></i> Voir le stage
+                        </a>
+                        <a href="{{ route('stages.journal.index', $stage) }}" class="button is-small is-light">
+                            <i class="fas fa-book mr-1"></i> Journal ({{ $stage->journal_entries_count }})
+                        </a>
+                        <a href="{{ route('pdf.convention', $stage) }}" class="button is-small is-light" target="_blank" rel="noopener">
+                            <i class="fas fa-file-pdf mr-1"></i> Convention
+                        </a>
+                    </div>
                 </div>
                 @endforeach
                 @endif
@@ -279,6 +343,13 @@
 </div>
 
 <script nonce="{{ $cspNonce ?? '' }}">
+document.querySelectorAll('[data-toggle-edition]').forEach(function (b) {
+    b.addEventListener('click', function () {
+        var f = document.getElementById('form-etudiant');
+        f.hidden = !f.hidden;
+        if (!f.hidden) { document.getElementById('f-nom').focus(); }
+    });
+});
 const promos = { 'SIO1': {{ $currentYear + 2 }}, 'SIO2': {{ $currentYear + 1 }} };
 function updatePromo() {
     const sel   = document.getElementById('classe-select');

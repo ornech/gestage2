@@ -286,8 +286,9 @@ class AdminUserController extends Controller
         $currentYear = (int) explode('-', $annee)[0];
 
         $user->load([
-            'stages' => fn ($q) => $q->with(['entreprise', 'maitreDeStage'])->orderBy('date_debut', 'desc'),
+            'stages' => fn ($q) => $q->with(['entreprise', 'maitreDeStage'])->withCount('journalEntries')->orderBy('date_debut', 'desc'),
             'conventionPapier',
+            'tuteur',
         ]);
 
         [$precedent, $suivant] = $this->voisins($user);
@@ -343,6 +344,16 @@ class AdminUserController extends Controller
         return redirect()
             ->route('admin.users.edit', $user)
             ->with('success', "{$user->prenom} {$user->nom} mis à jour.");
+    }
+
+    public function updateSpe(Request $request, User $user)
+    {
+        abort_unless($user->hasRole('Etudiant'), 404);
+
+        $request->validate(['spe' => 'nullable|in:SLAM,SISR']);
+        $user->update(['spe' => $request->spe ?: null]);
+
+        return back()->with('success', 'Spécialité mise à jour.');
     }
 
     public function updateStatut(Request $request, User $user)

@@ -30,4 +30,31 @@ class NavigationEtudiantsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.users.edit', $c))
             ->assertViewHas('suivant', null);
     }
+
+    public function test_pagination_utilise_le_gabarit_bulma_sans_svg(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        User::factory()->etudiant()->count(35)->create(['promo' => 2027, 'statut' => 'actif']);
+
+        $this->actingAs($admin)->get(route('admin.users.index', ['classe' => 'SIO2']))
+            ->assertOk()
+            ->assertSee('pagination-link', false)
+            ->assertDontSee('<svg', false);
+    }
+
+    public function test_fiche_etudiant_affiche_les_acces_stage_et_journal_et_la_specialite_se_change_seule(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        $etu = User::factory()->etudiant()->create(['promo' => 2027, 'statut' => 'actif', 'spe' => null]);
+
+        $this->actingAs($admin)->get(route('admin.users.edit', $etu))
+            ->assertOk()
+            ->assertSee('Aucun stage', false)
+            ->assertSee('data-toggle-edition', false);
+
+        $this->actingAs($admin)->patch(route('admin.users.spe', $etu), ['spe' => 'SISR'])->assertRedirect();
+        $this->assertSame('SISR', $etu->fresh()->spe);
+
+        $this->actingAs($admin)->patch(route('admin.users.spe', $etu), ['spe' => 'XXX'])->assertSessionHasErrors('spe');
+    }
 }
