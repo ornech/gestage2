@@ -2,7 +2,7 @@
 
 return [
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Gestage'),
 
     'version' => trim(shell_exec('git describe --tags --always 2>/dev/null') ?: 'dev'),
 

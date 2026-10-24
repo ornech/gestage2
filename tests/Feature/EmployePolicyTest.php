@@ -62,4 +62,20 @@ class EmployePolicyTest extends TestCase
         $this->actingAs($autre)->get(route('employes.show', $employe))->assertSee('secret@entreprise.test');
         $this->actingAs(User::factory()->professeur()->create())->get(route('employes.show', $employe))->assertSee('secret@entreprise.test');
     }
+
+    public function test_fiche_entreprise_adaptee_au_role(): void
+    {
+        $etudiant = User::factory()->etudiant()->create();
+        $autre = User::factory()->etudiant()->create();
+        $employe = Employe::factory()->create();
+        Stage::factory()->create(['etudiant_id' => $autre->id, 'maitre_de_stage_id' => $employe->id, 'entreprise_id' => $employe->entreprise_id]);
+        $url = route('entreprises.show', $employe->entreprise_id);
+
+        $this->actingAs(User::factory()->professeur()->create())->get($url)
+            ->assertOk()->assertSee('Modifier le standard')->assertSee('Ajouter un maître de stage')->assertSee($autre->nom);
+
+        $this->actingAs($etudiant)->get($url)
+            ->assertOk()->assertDontSee('Modifier le standard')->assertDontSee('Ajouter un maître de stage')
+            ->assertDontSee($autre->nom)->assertSee('Un autre étudiant')->assertSee('Réservé');
+    }
 }

@@ -119,8 +119,9 @@ class CompanyController extends Controller
     {
         $entreprise->load([
             'employes',
+            'stages' => fn ($q) => $q->orderByDesc('annee_scolaire')->orderByDesc('date_debut'),
             'stages.etudiant',
-            'stages.maitreDeStage'
+            'stages.maitreDeStage',
         ]);
 
         // Téléphones des contacts : visibles par le staff, et par l'étudiant pour son propre maître de stage
