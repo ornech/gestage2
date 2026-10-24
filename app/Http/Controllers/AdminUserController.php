@@ -136,6 +136,9 @@ class AdminUserController extends Controller
 
         $query->orderBy('promo')->orderBy('nom');
 
+        // Stage de l'année affichée (raccourcis stage / journal de la liste)
+        $query->with(['stages' => fn ($q) => $q->where('annee_scolaire', $anneeSelectionnee)->withCount('journalEntries')]);
+
         $users = $query->paginate(30)->withQueryString();
 
         $syActif = (int) explode('-', $anneeActive)[0];

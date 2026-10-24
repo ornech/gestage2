@@ -118,7 +118,19 @@
                 <td>{{ $user->spe ?? '—' }}</td>
                 <td>{{ $user->promo ?? '—' }}</td>
                 <td><span class="tag {{ $statutColor }}">{{ $statutLabel }}</span></td>
-                <td>
+                <td class="is-nowrap">
+                    @php $stageListe = $user->stages->first(); @endphp
+                    @if($stageListe)
+                        <a href="{{ route('stages.show', $stageListe) }}" class="button is-small is-info is-light" title="Stage {{ $anneeSelectionnee }}">
+                            <i class="fas fa-briefcase"></i>
+                        </a>
+                        <a href="{{ route('stages.journal.index', $stageListe) }}" class="button is-small is-light" title="Journal ({{ $stageListe->journal_entries_count }} saisie(s))">
+                            <i class="fas fa-book"></i>
+                        </a>
+                    @else
+                        <span class="button is-small" disabled title="Pas de stage {{ $anneeSelectionnee }}"><i class="fas fa-briefcase"></i></span>
+                        <span class="button is-small" disabled title="Pas de journal"><i class="fas fa-book"></i></span>
+                    @endif
                     @role('Administrateur')
                         <a href="{{ route('admin.users.edit', $user) }}"
                            class="button is-small is-warning" title="Modifier">

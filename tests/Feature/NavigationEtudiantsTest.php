@@ -57,4 +57,14 @@ class NavigationEtudiantsTest extends TestCase
 
         $this->actingAs($admin)->patch(route('admin.users.spe', $etu), ['spe' => 'XXX'])->assertSessionHasErrors('spe');
     }
+
+    public function test_liste_etudiants_propose_les_raccourcis_stage_et_journal(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        $etu = User::factory()->etudiant()->create(['promo' => 2027, 'statut' => 'actif']);
+
+        $this->actingAs($admin)->get(route('admin.users.index', ['classe' => 'SIO2']))
+            ->assertOk()
+            ->assertSee('Pas de stage', false);
+    }
 }
