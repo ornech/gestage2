@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AdminAuditController;
 use App\Http\Controllers\AdminCommunicationController;
 use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AdminParametreController;
@@ -268,15 +267,15 @@ Route::middleware(['auth', 'role:Administrateur'])->group(function () {
     Route::get('/admin/professeurs',                  [AdminUserController::class, 'professeurs'])   ->name('admin.professeurs.index');
     Route::patch('/admin/users/{user}/toggle-admin',  [AdminUserController::class, 'toggleAdmin'])   ->name('admin.users.toggle-admin');
     Route::get('/admin/reset-password',               [AdminUserController::class, 'resetPasswordForm']) ->name('admin.reset-password');
-    Route::post('/admin/reset-password',              [AdminUserController::class, 'resetPassword'])     ->name('admin.reset-password.do');
+    Route::post('/admin/reset-password',              [AdminUserController::class, 'resetPassword'])     ->name('admin.reset-password.do')->middleware('throttle:10,1');
     Route::delete('/admin/users/{user}',          [AdminUserController::class, 'destroy'])  ->name('admin.users.destroy');
     Route::patch('/admin/users/{user}/anonymize', [AdminUserController::class, 'anonymize'])->name('admin.users.anonymize');
 
     // Import Pronote — UC_PRONOTE
     // Import Pronote accessible via /imports/pronote (Prof|Admin)
 
-    // Journal d'actions — UC_AUDIT (conservé, non affiché en nav)
-    Route::get('/admin/audit', [AdminAuditController::class, 'index'])->name('admin.audit.index');
+    // Journal d'actions — UC_AUDIT : désactivé jusqu'à la mise en place d'un vrai système d'audit
+    // Route::get('/admin/audit', [AdminAuditController::class, 'index'])->name('admin.audit.index');
 
     // Nettoyage comptes — comptes @import.local et doublons
     Route::get('/admin/comptes/nettoyage',              [AdminUserController::class, 'nettoyage'])      ->name('admin.comptes.nettoyage');

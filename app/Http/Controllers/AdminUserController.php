@@ -8,6 +8,7 @@ use App\Models\Parametre;
 use App\Models\User;
 use App\Services\InvitationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -243,6 +244,17 @@ class AdminUserController extends Controller
         $request->validate(['user_id' => 'required|exists:users,id']);
 
         $user = User::findOrFail($request->user_id);
+
+        // Ni soi-même ni un autre administrateur : on ne coupe pas l'accès d'un compte à privilèges par cette voie
+        if ($user->is($request->user()) || $user->hasRole('Administrateur')) {
+            return back()->with('error', 'Le mot de passe d\'un compte administrateur ne peut pas être réinitialisé ici.');
+        }
+
+        Log::info('Réinitialisation de mot de passe', [
+            'par_id'    => $request->user()->id,
+            'cible_id'  => $user->id,
+            'sans_mail' => $request->boolean('sans_mail'),
+        ]);
 
         // L'ancien mot de passe est invalidé ; l'utilisateur en choisit un nouveau via un lien par mail.
         $invitation = $invitations->inviter($user, 0, ! $request->boolean('sans_mail'));

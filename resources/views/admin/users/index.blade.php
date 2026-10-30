@@ -58,6 +58,8 @@
         </div>
     </div>
 
+    @include('admin.partials.lien-invitation')
+
     @if(session('success'))
         <div class="notification is-success is-light">{{ session('success') }}</div>
     @endif
@@ -132,6 +134,14 @@
                         <span class="button is-small" disabled title="Pas de journal"><i class="fas fa-book"></i></span>
                     @endif
                     @role('Administrateur')
+                        <form action="{{ route('admin.reset-password.do') }}" method="POST" style="display:inline;">
+                            @csrf
+                            <input type="hidden" name="user_id" value="{{ $user->id }}">
+                            <button type="submit" class="button is-small is-light" title="Réinitialiser le mot de passe"
+                                    data-confirm="Réinitialiser le mot de passe de {{ $user->prenom }} {{ $user->nom }} ? L'ancien sera invalidé et un lien lui sera envoyé (ou affiché ici si son adresse ne peut pas recevoir de mail).">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </form>
                         <a href="{{ route('admin.users.edit', $user) }}"
                            class="button is-small is-warning" title="Modifier">
                             <i class="fas fa-pen"></i>
