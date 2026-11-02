@@ -8,6 +8,7 @@ use App\Services\EchecsMail;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -30,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Production : migrate:fresh/refresh/reset et db:wipe refusés (même avec --force), pour ne jamais effacer la base par erreur
+        DB::prohibitDestructiveCommands($this->app->isProduction());
+
         // Pagination au gabarit Bulma du projet (sinon Laravel prend la vue Tailwind, dont les SVG s'affichent en énorme sous Bulma)
         Paginator::defaultView('pagination::default');
 
