@@ -28,6 +28,9 @@ class AdminStatistiqueController extends Controller
                 'total' => $l['total'],
                 'statuts' => $l['statuts'],
                 'specialites' => $l['specialites'],
+                'terminee' => $l['terminee'],
+                'base_diplomes' => $l['base_diplomes'],
+                'base_stage' => $l['base_stage'],
                 'avec_stage' => $l['avec_stage'],
                 'convention_validee' => $l['convention_validee'],
                 'liens' => $this->liensStatuts($l['promo']),
@@ -60,7 +63,7 @@ class AdminStatistiqueController extends Controller
                     $l['promo'], $l['total'],
                     $l['statuts']['actif'], $l['statuts']['diplome'], $l['statuts']['echec'], $l['statuts']['archive'], $l['statuts']['demissionnaire'],
                     $l['specialites']['SLAM'], $l['specialites']['SISR'], $l['specialites']['aucune'],
-                    $l['avec_stage'], $l['convention_validee'], $l['taux_diplomes'], $l['taux_demission'],
+                    $l['avec_stage'], $l['convention_validee'], $l['taux_diplomes'] ?? '', $l['taux_demission'],
                 ], ';');
             }
             fclose($out);
@@ -122,24 +125,24 @@ class AdminStatistiqueController extends Controller
         $insights = [];
         $assezGrandes = $chrono->filter(fn ($l) => $l['total'] >= 5)->values();
 
-        $terminees = $assezGrandes->filter(fn ($l) => $l['statuts']['actif'] === 0)->values();
+        $terminees = $assezGrandes->filter(fn ($l) => $l['terminee'])->values();
         if ($terminees->count() >= 1) {
             $meilleure = $terminees->sortByDesc('taux_diplomes')->first();
             $insights[] = ['icone' => 'fa-graduation-cap', 'couleur' => 'has-text-link',
-                'texte' => "Meilleur taux de diplômés : promo {$meilleure['promo']} ({$meilleure['taux_diplomes']} %, {$meilleure['statuts']['diplome']} sur {$meilleure['total']})."];
+                'texte' => "Meilleur taux de diplômés : promo {$meilleure['promo']} ({$meilleure['taux_diplomes']} %, {$meilleure['statuts']['diplome']} sur {$meilleure['base_diplomes']}, hors démissionnaires)."];
         }
 
-        if ($assezGrandes->isNotEmpty()) {
-            $pire = $assezGrandes->sortByDesc('taux_demission')->first();
+        if ($terminees->isNotEmpty()) {
+            $pire = $terminees->sortByDesc('taux_demission')->first();
             if ($pire['taux_demission'] > 0) {
                 $insights[] = ['icone' => 'fa-user-minus', 'couleur' => 'has-text-danger',
                     'texte' => "Plus forte démission : promo {$pire['promo']} ({$pire['taux_demission']} %, {$pire['statuts']['demissionnaire']} sur {$pire['total']})."];
             }
         }
 
-        if ($assezGrandes->count() >= 2) {
-            $derniere = $assezGrandes->last();
-            $precedente = $assezGrandes->get($assezGrandes->count() - 2);
+        if ($terminees->count() >= 2) {
+            $derniere = $terminees->last();
+            $precedente = $terminees->get($terminees->count() - 2);
             $ecart = round($derniere['taux_demission'] - $precedente['taux_demission'], 1);
             if ($ecart != 0) {
                 $sens = $ecart > 0 ? 'hausse' : 'baisse';
@@ -160,7 +163,7 @@ class AdminStatistiqueController extends Controller
         $sansStage = $chrono->sum('actifs_sans_stage');
         if ($sansStage > 0) {
             $insights[] = ['icone' => 'fa-briefcase', 'couleur' => 'has-text-warning-dark',
-                'texte' => "{$sansStage} étudiant(s) actif(s) n'ont encore aucun stage."];
+                'texte' => "{$sansStage} étudiant(s) actif(s) n'ont pas encore de stage cette année."];
         }
 
         return $insights;

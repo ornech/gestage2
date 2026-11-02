@@ -3,9 +3,13 @@
 @section('content')
 @php
     $totalEtudiants = $lignes->sum('total');
-    $totalDiplomes = $lignes->sum(fn ($l) => $l['statuts']['diplome']);
-    $totalDemissions = $lignes->sum(fn ($l) => $l['statuts']['demissionnaire']);
+    $terminees = $lignes->where('terminee', true);
+    $totalDiplomes = $terminees->sum(fn ($l) => $l['statuts']['diplome']);
+    $baseDiplomes = $terminees->sum('base_diplomes');
+    $totalTermine = $terminees->sum('total');
+    $totalDemissions = $terminees->sum(fn ($l) => $l['statuts']['demissionnaire']);
     $totalAvecStage = $lignes->sum('avec_stage');
+    $baseStage = $lignes->sum('base_stage');
     $pct = fn ($a, $b) => $b > 0 ? round($a * 100 / $b) : 0;
     $statutsLibelles = $donnees['statuts'];
 @endphp
@@ -75,22 +79,22 @@
         <div class="column is-6-mobile is-3-desktop">
             <div class="box p-3 has-text-centered mb-0">
                 <p class="heading">Diplômés</p>
-                <p class="title is-4 mb-0 has-text-link">{{ $pct($totalDiplomes, $totalEtudiants) }} %</p>
-                <p class="is-size-7 has-text-grey">{{ $totalDiplomes }} sur {{ $totalEtudiants }}</p>
+                <p class="title is-4 mb-0 has-text-link">{{ $pct($totalDiplomes, $baseDiplomes) }} %</p>
+                <p class="is-size-7 has-text-grey">{{ $totalDiplomes }} sur {{ $baseDiplomes }} (promos terminées, hors démissionnaires)</p>
             </div>
         </div>
         <div class="column is-6-mobile is-3-desktop">
             <div class="box p-3 has-text-centered mb-0">
                 <p class="heading">Démissionnaires</p>
-                <p class="title is-4 mb-0 has-text-danger">{{ $pct($totalDemissions, $totalEtudiants) }} %</p>
-                <p class="is-size-7 has-text-grey">{{ $totalDemissions }} sur {{ $totalEtudiants }}</p>
+                <p class="title is-4 mb-0 has-text-danger">{{ $pct($totalDemissions, $totalTermine) }} %</p>
+                <p class="is-size-7 has-text-grey">{{ $totalDemissions }} sur {{ $totalTermine }} (promos terminées)</p>
             </div>
         </div>
         <div class="column is-6-mobile is-3-desktop">
             <div class="box p-3 has-text-centered mb-0">
                 <p class="heading">Ont un stage</p>
-                <p class="title is-4 mb-0 has-text-success">{{ $pct($totalAvecStage, $totalEtudiants) }} %</p>
-                <p class="is-size-7 has-text-grey">{{ $totalAvecStage }} sur {{ $totalEtudiants }}</p>
+                <p class="title is-4 mb-0 has-text-success">{{ $pct($totalAvecStage, $baseStage) }} %</p>
+                <p class="is-size-7 has-text-grey">{{ $totalAvecStage }} sur {{ $baseStage }} (cursus, ou année en cours pour SIO1/SIO2)</p>
             </div>
         </div>
     </div>
@@ -169,14 +173,14 @@
                     @foreach($statutsLibelles as $cle => $libelle)<td class="has-text-right">{{ $l['statuts'][$cle] }}</td>@endforeach
                     <td class="has-text-right">{{ $l['specialites']['SLAM'] }}</td>
                     <td class="has-text-right">{{ $l['specialites']['SISR'] }}</td>
-                    <td class="has-text-right">{{ $l['taux_diplomes'] }} %</td>
+                    <td class="has-text-right">{{ $l['taux_diplomes'] === null ? '—' : $l['taux_diplomes'].' %' }}</td>
                     <td class="has-text-right">{{ $l['taux_demission'] }} %</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
         </div>
-        <p class="help">Les promos encore en cours comptent surtout des étudiants actifs : les taux de diplômés et de démission ne sont significatifs que pour les promos terminées.</p>
+        <p class="help">Les promos en cours (SIO1, SIO2) n'ont pas encore de résultats : pas de taux de diplômés, et leur taux de démission est provisoire. Pour les stages, une promo en cours compte les actifs ayant un stage cette année ; une promo terminée compte les étudiants ayant eu un stage au cours du cursus, démissionnaires et archivés exclus.</p>
     </div>
 
     <script type="application/json" id="stats-data">@json($donnees)</script>
@@ -249,16 +253,16 @@
     }
 
     function tendance() {
-        var serie = function (label, couleur, f) {
+        var serie = function (label, couleur, f, base, termineesSeules) {
             return { label: label, borderColor: couleur, backgroundColor: couleur, tension: .25, pointRadius: 4, pointHoverRadius: 6,
-                     data: promos.map(function (p) { return pct(f(p), p.total); }) };
+                     data: promos.map(function (p) { return termineesSeules && !p.terminee ? null : pct(f(p), base ? base(p) : p.total); }) };
         };
         recreer('graphe-tendance', { type: 'line',
             data: { labels: promos.map(function (p) { return p.promo; }), datasets: [
-                serie('Diplômés', C.diplome, function (p) { return p.statuts.diplome; }),
-                serie('Démissionnaires', C.demissionnaire, function (p) { return p.statuts.demissionnaire; }),
-                serie('Ont un stage', C.stage, function (p) { return p.avec_stage; }),
-                serie('Convention validée', C.convention, function (p) { return p.convention_validee; })
+                serie('Diplômés', C.diplome, function (p) { return p.statuts.diplome; }, function (p) { return p.base_diplomes; }, true),
+                serie('Démissionnaires', C.demissionnaire, function (p) { return p.statuts.demissionnaire; }, null, true),
+                serie('Ont un stage', C.stage, function (p) { return p.avec_stage; }, function (p) { return p.base_stage; }),
+                serie('Convention validée', C.convention, function (p) { return p.convention_validee; }, function (p) { return p.base_stage; })
             ] },
             options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                 scales: { y: { min: 0, max: 100, ticks: { callback: function (v) { return v + ' %'; } } } },
@@ -267,7 +271,7 @@
 
     function stages() {
         var jeu = function (label, couleur, cle) {
-            return { label: label, backgroundColor: couleur, data: promos.map(function (p) { return valeur(p[cle], p.total); }), cle: cle };
+            return { label: label, backgroundColor: couleur, data: promos.map(function (p) { return valeur(p[cle], p.base_stage); }), cle: cle };
         };
         recreer('graphe-stages', { type: 'bar',
             data: { labels: promos.map(function (p) { return p.promo; }), datasets: [
@@ -277,7 +281,7 @@
                 scales: { y: { beginAtZero: true, max: mode === 'pourcentages' ? 100 : undefined, ticks: { callback: function (v) { return v + suffixe(); } } }, x: { grid: { display: false } } },
                 plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function (c) {
                     var p = promos[c.dataIndex], n = p[c.dataset.cle];
-                    return c.dataset.label + ' : ' + n + '/' + p.total + ' (' + pct(n, p.total) + ' %)';
+                    return c.dataset.label + ' : ' + n + '/' + p.base_stage + ' (' + pct(n, p.base_stage) + ' %)';
                 } } } } } });
     }
 
