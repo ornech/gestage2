@@ -41,7 +41,7 @@
             <div class="field">
                 <label class="label">Numéro de SIRET</label>
                 <div class="control">
-                    <input class="input" type="text" name="siret" maxlength="14" placeholder="Ex : 41816609600051" required>
+                    <input class="input" type="text" name="siret" maxlength="20" inputmode="numeric" placeholder="Ex : 41816609600051" required>
                 </div>
             </div>
 

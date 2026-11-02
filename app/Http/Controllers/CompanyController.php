@@ -144,7 +144,12 @@ class CompanyController extends Controller
         $request->validate(['siret' => 'required|digits:14']);
 
         $siret = $request->siret;
-        $data  = (new SireneClient())->getBySiret($siret);
+        $client = new SireneClient();
+        $data   = $client->getBySiret($siret);
+
+        if (!$data && $client->status !== 404) {
+            return back()->withInput()->withErrors(['siret' => "Le service INSEE n'a pas répondu correctement (code " . ($client->status ?? 'aucune réponse') . '). Réessayez plus tard ou contactez un administrateur.']);
+        }
 
         if (!$data || !isset($data['etablissement'])) {
             return view('entreprises.import-not-found', ['siret' => $siret]);
