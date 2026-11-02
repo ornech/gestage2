@@ -47,6 +47,29 @@
 
     @include('admin.partials.lien-invitation')
 
+    @if($echecsMail->isNotEmpty())
+        @php $dernier = $echecsMail->first(); @endphp
+        <div class="notification is-danger is-light mb-4">
+            <p>
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                <strong>Les mails envoyés à {{ $user->email }} ne sont pas remis.</strong>
+                {{ $dernier->diagnostic() }}
+            </p>
+            <ul class="is-size-7 mt-2">
+                @foreach($echecsMail->take(5) as $echec)
+                    <li>
+                        {{ $echec->created_at->format('d/m/Y H:i') }} · {{ $echec->mail }}
+                        <br><code>{{ $echec->erreur }}</code>
+                    </li>
+                @endforeach
+            </ul>
+            <p class="help">
+                Corrigez l'adresse, ou utilisez « Réinitialiser le mot de passe » avec « Ne pas envoyer d'email » pour obtenir un lien à lui transmettre.
+                L'alerte disparaît dès qu'un mail part avec succès vers cette adresse.
+            </p>
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="notification is-success is-light py-2 mb-4">{{ session('success') }}</div>
     @endif

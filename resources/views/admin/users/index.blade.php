@@ -105,7 +105,16 @@
             <tr>
                 <td><a href="{{ route('admin.users.edit', $user) }}" class="has-text-weight-semibold">{{ $user->nom }}</a></td>
                 <td><a href="{{ route('admin.users.edit', $user) }}">{{ $user->prenom }}</a></td>
-                <td>{{ $user->email }}</td>
+                <td>
+                    {{ $user->email }}
+                    @php $echecs = $echecsMail->get(strtolower((string) $user->email)); @endphp
+                    @if($echecs)
+                        <a href="{{ route('admin.users.edit', $user) }}" class="has-text-danger ml-1"
+                           title="Mail non remis ({{ $echecs->first()->mail }}) : {{ $echecs->first()->diagnostic() }}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </a>
+                    @endif
+                </td>
                 <td>
                     @if($classeAnnee)
                         <span class="tag {{ $classeAnnee === 'SIO1' ? 'is-info' : 'is-primary' }}">{{ $classeAnnee }}</span>

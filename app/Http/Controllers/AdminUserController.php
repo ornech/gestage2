@@ -111,7 +111,9 @@ class AdminUserController extends Controller
 
             $sy = $syActif;
 
-            return view('admin.users.anciens', compact('users', 'sy', 'promos', 'promoFiltre'));
+            $echecsMail = \App\Models\EchecMail::nonResolu()->latest()->get()->groupBy('email');
+
+            return view('admin.users.anciens', compact('users', 'sy', 'promos', 'promoFiltre', 'echecsMail'));
         }
 
         // ── Requête standard : actifs de l'année en cours ────────────────
@@ -157,9 +159,12 @@ class AdminUserController extends Controller
 
         $syActif = (int) explode('-', $anneeActive)[0];
 
+        // Adresses dont le dernier mail n'a pas pu être remis, indexées par adresse
+        $echecsMail = \App\Models\EchecMail::nonResolu()->latest()->get()->groupBy('email');
+
         return view('admin.users.index', compact(
             'users', 'annees', 'anneeSelectionnee', 'anneeActive',
-            'filtre', 'classeParam', 'syInt', 'syActif', 'stats'
+            'filtre', 'classeParam', 'syInt', 'syActif', 'stats', 'echecsMail'
         ));
     }
 
@@ -321,7 +326,9 @@ class AdminUserController extends Controller
 
         [$precedent, $suivant] = $this->voisins($user);
 
-        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear', 'annee', 'precedent', 'suivant'));
+        $echecsMail = \App\Models\EchecMail::nonResolu()->where('email', strtolower((string) $user->email))->latest()->get();
+
+        return view('admin.users.edit', compact('user', 'tuteurs', 'currentYear', 'annee', 'precedent', 'suivant', 'echecsMail'));
     }
 
     /**

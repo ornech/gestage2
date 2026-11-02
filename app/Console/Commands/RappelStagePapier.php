@@ -51,7 +51,13 @@ class RappelStagePapier extends Command
             if (!$etudiant->email) {
                 continue;
             }
-            Mail::to($etudiant->email)->send(new RappelSaisieStage($etudiant));
+            try {
+                Mail::to($etudiant->email)->send(new RappelSaisieStage($etudiant));
+            } catch (\Throwable $e) {
+                app(\App\Services\EchecsMail::class)->enregistrer([$etudiant->email], 'RappelSaisieStage', $e);
+                $this->error("  ✗ {$etudiant->prenom} {$etudiant->nom} <{$etudiant->email}> : {$e->getMessage()}");
+                continue;
+            }
             $envoyes++;
             $this->line("  → [sans stage] {$etudiant->prenom} {$etudiant->nom} <{$etudiant->email}>");
         }
@@ -60,7 +66,13 @@ class RappelStagePapier extends Command
             if (!$etudiant->email) {
                 continue;
             }
-            Mail::to($etudiant->email)->send(new RappelConventionHorsApp($etudiant));
+            try {
+                Mail::to($etudiant->email)->send(new RappelConventionHorsApp($etudiant));
+            } catch (\Throwable $e) {
+                app(\App\Services\EchecsMail::class)->enregistrer([$etudiant->email], 'RappelConventionHorsApp', $e);
+                $this->error("  ✗ {$etudiant->prenom} {$etudiant->nom} <{$etudiant->email}> : {$e->getMessage()}");
+                continue;
+            }
             $envoyes++;
             $this->line("  → [convention hors app] {$etudiant->prenom} {$etudiant->nom} <{$etudiant->email}>");
         }

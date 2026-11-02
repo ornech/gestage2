@@ -69,7 +69,16 @@
             <tr>
                 <td>{{ $user->nom }}</td>
                 <td>{{ $user->prenom }}</td>
-                <td class="is-size-7">{{ $user->email }}</td>
+                <td class="is-size-7">
+                    {{ $user->email }}
+                    @php $echecs = $echecsMail->get(strtolower((string) $user->email)); @endphp
+                    @if($echecs)
+                        <a href="{{ route('admin.users.edit', $user) }}" class="has-text-danger ml-1"
+                           title="Mail non remis ({{ $echecs->first()->mail }}) : {{ $echecs->first()->diagnostic() }}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </a>
+                    @endif
+                </td>
                 <td>{{ $user->promo ?? '—' }}</td>
                 <td>
                     @if($user->statut === 'demissionnaire')
