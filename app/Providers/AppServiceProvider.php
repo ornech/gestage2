@@ -9,8 +9,11 @@ use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Backup\Events\BackupWasSuccessful;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +44,25 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(MessageSent::class, function (MessageSent $e) {
             foreach ($e->message->getTo() as $destinataire) {
                 app(EchecsMail::class)->resoudre($destinataire->getAddress());
+            }
+        });
+
+        // Sauvegarde réussie : l'archive (dump SQL gzip) est jointe au mail envoyé à BACKUP_MAIL_TO.
+        // Un échec d'envoi (taille refusée par la messagerie, etc.) ne doit jamais faire échouer la sauvegarde.
+        Event::listen(BackupWasSuccessful::class, function (BackupWasSuccessful $e) {
+            try {
+                $backup = $e->backupDestination->newestBackup();
+                $nom = basename($backup->path());
+                $contenu = $backup->disk()->get($backup->path());
+
+                Mail::raw(
+                    sprintf('Sauvegarde de %s du %s (%.1f Mo) en pièce jointe.', config('app.name'), $backup->date()->format('d/m/Y H:i'), strlen($contenu) / 1048576),
+                    fn ($m) => $m->to(config('backup.notifications.mail.to'))
+                        ->subject('Sauvegarde ' . config('app.name') . ' du ' . $backup->date()->format('d/m/Y'))
+                        ->attachData($contenu, $nom, ['mime' => 'application/zip'])
+                );
+            } catch (\Throwable $ex) {
+                Log::error('Envoi de la sauvegarde par mail impossible : ' . $ex->getMessage());
             }
         });
     }
