@@ -99,6 +99,11 @@ MAIL_FROM_NAME="Gestage BTS SIO"
 # Utiliser la boîte de l'application, avec une redirection cPanel vers votre adresse personnelle.
 BACKUP_MAIL_TO="gestage@votre-domaine.fr"
 
+# Backup — mot de passe de l'archive (chiffrement AES). L'archive, jointe au mail de chaque sauvegarde,
+# contient toute la base (données des élèves, hachages de mots de passe) : ne pas la laisser en clair.
+# À conserver hors de la messagerie ; ouverture avec 7-Zip ou `unzip`.
+BACKUP_ARCHIVE_PASSWORD="mot-de-passe-long-et-aleatoire"
+
 # API INSEE Sirene (obtenir une clé sur api.insee.fr)
 INSEE_API_KEY=votre_cle_api
 

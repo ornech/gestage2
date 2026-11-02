@@ -54,7 +54,7 @@ return [
     'notifications' => [
         'notifications' => [
             // Seulement succès et échec — pas de bruit sur le monitoring
-            BackupWasSuccessfulNotification::class   => ['mail'],
+            BackupWasSuccessfulNotification::class   => [],   // remplacé par le mail avec l'archive jointe (AppServiceProvider)
             BackupHasFailedNotification::class       => ['mail'],
             CleanupHasFailedNotification::class      => ['mail'],
             UnhealthyBackupWasFoundNotification::class => ['mail'],
