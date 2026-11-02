@@ -138,42 +138,46 @@ class CompanyController extends Controller
     }
 
     public function import(Request $request)
-{
-    $request->validate([
-        'siret' => 'required|digits:14'
-    ]);
+    {
+        // Les SIRET se copient souvent avec des espaces (123 456 789 00012)
+        $request->merge(['siret' => preg_replace('/\D/', '', (string) $request->siret)]);
+        $request->validate(['siret' => 'required|digits:14']);
 
-    // NORMALISATION DU SIRET
-    $siret = trim($request->siret);
+        $siret = $request->siret;
+        $data  = (new SireneClient())->getBySiret($siret);
 
-    $client = new SireneClient();
-    $data = $client->getBySiret($siret);
+        if (!$data || !isset($data['etablissement'])) {
+            return view('entreprises.import-not-found', ['siret' => $siret]);
+        }
 
-    if (!$data || !isset($data['etablissement'])) {
-    return view('entreprises.import-not-found', [
-        'siret' => $request->siret
-    ]);
-}
+        $etab    = $data['etablissement'];
+        $unite   = $etab['uniteLegale'] ?? [];
+        $adr     = $etab['adresseEtablissement'] ?? [];
+        $periode = ($etab['periodesEtablissement'] ?? [[]])[0] ?? [];
 
+        // Entrepreneur individuel : pas de dénomination, on prend prénom + nom
+        $nom = $unite['denominationUniteLegale']
+            ?? trim(($unite['prenomUsuelUniteLegale'] ?? '') . ' ' . ($unite['nomUniteLegale'] ?? ''))
+            ?: ($etab['denominationUsuelleEtablissement'] ?? null)
+            ?: ($periode['enseigne1Etablissement'] ?? null);
 
-    $etab = $data['etablissement'];
+        $numVoie = trim(($adr['numeroVoieEtablissement'] ?? '') . ' ' . ($adr['indiceRepetitionEtablissement'] ?? ''));
+        $adresse = trim("{$numVoie} " . ($adr['typeVoieEtablissement'] ?? '') . ' ' . ($adr['libelleVoieEtablissement'] ?? ''));
 
-    $normalized = [
-        'nom' => $etab['uniteLegale']['denominationUniteLegale'] ?? null,
-        'adresse' => $etab['adresseEtablissement']['libelleVoieEtablissement'] ?? null,
-        'cp' => $etab['adresseEtablissement']['codePostalEtablissement'] ?? null,
-        'ville' => $etab['adresseEtablissement']['libelleCommuneEtablissement'] ?? null,
-        'siret' => $siret,
-    ];
+        $normalized = [
+            'nom'      => $nom,
+            'adresse'  => $adresse ?: null,
+            'cp'       => $adr['codePostalEtablissement'] ?? null,
+            'ville'    => $adr['libelleCommuneEtablissement'] ?? null,
+            'code_naf' => $periode['activitePrincipaleEtablissement'] ?? ($unite['activitePrincipaleUniteLegale'] ?? null),
+            'siret'    => $siret,
+        ];
 
-    // RECHERCHE CORRECTE
-    $entreprise = Entreprise::where('siret', $siret)->first();
-
-    return view('entreprises.import-result', [
-        'data' => $normalized,
-        'entreprise' => $entreprise
-    ]);
-}
+        return view('entreprises.import-result', [
+            'data'       => $normalized,
+            'entreprise' => Entreprise::where('siret', $siret)->first(),
+        ]);
+    }
 
 public function create()
 {

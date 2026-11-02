@@ -36,6 +36,7 @@
             <input type="hidden" name="code_postal" value="{{ $data['cp'] }}">
             <input type="hidden" name="ville" value="{{ $data['ville'] }}">
             <input type="hidden" name="siret" value="{{ $data['siret'] }}">
+            <input type="hidden" name="code_naf" value="{{ $data['code_naf'] }}">
             <button class="button is-success">Créer cette entreprise</button>
         </form>
     @endif
