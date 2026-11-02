@@ -200,4 +200,10 @@ public function edit(Stage $stage)
     {
         return $this->rechercherEntrepriseParSiret($request);
     }
+
+    /** Recherche par nom dans la base locale (entreprises étrangères ou sans SIRET). */
+    public function rechercheEntreprise(Request $request)
+    {
+        return $this->rechercherEntreprisesParNom($request);
+    }
 }

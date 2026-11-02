@@ -58,8 +58,8 @@
             <div class="field has-addons mb-1">
                 <div class="control is-expanded">
                     <input class="input" type="text" id="siret-input"
-                           placeholder="N° SIRET — 14 chiffres"
-                           maxlength="17" inputmode="numeric"
+                           placeholder="N° SIRET (14 chiffres) ou nom de l'entreprise"
+                           maxlength="100"
                            value="{{ old('siret_recherche') }}">
                 </div>
                 <div class="control">
@@ -70,6 +70,7 @@
             </div>
             <p class="help mb-3">
                 <i class="fas fa-external-link-alt mr-1"></i>
+                Entreprise étrangère ou sans SIRET : saisissez son nom (entreprises déjà enregistrées).
                 SIRET inconnu ? Recherchez l'entreprise sur
                 <a href="https://annuaire-entreprises.data.gouv.fr/" target="_blank" rel="noopener noreferrer">
                     l'Annuaire des Entreprises (data.gouv.fr)
@@ -286,27 +287,63 @@ const ncAnnuler = document.getElementById('nc-annuler');
 const blocDates    = document.getElementById('bloc-dates');
 const blocSubmit   = document.getElementById('bloc-submit');
 
-// Formatage SIRET auto
-siretInput.addEventListener('input', function () {
-    let v = this.value.replace(/\D/g, '').slice(0, 14);
-    this.value = v;
-});
+function afficherEntreprise(data) {
+    entrepriseId.value = data.id;
+    const badge = data.created
+        ? '<span class="tag is-warning is-light ml-2">Importée depuis l\'INSEE</span>'
+        : '<span class="tag is-success is-light ml-2">Déjà dans la base</span>';
+    entrepriseInfo.innerHTML =
+        '<i class="fas fa-building mr-2"></i><strong>' + escapeHtml(data.nom) + '</strong>' + badge +
+        (data.adresse ? '<br><span class="is-size-7 has-text-grey">' + escapeHtml(data.adresse) + '</span>' : '');
+    blocTrouvee.style.display = 'block';
+
+    selectContact.innerHTML = '<option value="">— Sélectionner —</option>';
+    data.contacts.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.label;
+        selectContact.appendChild(opt);
+    });
+    blocContact.style.display = 'block';
+    blocDates.style.display   = 'block';
+    blocSubmit.style.display  = 'block';
+}
+
+function escapeHtml(t) {
+    const d = document.createElement('div');
+    d.textContent = t ?? '';
+    return d.innerHTML;
+}
 
 btnSiret.addEventListener('click', async function () {
-    const siret = siretInput.value.replace(/\s/g, '');
-    if (siret.length !== 14) {
+    const saisie = siretInput.value.trim();
+    const siret  = saisie.replace(/\s/g, '');
+    const parNumero = /^\d+$/.test(siret);
+
+    siretResult.style.display = 'none';
+    siretResult.innerHTML = '';
+
+    if (parNumero && siret.length !== 14) {
         siretResult.style.display = 'block';
-        siretResult.innerHTML = '<p class="help is-danger">Le SIRET doit contenir 14 chiffres.</p>';
+        siretResult.innerHTML = '<p class="help is-danger">Le SIRET doit contenir 14 chiffres (ou saisissez le nom de l\'entreprise).</p>';
+        return;
+    }
+    if (!parNumero && saisie.length < 2) {
+        siretResult.style.display = 'block';
+        siretResult.innerHTML = '<p class="help is-danger">Saisissez un SIRET ou au moins 2 caractères du nom.</p>';
         return;
     }
 
     btnSiret.classList.add('is-loading');
 
-    const resp = await fetch('{{ route("admin.stages.recherche-siret") }}?siret=' + siret, {
+    const url = parNumero
+        ? '{{ route("admin.stages.recherche-siret") }}?siret=' + siret
+        : '{{ route("admin.stages.recherche-entreprise") }}?q=' + encodeURIComponent(saisie);
+    const resp = await fetch(url, {
         headers: { 'Accept': 'application/json',
                    'X-Requested-With': 'XMLHttpRequest' }
     });
-    const data = await resp.json();
+    const data = await resp.json().catch(() => ({}));
 
     btnSiret.classList.remove('is-loading');
     blocTrouvee.style.display    = 'none';
@@ -314,32 +351,42 @@ btnSiret.addEventListener('click', async function () {
     blocContact.style.display    = 'none';
     blocDates.style.display      = 'none';
     blocSubmit.style.display     = 'none';
+    entrepriseId.value = '';
 
-    if (data.found) {
-        entrepriseId.value = data.id;
-        const badge = data.created
-            ? '<span class="tag is-warning is-light ml-2">Importée depuis l\'INSEE</span>'
-            : '<span class="tag is-success is-light ml-2">Déjà dans la base</span>';
-        entrepriseInfo.innerHTML =
-            '<i class="fas fa-building mr-2"></i><strong>' + data.nom + '</strong>' + badge +
-            (data.adresse ? '<br><span class="is-size-7 has-text-grey">' + data.adresse + '</span>' : '');
-        blocTrouvee.style.display = 'block';
-
-        // Contacts
-        selectContact.innerHTML = '<option value="">— Sélectionner —</option>';
-        data.contacts.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.label;
-            selectContact.appendChild(opt);
-        });
-        blocContact.style.display = 'block';
-        blocDates.style.display   = 'block';
-        blocSubmit.style.display  = 'block';
-    } else {
-        entrepriseId.value = '';
-        blocIntrouvable.style.display = 'block';
+    if (parNumero) {
+        if (data.found) {
+            afficherEntreprise(data);
+        } else {
+            blocIntrouvable.style.display = 'block';
+        }
+        return;
     }
+
+    const resultats = data.results || [];
+    if (resultats.length === 0) {
+        blocIntrouvable.style.display = 'block';
+    } else if (resultats.length === 1) {
+        afficherEntreprise(resultats[0]);
+    } else {
+        siretResult.style.display = 'block';
+        siretResult.innerHTML = '<p class="help mb-2">' + resultats.length + ' entreprises trouvées — choisissez :</p>';
+        resultats.forEach(r => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'button is-light is-fullwidth is-justify-content-flex-start mb-1';
+            b.innerHTML = '<strong>' + escapeHtml(r.nom) + '</strong>&nbsp;<span class="has-text-grey is-size-7">' + escapeHtml(r.adresse) + '</span>';
+            b.addEventListener('click', () => {
+                siretResult.style.display = 'none';
+                afficherEntreprise(r);
+            });
+            siretResult.appendChild(b);
+        });
+    }
+});
+
+// Entrée dans le champ : lance la recherche au lieu de soumettre le formulaire
+siretInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); btnSiret.click(); }
 });
 
 // Ajout d'un nouveau maître de stage (AJAX)

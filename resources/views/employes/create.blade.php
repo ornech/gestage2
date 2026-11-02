@@ -1,61 +1,65 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container mt-5" style="max-width:640px;">
 
-    {{-- Titre de la page --}}
-    <h1 class="mb-4">Ajouter un employé</h1>
+    <div class="level mb-4">
+        <div class="level-left">
+            <h1 class="title is-4 mb-0">Ajouter un employé</h1>
+        </div>
+        <div class="level-right">
+            <a href="{{ route('entreprises.show', $entreprise_id) }}" class="button is-light is-small">← Retour</a>
+        </div>
+    </div>
 
-    {{-- Affichage des erreurs de validation si le formulaire est incorrect --}}
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                {{-- Boucle sur chaque erreur et affichage --}}
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="notification is-danger is-light mb-4">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
     @endif
 
-    {{-- Formulaire d'ajout d'un employé --}}
-    <form action="{{ route('employes.store', $entreprise_id) }}" method="POST">
-        @csrf  {{-- Jeton de sécurité obligatoire dans les formulaires Laravel --}}
+    <div class="box">
+        <form action="{{ route('employes.store', $entreprise_id) }}" method="POST">
+            @csrf
             <input type="hidden" name="entreprise_id" value="{{ $entreprise_id }}">
 
-        {{-- Champ Nom --}}
-        <div class="mb-3">
-            <label for="nom" class="form-label">Nom</label>
-            <input type="text" name="nom" id="nom" class="form-control" value="{{ old('nom') }}">
-        </div>
+            <div class="columns">
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small" for="nom">Nom</label>
+                        <input class="input is-small" type="text" name="nom" id="nom" value="{{ old('nom', request('nom')) }}" required>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small" for="prenom">Prénom</label>
+                        <input class="input is-small" type="text" name="prenom" id="prenom" value="{{ old('prenom') }}" required>
+                    </div>
+                </div>
+            </div>
 
-        {{-- Champ Prénom --}}
-        <div class="mb-3">
-            <label for="prenom" class="form-label">Prénom</label>
-            <input type="text" name="prenom" id="prenom" class="form-control" value="{{ old('prenom') }}">
-        </div>
+            <div class="field">
+                <label class="label is-small" for="email">Email</label>
+                <input class="input is-small" type="email" name="email" id="email" value="{{ old('email') }}" required>
+            </div>
 
-        {{-- Champ Email --}}
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}">
-        </div>
+            <div class="field">
+                <label class="label is-small" for="telephone">Téléphone</label>
+                <input class="input is-small" type="text" name="telephone" id="telephone" value="{{ old('telephone') }}">
+            </div>
 
-        {{-- Champ Téléphone --}}
-        <div class="mb-3">
-            <label for="telephone" class="form-label">Téléphone</label>
-            <input type="text" name="telephone" id="telephone" class="form-control" value="{{ old('telephone') }}">
-        </div>
-
-     
-
-        {{-- Bouton de validation du formulaire --}}
-        <button type="submit" class="btn btn-success">Enregistrer</button>
-
-        {{-- Bouton pour revenir à la liste des employés --}}
-        <a href="{{ route('employes.index') }}" class="btn btn-secondary ms-2">Annuler</a>
-
-    </form>
+            <div class="field is-grouped mt-4">
+                <div class="control">
+                    <button type="submit" class="button is-primary is-small">Enregistrer</button>
+                </div>
+                <div class="control">
+                    <a href="{{ route('entreprises.show', $entreprise_id) }}" class="button is-light is-small">Annuler</a>
+                </div>
+            </div>
+        </form>
+    </div>
 
 </div>
 @endsection

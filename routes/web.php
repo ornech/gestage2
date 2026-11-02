@@ -153,6 +153,10 @@ Route::middleware(['auth', 'role:Etudiant'])->group(function () {
     Route::get('/etudiant/stage/nouveau', [StageController::class, 'etudiantNouveau'])
         ->name('etudiant.stage.nouveau');
 
+    Route::get('/etudiant/stage/recherche-entreprise', [StageController::class, 'rechercheEntreprise'])
+        ->name('etudiant.stage.recherche-entreprise')
+        ->middleware('throttle:siret');
+
     Route::get('/etudiant/stage/recherche-siret', [StageController::class, 'rechercheSiret'])
         ->name('etudiant.stage.recherche-siret')
         ->middleware('throttle:siret');
@@ -201,6 +205,7 @@ Route::middleware(['auth', 'role:Professeur|Administrateur'])->group(function ()
     Route::get('/admin/stages/export-maitres',        [AdminStageController::class, 'exportMaitresCsv'])->name('admin.stages.export-maitres');
     Route::get('/admin/stages/nouveau',                [AdminStageController::class, 'creerForm'])->name('admin.stages.creer.form');
     Route::post('/admin/stages/nouveau',               [AdminStageController::class, 'creer'])    ->name('admin.stages.creer');
+    Route::get('/admin/stages/recherche-entreprise',   [AdminStageController::class, 'rechercheEntreprise'])->name('admin.stages.recherche-entreprise')->middleware('throttle:siret');
     Route::get('/admin/stages/recherche-siret',        [AdminStageController::class, 'rechercheSiret'])      ->name('admin.stages.recherche-siret')->middleware('throttle:siret');
     Route::post('/admin/stages/maitre-de-stage',       [AdminStageController::class, 'ajouterMaitreDeStage'])->name('admin.stages.maitre-de-stage.store');
     Route::put('/admin/stages/{stage}/assign',        [AdminStageController::class, 'assign']) ->name('admin.stages.assign');

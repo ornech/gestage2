@@ -80,6 +80,31 @@ trait RechercheSiretTrait
         return $this->entrepriseJson($entreprise->load('employes'), created: true);
     }
 
+    /**
+     * Recherche en base locale par raison sociale (ou début de SIRET) : seul moyen de
+     * retrouver une entreprise étrangère, créée à la main et donc sans SIRET.
+     */
+    private function rechercherEntreprisesParNom(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return response()->json(['results' => [], 'error' => 'Saisir au moins 2 caractères.']);
+        }
+
+        $like = '%' . addcslashes($q, '%_\\') . '%';
+
+        $entreprises = Entreprise::with('employes')
+            ->where(fn ($w) => $w->where('raison_sociale', 'like', $like)->orWhere('siret', 'like', $like))
+            ->orderBy('raison_sociale')
+            ->limit(15)
+            ->get();
+
+        return response()->json([
+            'results' => $entreprises->map(fn ($e) => $this->entrepriseJson($e)->getData(true))->values(),
+        ]);
+    }
+
     private function entrepriseJson(Entreprise $e, bool $created = false): \Illuminate\Http\JsonResponse
     {
         return response()->json([

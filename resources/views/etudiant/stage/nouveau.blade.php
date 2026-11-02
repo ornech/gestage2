@@ -39,9 +39,9 @@
             {{-- Recherche SIRET --}}
             <div class="field has-addons mb-1">
                 <div class="control is-expanded">
-                    <input class="input" type="text" id="siret-input"
-                           placeholder="N° SIRET — 14 chiffres"
-                           maxlength="17" inputmode="numeric"
+                    <input class="input" type="text" id="siret-input" name="siret_recherche"
+                           placeholder="N° SIRET (14 chiffres) ou nom de l'entreprise"
+                           maxlength="100"
                            value="{{ old('siret_recherche') }}">
                 </div>
                 <div class="control">
@@ -52,6 +52,7 @@
             </div>
             <p class="help mb-3">
                 <i class="fas fa-external-link-alt mr-1"></i>
+                Entreprise étrangère ou sans SIRET : saisissez son nom (si elle est déjà enregistrée).
                 Vous ne connaissez pas le SIRET ? Retrouvez votre entreprise et son numéro SIRET par secteur d'activité sur
                 <a href="https://annuaire-entreprises.data.gouv.fr/" target="_blank" rel="noopener noreferrer">
                     l'Annuaire des Entreprises (data.gouv.fr)
@@ -167,7 +168,7 @@
                 <div class="column">
                     <div class="field">
                         <label class="label is-small">Date de début</label>
-                        <input class="input" type="date" name="date_debut"
+                        <input class="input" type="date" name="date_debut" id="date-debut"
                                value="{{ $defaultDateDebut }}" required>
                     </div>
                 </div>
@@ -175,7 +176,7 @@
                     <div class="field">
                         <label class="label is-small">Durée (en semaines)</label>
                         <div class="select is-fullwidth">
-                            <select name="duree" required>
+                            <select name="duree" id="duree" required>
                                 <option value="">— Choisir —</option>
                                 @for($i = 1; $i <= 12; $i++)
                                     <option value="{{ $i }}" {{ $defaultDuree == $i ? 'selected' : '' }}>
@@ -191,9 +192,10 @@
 
         {{-- Bouton final --}}
         <div id="bloc-submit" style="display:none;">
-            <button type="submit" class="button is-primary is-fullwidth">
+            <button type="submit" class="button is-primary is-fullwidth" id="btn-valider" disabled>
                 <i class="fas fa-check mr-2"></i> Enregistrer mon stage
             </button>
+            <p class="help is-warning mt-2" id="aide-valider"></p>
         </div>
 
     </form>
@@ -221,27 +223,110 @@ const ncAnnuler = document.getElementById('nc-annuler');
 const blocDates    = document.getElementById('bloc-dates');
 const blocSubmit   = document.getElementById('bloc-submit');
 
-// Formatage SIRET auto (groupes de 3)
-siretInput.addEventListener('input', function () {
-    let v = this.value.replace(/\D/g, '').slice(0, 14);
-    this.value = v;
+const btnValider   = document.getElementById('btn-valider');
+const aideValider  = document.getElementById('aide-valider');
+const formStage    = document.getElementById('form-stage');
+const dateDebut    = document.getElementById('date-debut');
+const duree        = document.getElementById('duree');
+
+// Garde-fou : retourne le message du premier élément manquant, ou '' si tout est prêt
+function elementManquant() {
+    if (!entrepriseId.value) return 'Recherche d\'abord ton entreprise.';
+    if (!selectContact.value) {
+        return blocNouveauContact.style.display !== 'none'
+            ? 'Clique sur « Enregistrer » pour valider le maître de stage, puis sélectionne-le.'
+            : 'Sélectionne ton maître de stage (ou ajoute-le).';
+    }
+    if (!dateDebut.value) return 'Renseigne la date de début.';
+    if (!duree.value) return 'Choisis la durée du stage.';
+    return '';
+}
+
+function majValidation() {
+    const manque = elementManquant();
+    btnValider.disabled = manque !== '';
+    aideValider.textContent = manque;
+}
+
+[selectContact, dateDebut, duree].forEach(el => {
+    el.addEventListener('change', majValidation);
+    el.addEventListener('input', majValidation);
 });
 
+// Bloque aussi la soumission par la touche Entrée
+formStage.addEventListener('submit', function (e) {
+    if (elementManquant() !== '') {
+        e.preventDefault();
+        majValidation();
+    }
+});
+
+let contactAnterieur = @json(old('maitre_de_stage_id'));
+
+function escapeHtml(t) {
+    const d = document.createElement('div');
+    d.textContent = t ?? '';
+    return d.innerHTML;
+}
+
+function afficherEntreprise(data) {
+    entrepriseId.value = data.id;
+    const badge = data.created
+        ? '<span class="tag is-warning is-light ml-2">Importée depuis l\'INSEE</span>'
+        : '<span class="tag is-success is-light ml-2">Déjà dans la base</span>';
+    entrepriseInfo.innerHTML =
+        '<i class="fas fa-building mr-2"></i><strong>' + escapeHtml(data.nom) + '</strong>' + badge +
+        (data.adresse ? '<br><span class="is-size-7 has-text-grey">' + escapeHtml(data.adresse) + '</span>' : '');
+    blocTrouvee.style.display = 'block';
+
+    selectContact.innerHTML = '<option value="">— Sélectionner —</option>';
+    data.contacts.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.label;
+        selectContact.appendChild(opt);
+    });
+    blocContact.style.display = 'block';
+    blocDates.style.display   = 'block';
+    blocSubmit.style.display  = 'block';
+
+    // Re-sélection du maître de stage après un retour avec erreurs
+    if (contactAnterieur) {
+        selectContact.value = contactAnterieur;
+        contactAnterieur = null;
+    }
+    majValidation();
+}
+
 btnSiret.addEventListener('click', async function () {
-    const siret = siretInput.value.replace(/\s/g, '');
-    if (siret.length !== 14) {
+    const saisie = siretInput.value.trim();
+    const siret  = saisie.replace(/\s/g, '');
+    const parNumero = /^\d+$/.test(siret);
+
+    siretResult.style.display = 'none';
+    siretResult.innerHTML = '';
+
+    if (parNumero && siret.length !== 14) {
         siretResult.style.display = 'block';
-        siretResult.innerHTML = '<p class="help is-danger">Le SIRET doit contenir 14 chiffres.</p>';
+        siretResult.innerHTML = '<p class="help is-danger">Le SIRET doit contenir 14 chiffres (ou saisissez le nom de l\'entreprise).</p>';
+        return;
+    }
+    if (!parNumero && saisie.length < 2) {
+        siretResult.style.display = 'block';
+        siretResult.innerHTML = '<p class="help is-danger">Saisissez un SIRET ou au moins 2 caractères du nom.</p>';
         return;
     }
 
     btnSiret.classList.add('is-loading');
 
-    const resp = await fetch('{{ route("etudiant.stage.recherche-siret") }}?siret=' + siret, {
+    const url = parNumero
+        ? '{{ route("etudiant.stage.recherche-siret") }}?siret=' + siret
+        : '{{ route("etudiant.stage.recherche-entreprise") }}?q=' + encodeURIComponent(saisie);
+    const resp = await fetch(url, {
         headers: { 'Accept': 'application/json',
                    'X-Requested-With': 'XMLHttpRequest' }
     });
-    const data = await resp.json();
+    const data = await resp.json().catch(() => ({}));
 
     btnSiret.classList.remove('is-loading');
     blocTrouvee.style.display    = 'none';
@@ -249,32 +334,42 @@ btnSiret.addEventListener('click', async function () {
     blocContact.style.display    = 'none';
     blocDates.style.display      = 'none';
     blocSubmit.style.display     = 'none';
+    entrepriseId.value = '';
 
-    if (data.found) {
-        entrepriseId.value = data.id;
-        const badge = data.created
-            ? '<span class="tag is-warning is-light ml-2">Importée depuis l\'INSEE</span>'
-            : '<span class="tag is-success is-light ml-2">Déjà dans la base</span>';
-        entrepriseInfo.innerHTML =
-            '<i class="fas fa-building mr-2"></i><strong>' + data.nom + '</strong>' + badge +
-            (data.adresse ? '<br><span class="is-size-7 has-text-grey">' + data.adresse + '</span>' : '');
-        blocTrouvee.style.display = 'block';
-
-        // Contacts
-        selectContact.innerHTML = '<option value="">— Sélectionner —</option>';
-        data.contacts.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.label;
-            selectContact.appendChild(opt);
-        });
-        blocContact.style.display = 'block';
-        blocDates.style.display   = 'block';
-        blocSubmit.style.display  = 'block';
-    } else {
-        entrepriseId.value = '';
-        blocIntrouvable.style.display = 'block';
+    if (parNumero) {
+        if (data.found) {
+            afficherEntreprise(data);
+        } else {
+            blocIntrouvable.style.display = 'block';
+        }
+        return;
     }
+
+    const resultats = data.results || [];
+    if (resultats.length === 0) {
+        blocIntrouvable.style.display = 'block';
+    } else if (resultats.length === 1) {
+        afficherEntreprise(resultats[0]);
+    } else {
+        siretResult.style.display = 'block';
+        siretResult.innerHTML = '<p class="help mb-2">' + resultats.length + ' entreprises trouvées — choisissez :</p>';
+        resultats.forEach(r => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'button is-light is-fullwidth is-justify-content-flex-start mb-1';
+            b.innerHTML = '<strong>' + escapeHtml(r.nom) + '</strong>&nbsp;<span class="has-text-grey is-size-7">' + escapeHtml(r.adresse) + '</span>';
+            b.addEventListener('click', () => {
+                siretResult.style.display = 'none';
+                afficherEntreprise(r);
+            });
+            siretResult.appendChild(b);
+        });
+    }
+});
+
+// Entrée dans le champ : lance la recherche au lieu de soumettre le formulaire
+siretInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); btnSiret.click(); }
 });
 
 // Ajout d'un nouveau maître de stage (AJAX, sans quitter le formulaire)
@@ -282,12 +377,14 @@ btnNouveauContact.addEventListener('click', function (e) {
     e.preventDefault();
     ncErreur.style.display = 'none';
     blocNouveauContact.style.display = blocNouveauContact.style.display === 'none' ? 'block' : 'none';
+    majValidation();
 });
 
 ncAnnuler.addEventListener('click', function () {
     blocNouveauContact.style.display = 'none';
     ncErreur.style.display = 'none';
     [ncNom, ncPrenom, ncEmail, ncTelephone].forEach(i => i.value = '');
+    majValidation();
 });
 
 ncEnregistrer.addEventListener('click', async function () {
@@ -342,13 +439,13 @@ ncEnregistrer.addEventListener('click', async function () {
 
     blocNouveauContact.style.display = 'none';
     [ncNom, ncPrenom, ncEmail, ncTelephone].forEach(i => i.value = '');
+    majValidation();
 });
 
 // Si retour avec erreurs (old values), réafficher les blocs
-@if(old('entreprise_id'))
-blocContact.style.display = 'block';
-blocDates.style.display   = 'block';
-blocSubmit.style.display  = 'block';
+@if(old('entreprise_id') && old('siret_recherche'))
+btnSiret.click(); // recharge l'entreprise et ses contacts, puis re-sélectionne le maître de stage
 @endif
+majValidation();
 </script>
 @endsection

@@ -228,6 +228,11 @@ class AdminStageController extends Controller
         return $this->rechercherEntrepriseParSiret($request);
     }
 
+    public function rechercheEntreprise(Request $request)
+    {
+        return $this->rechercherEntreprisesParNom($request);
+    }
+
     /**
      * Ajout en AJAX d'un nouveau maître de stage depuis le formulaire de création
      * de stage par le staff (passe-droit) — miroir de StageController::ajouterMaitreDeStage.

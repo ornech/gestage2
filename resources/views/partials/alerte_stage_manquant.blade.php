@@ -10,6 +10,7 @@
                 <strong>⚠ Action requise</strong> —
                 Votre convention de stage a été enregistrée par votre professeur
                 (statut : <strong>{{ match($convPapier->statut) {
+                    'hors_app'             => 'remise en dehors de l\'application',
                     'a_faire_signer'       => "à faire signer par l'employeur",
                     'en_attente' => 'en attente de signature',
                     'validee'      => 'remise ✓',
