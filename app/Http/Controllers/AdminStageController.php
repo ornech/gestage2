@@ -212,11 +212,14 @@ class AdminStageController extends Controller
             ->where('statut', 'actif')
             ->orderBy('classe')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'prenom', 'classe', 'classe_id']);
+            ->get(['id', 'nom', 'prenom', 'classe', 'classe_id', 'promo']);
 
         $annee = Parametre::anneeActive();
 
-        return view('admin.stages.creer', compact('etudiants', 'annee'));
+        // Dates de stage de la classe courante de chaque étudiant, pour pré-remplir le formulaire
+        $configs = \App\Models\ConfigurationStage::where('annee_scolaire', $annee)->get()->keyBy('classe');
+
+        return view('admin.stages.creer', compact('etudiants', 'annee', 'configs'));
     }
 
     /**

@@ -175,7 +175,7 @@
                 <div class="column">
                     <div class="field">
                         <label class="label is-small">Date de début</label>
-                        <input class="input" type="date" name="date_debut"
+                        <input class="input" type="date" name="date_debut" id="date-debut"
                                value="{{ $defaultDateDebut }}" required>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
                     <div class="field">
                         <label class="label is-small">Durée (en semaines)</label>
                         <div class="select is-fullwidth">
-                            <select name="duree" required>
+                            <select name="duree" id="duree" required>
                                 <option value="">— Choisir —</option>
                                 @for($i = 1; $i <= 12; $i++)
                                     <option value="{{ $i }}" {{ $defaultDuree == $i ? 'selected' : '' }}>
@@ -212,6 +212,8 @@
         'id'     => $e->id,
         'label'  => "{$e->prenom} {$e->nom}",
         'classe' => $e->classe,
+        'debut'  => $configs->get($e->classe_courante)?->stage_date_debut?->format('Y-m-d'),
+        'duree'  => $configs->get($e->classe_courante)?->duree_en_semaines,
     ])->values();
 @endphp
 
@@ -231,6 +233,12 @@ function selectionnerEtudiant(e) {
     etudiantSelectionne.innerHTML = '<i class="fas fa-user-check mr-2"></i><strong>' + e.label + '</strong>'
         + (e.classe ? ' <span class="tag is-light is-small ml-2">' + e.classe + '</span>' : '');
     etudiantSelectionne.style.display = 'block';
+
+    // Dates de stage de la classe de l'étudiant (configuration de l'année)
+    if (e.debut) {
+        document.getElementById('date-debut').value = e.debut;
+        if (e.duree) document.getElementById('duree').value = e.duree;
+    }
 }
 
 etudiantRecherche.addEventListener('input', function () {
