@@ -250,8 +250,13 @@ class AdminUserController extends Controller
 
         $user = User::findOrFail($request->user_id);
 
-        // Ni soi-même ni un autre administrateur : on ne coupe pas l'accès d'un compte à privilèges par cette voie
-        if ($user->is($request->user()) || $user->hasRole('Administrateur')) {
+        // Pas son propre compte, ni celui d'un administrateur qui n'est pas professeur : on ne coupe pas
+        // l'accès d'un compte à privilèges par cette voie. Un professeur reste réinitialisable même s'il
+        // cumule le rôle Administrateur.
+        if ($user->is($request->user())) {
+            return back()->with('error', 'Vous ne pouvez pas réinitialiser votre propre mot de passe ici.');
+        }
+        if ($user->hasRole('Administrateur') && ! $user->hasRole('Professeur')) {
             return back()->with('error', 'Le mot de passe d\'un compte administrateur ne peut pas être réinitialisé ici.');
         }
 

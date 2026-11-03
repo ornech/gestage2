@@ -249,6 +249,26 @@ class InvitationTest extends TestCase
             ->assertSee('data-copy', false);
     }
 
+    public function test_un_professeur_qui_est_aussi_administrateur_recoit_un_lien(): void
+    {
+        $prof = User::factory()->professeur()->create(['email' => 'prof.admin@ac-poitiers.fr']);
+        $prof->assignRole('Administrateur');
+
+        $this->actingAs(User::factory()->administrateur()->create())
+            ->post(route('admin.reset-password.do'), ['user_id' => $prof->id])
+            ->assertSessionHas('lien_invitation');
+    }
+
+    public function test_un_administrateur_pur_et_son_propre_compte_restent_proteges(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        $autre = User::factory()->administrateur()->create();
+
+        $this->actingAs($admin)->post(route('admin.reset-password.do'), ['user_id' => $autre->id])->assertSessionHas('error');
+        $this->actingAs($admin)->post(route('admin.reset-password.do'), ['user_id' => $admin->id])->assertSessionHas('error');
+        $this->assertNull(session('lien_invitation'));
+    }
+
     public function test_un_non_admin_ne_peut_pas_obtenir_de_lien(): void
     {
         $cible = User::factory()->etudiant()->create();
